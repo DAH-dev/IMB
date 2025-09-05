@@ -1,0 +1,492 @@
+<!-- À intégrer comme page messages.html -->
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMMO ABIDJAN - Messages</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #1e4a8d;
+      --accent: #ff6b00;
+      --light: #f8f9fa;
+    }
+     html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden; /* Empêche scroll global */
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    
+.main-content{
+   width: 100%;
+}
+
+    .icon-badge {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-right: 10px; 
+    }
+
+    .bg-primary {
+      background-color: #007bff;
+    }
+
+    .bg-success {
+      background-color: #28a745;
+    }
+
+    .bg-warning {
+      background-color: #ffc107;
+    }
+
+    .bg-info {
+      background-color: #17a2b8;
+    }
+
+    .logo {
+      font-size: 12px;
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    .sidebar {
+    background-color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px; 
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1050;
+    transition: left 0.3s ease-in-out;
+}
+
+.sidebar.active {
+    left: 0;
+}
+.main-content {
+  transition: all 0.3s ease-in-out;
+  padding: 1rem;
+  padding-top: 40px; /* correspond à la hauteur de la navbar */
+  height: 100vh;
+  overflow: hidden;
+}
+    .main-content.shifted {
+      margin-left: 200px;
+    }
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      top: 0;
+      z-index: 1000;
+      position: fixed;
+      width: 100%;
+      height: 40px;
+    }
+    .dashboard-card {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+   #mobileMenuBtn {
+    position: fixed;
+    top: 11px;
+    left: 19px;
+    z-index: 1100; /* Doit être plus grand que celui de la sidebar */
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #000; /* ou ta couleur préférée */
+    background: var(--primary);
+    color: white;
+    border-radius: 4px;
+}
+
+    .navbar h5 {
+      font-size: 12px;
+      margin-left: 20px;
+    }
+
+    .navbar .btn-accent {
+      font-size: 12px;
+    }
+.sidebar a {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+
+    .messaging-layout {
+      display: flex;
+      gap: 20px;
+      /* height: 70vh; */
+       height: 100%;
+
+  height: calc(100vh - 100px); /* Ajusté pour inclure navbar + padding */
+  overflow: hidden;
+   flex: 1;
+    }
+    .toutechange {
+  height: calc(100vh - 40px); /* 40px = hauteur exacte de la navbar */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
+  border-top: 1px solid #ddd; /* ✅ Fine ligne horizontale */
+}
+
+    .conversations-list {
+      width: 30%;
+      border-right: 1px solid #ddd;
+      overflow-y: auto;
+      max-height: 100%;
+    }
+
+    .conversations-list .list-group-item {
+      border: none;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 5px;
+    }
+
+    .chat-window {
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+       height: 100%;
+       height: calc(100% - 20px); /* ou ajuste selon le padding/marge */
+        flex: 1;
+
+      
+    }
+
+    .nom {
+      font-size: 11px;
+    }
+
+    .chat-messages {
+      flex-grow: 1;
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      background: #fff;
+      border-radius: 10px;
+
+       
+    }
+
+    .chat-message {
+      margin-bottom: 12px;
+    }
+
+    .chat-message.from-user {
+      text-align: right;
+    }
+
+    .chat-message p {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 15px;
+      background-color: var(--light);
+      max-width: 70%;
+    }
+
+    .chat-message.from-user p {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .chat-input {
+       margin-top: 10px;
+       margin-bottom: 0;
+    }
+
+
+
+
+
+
+    
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        width: 250px;
+      }
+
+          .sidebar a {
+          font-size: 18px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+      
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .messaging-layout {
+        flex-direction: column;
+      }
+
+      .conversations-list,
+      .chat-window {
+        width: 100%;
+      }
+      .chat-messages{
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="sidebar" id="sidebar">
+    <div class="p-4">
+      <h4 class="text-center mb-4 logo">
+        <i class="fas fa-home me-2 text-primary"></i> IMMO ABIDJAN
+      </h4>
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
+        <img src="https://ui-avatars.com/api/?name=Eric+Dah&background=1e4a8d&color=fff" class="rounded-circle me-3" width="40" height="40">
+        <div class="identity">
+          <h6 class="mb-0">Eric Dah</h6>
+          <small class="text-muted">Propriétaire</small>
+        </div>
+      </div>
+
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="{% url 'proprietaire' %}"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'mes_proprietes' %}"><i class="fas fa-home me-2"></i> Mes propriétés</a></li>
+        <li class="nav-item"><a class="nav-link active" href="{% url 'mes_messages'%}"><i class="fas fa-envelope me-2"></i> Messages</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'statistiques' %}"><i class="fas fa-chart-line me-2"></i> Statistiques</a></li>
+        <li class="nav-item mt-3"><a class="nav-link" href="{% url 'proprietaire_parametres' %}"><i class="fas fa-cog me-2"></i> Paramètres</a></li>
+        <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <nav class="navbar navbar-expand-lg nav">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0 margin">Messages</h5>
+        </div>
+        <div> <a class="nav-link" href="{% url 'index'%}">
+            <i class="fas fa-home me-2"></i>
+          </a></div>
+        <button class="btn btn-accent">
+          <i class="fas fa-plus-circle me-1"></i> Ajouter une propriété
+        </button>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-3 toutechange">
+      <div class="dashboard-card messaging-layout">
+        <div class="conversations-list list-group">
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-primary">
+              <i class="fas fa-paperclip"></i>
+            </div>
+            <div>
+              <strong class="nom">Famille JCMCI - UNA</strong><br>
+              <small>Fr : fichier attaché</small>
+            </div>
+          </div>
+
+          <div class="list-group-item active d-flex align-items-center">
+            <div class="icon-badge bg-success">
+              <i class="fas fa-building"></i>
+            </div>
+            <div>
+              <strong>Immobilier</strong><br>
+              <small>Sery : ok</small>
+            </div>
+          </div>
+
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-warning">
+              <i class="fas fa-image"></i>
+            </div>
+            <div>
+              <strong>Vision, fardeau...</strong><br>
+              <small>Image reçue</small>
+            </div>
+          </div>
+
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-info">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <strong>JCMCI-ABOBO</strong><br>
+              <small>Pascal : 👍</small>
+            </div>
+          </div>
+
+
+
+                    <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-primary">
+              <i class="fas fa-paperclip"></i>
+            </div>
+            <div>
+              <strong class="nom">Famille JCMCI - UNA</strong><br>
+              <small>Fr : fichier attaché</small>
+            </div>
+          </div>
+
+         
+
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-warning">
+              <i class="fas fa-image"></i>
+            </div>
+            <div>
+              <strong>Vision, fardeau...</strong><br>
+              <small>Image reçue</small>
+            </div>
+          </div>
+
+
+
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-info">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <strong>JCMCI-ABOBO</strong><br>
+              <small>Pascal : 👍</small>
+            </div>
+          </div>
+
+
+          
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-warning">
+              <i class="fas fa-image"></i>
+            </div>
+            <div>
+              <strong>Vision, fardeau...</strong><br>
+              <small>Image reçue</small>
+            </div>
+          </div>
+
+          <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-primary">
+              <i class="fas fa-paperclip"></i>
+            </div>
+            <div>
+              <strong class="nom">Famille JCMCI - UNA</strong><br>
+              <small>Fr : fichier attaché</small>
+            </div>
+          </div>
+
+           <div class="list-group-item d-flex align-items-center">
+            <div class="icon-badge bg-info">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <strong>JCMCI-ABOBO</strong><br>
+              <small>Pascal : 👍</small>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="chat-window">
+          <div class="chat-messages">
+            <div class="chat-message from-user">
+              <p>Bonjour, est-ce que la maison à Cocody est toujours dispo ?</p>
+              <small class="text-muted d-block">11:44</small>
+            </div>
+            <div class="chat-message">
+              <p>Oui, elle est encore disponible pour visite.</p>
+              <small class="text-muted d-block">11:45</small>
+            </div>
+
+
+            <div class="chat-message from-user">
+              <p>Bonjour, est-ce que la maison à Cocody est toujours dispo ?</p>
+              <small class="text-muted d-block">11:44</small>
+            </div>
+            <div class="chat-message">
+              <p>Oui, elle est encore disponible pour visite.</p>
+              <small class="text-muted d-block">11:45</small>
+            </div>
+
+
+            <div class="chat-message from-user">
+              <p>Bonjour, est-ce que la maison à Cocody est toujours dispo ?</p>
+              <small class="text-muted d-block">11:44</small>
+            </div>
+            <div class="chat-message">
+              <p>Oui, elle est encore disponible pour visite.</p>
+              <small class="text-muted d-block">11:45</small>
+            </div>
+          </div>
+
+          <div class="chat-input">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Écrire un message..." />
+              <button class="btn btn-primary" type="button">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script de gestion du menu (ordinateur et mobile) -->
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+        const sidebar = document.getElementById("sidebar");
+
+        mobileMenuBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("active");
+        });
+    });
+</script>
+
+</body>
+
+</html>

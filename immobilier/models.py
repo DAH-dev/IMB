@@ -1,9 +1,10 @@
 from django.db import models
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 # --- Utilisateur ---
 class Utilisateur(AbstractUser):
+    # Ajout du champ 'photo'
+    photo = models.ImageField(upload_to="utilisateurs/", blank=True, null=True)
     # tes champs personnalisés ici
     telephone = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=20, choices=[('client','Client'),('proprietaire','Propriétaire'),('admin','Admin'),('superadmin','SuperAdmin')])
@@ -32,22 +33,30 @@ class Propriete(models.Model):
         ('appartement', 'Appartement'),
         ('terrain', 'Terrain'),
         ('villa', 'Villa'),
+        ('immeuble', 'Immeuble'),
+        ('magasin', 'Magasin'),
     ]
     STATUT_CHOICES = [
         ('disponible', 'Disponible'),
         ('reserve', 'Réservé'),
         ('vendu', 'Vendu'),
+        ('en_netoyage', 'En netoyage'),
+        ('en_construction', 'En construction'),
     ]
 
     titre = models.CharField(max_length=255)
     description = models.TextField()
+    caracteristiques = models.JSONField(default=dict, blank=True)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     prix = models.DecimalField(max_digits=12, decimal_places=2)
     localisation = models.CharField(max_length=255)
-    surface = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
     date_publication = models.DateTimeField(auto_now_add=True)
-    proprietaire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="proprietes")
+    proprietaire = models.ForeignKey("Utilisateur", on_delete=models.CASCADE, related_name="proprietes")
+    
+    # Ajout des champs 'image' et 'video'
+    image = models.ImageField(upload_to="proprietes/images/", blank=True, null=True)
+    video = models.FileField(upload_to="proprietes/videos/", blank=True, null=True)
 
 
 # --- Annonce ---
@@ -107,4 +116,55 @@ class Activite(models.Model):
     cible = models.CharField(max_length=255)
     date_action = models.DateTimeField(auto_now_add=True)
 
-# Create your models here.
+# --- Message ---
+class Message(models.Model):
+    STATUT_CHOICES = [
+        ('envoye', 'Envoyé'),
+        ('lu', 'Lu'),
+        ('supprime', 'Supprimé'),
+    ]
+    expediteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_envoyes")
+    destinataire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_recus")
+    contenu = models.TextField()
+    date_envoi = models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='envoye')
+
+    def __str__(self):
+        return f"Message de {self.expediteur} à {self.destinataire} - {self.statut}"
+
+
+# --- Information ---
+class Information(models.Model):
+    TYPE_CHOICES = [
+        ('mission', 'Mission'),
+        ('vision', 'Vision'),
+        ('valeur', 'Valeur'),
+        ('presentation', 'Présentation'),
+    ]
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    titre = models.CharField(max_length=255)
+    contenu = models.TextField()
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_mise_a_jour = models.DateTimeField(auto_now=True)
+    admin = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="informations_geres")
+
+    def __str__(self):
+        return f"{self.type} - {self.titre}"
+
+
+# --- Temoignage ---
+class Temoignage(models.Model):
+    STATUT_CHOICES = [
+        ('attente', 'En attente'),
+        ('valide', 'Validé'),
+        ('rejete', 'Rejeté'),
+    ]
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="temoignages")
+    nom = models.CharField(max_length=255, blank=True, null=True)
+    contenu = models.TextField()
+    date_creation = models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='attente')
+
+    def __str__(self):
+        auteur = self.utilisateur if self.utilisateur else self.nom
+        return f"Témoignage de {auteur} - {self.statut}"

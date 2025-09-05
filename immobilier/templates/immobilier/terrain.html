@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IMMOBILIER Abidjan - Plateforme immobilière</title>
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" crossorigin="anonymous">
+
+  {% load static %}
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha512-1ycn6IcaQQ40jmTGadSAoAEBcHR/S/gVDJcWzSFFB1MxFDNfC9XhCAbKxS+olfR7zGCe+KyHAqASzYfxcC2k/g=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
+
+  <style>
+    :root {
+      --primary: #1e4a8d;
+      --secondary: #f8f9fa;
+      /* --accent: #ff6b00; */
+      --success: #28a745;
+      --light: #ffffff;
+      --dark: #343a40;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      background-color: white;
+      background-color: #f5f7fa23;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* NAVBAR */
+    nav.navbar {
+      background: linear-gradient(to right, var(--primary), #2c5ba8);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    nav.navbar .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 40px;
+    }
+
+    .logo {
+      font-size: 20px;
+    }
+
+    nav.navbar .navbar-brand {
+      color: white;
+      font-weight: 700;
+      /* font-size: 1rem; */
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    nav.navbar .navbar-brand i {
+      font-size: 1rem;
+    }
+
+    nav.navbar ul.navbar-nav {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    nav.navbar ul.navbar-nav li a.nav-link {
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    nav.navbar ul.navbar-nav li a.nav-link.active,
+    nav.navbar ul.navbar-nav li a.nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    nav.navbar ul.navbar-nav li.ms-lg-3 a.btn-accent {
+      background-color: var(--accent);
+      border: none;
+      color: white;
+      padding: 4px 10px;
+      font-weight: 500;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7rem;
+      text-align: center;
+      white-space: nowrap;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    nav.navbar ul.navbar-nav li.ms-lg-3 a.btn-accent:hover {
+      background-color: #e05a00;
+    }
+
+    /* Hamburger menu (responsive) */
+    nav.navbar .navbar-toggler {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 28px;
+      height: 22px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    nav.navbar .navbar-toggler span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: white;
+      border-radius: 3px;
+    }
+
+    .navbar-toggler-icon {
+      display: inline-block;
+      width: 1.5em;
+      height: 1.5em;
+      vertical-align: middle;
+      content: "";
+      background: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba%28255,255,255,0.8%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") center / contain no-repeat;
+    }
+
+    /* Responsive Navbar */
+    @media (max-width: 768px) {
+      nav.navbar ul.navbar-nav {
+        max-height: 0;
+        overflow: hidden;
+        flex-direction: column;
+        transition: max-height 0.4s ease-in-out;
+      }
+
+      nav.navbar ul.navbar-nav.show {
+        max-height: 600px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+
+      nav.navbar ul.navbar-nav li {
+        margin: 8px 0;
+      }
+    }
+
+    /* HERO SECTION */
+      .hero-section {
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80') center/cover no-repeat;
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      color: white;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .hero-section .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero-section h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .hero-section p.lead {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .recherche {
+      max-width: 300px;
+      margin: 0 auto 20px;
+      display: flex;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .recherche input {
+      flex: 1;
+      padding: 2px 3px;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      background-color: #fff;
+    }
+
+    /* 
+.recherche input:hover {
+  background-color: #f9f9f9;
+} */
+
+    .recherche button {
+      background-color: var(--primary);
+      /* remplace par la vraie couleur si besoin */
+      color: white;
+      border: none;
+      padding: 6px 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .recherche button:hover {
+      background-color: #153a70;
+    }
+
+    .recherche button i {
+      pointer-events: none;
+      /* évite les clics accidentels sur l'icône */
+    }
+
+
+    /* Section Communes */
+    section.py-5.bg-light {
+      background-color: var(--secondary);
+      padding: 3rem 0;
+    }
+
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    .commune-badges {
+      justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .commune-badge {
+      display: inline-block;
+      background: rgba(255, 106, 0, 0.205);
+      color: var(--accent);
+      padding: 3px 7px;
+      margin: 0 3px 4px 3px;
+      border-radius: 5px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s, color 0.3s;
+      font-size: 0, 80rem;
+    }
+
+    .commune-badge:hover,
+    .commune-badge.active {
+      background: rgba(240, 108, 13, 0.568);
+      color: white;
+    }
+
+    .commune-badge a {
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+
+
+
+
+
+
+    .py-5 .container {
+      margin-top: 15px;
+    }
+
+
+
+
+
+
+
+
+    /* Grid for properties */
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1px;
+      justify-content: center;
+      justify-content: space-around;
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+
+    /* ... (votre code CSS existant) ... */
+
+    /* Ajustements pour les cartes de propriété */
+    .cart_appartement {
+      width: 200px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+      background: white;
+      border-radius: 10px;
+      /* Ajout de Flexbox pour une meilleure organisation interne */
+      display: flex;
+      flex-direction: column;
+      /* Les éléments s'empilent verticalement */
+      justify-content: space-between;
+      /* Distribue l'espace entre les éléments */
+      overflow: hidden;
+      /* Assure que tout le contenu reste dans les bordures */
+    }
+
+    .img_appartement {
+      width: 100%;
+      /* L'image prend toute la largeur de la carte */
+      height: 170px;
+      /* Hauteur fixe pour toutes les images */
+      overflow: hidden;
+      /* Masque tout ce qui dépasse */
+    }
+
+    .img_appartement img {
+      width: 100%;
+      height: 170px;
+      margin: auto;
+      border-radius: 3px;
+      border-style: none;
+      object-fit: cover;
+      /* Recadre l'image pour couvrir la zone sans déformer */
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .img_appartement video {
+      width: 100%;
+      height: 170px;
+      margin: auto;
+      border-radius: 3px;
+      border-style: none;
+      object-fit: cover;
+      /* Recadre l'image pour couvrir la zone sans déformer */
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .descrip_appartement {
+      padding: 4px;
+      /* Ajout d'un espacement intérieur */
+      flex-grow: 1;
+      /* Permet à cette section de prendre l'espace disponible */
+    }
+
+    .descrip_appartement h5 {
+      font-size: 0, 8rem;
+      /* Taille de police légèrement plus grande pour le titre */
+      margin-bottom: 2px;
+      color: var(--primary);
+    }
+
+    .descrip_appartement p {
+      display: flex;
+      /* Utilisation de Flexbox pour aligner icône et texte */
+      align-items: center;
+      /* Centre verticalement icône et texte */
+      flex-wrap: nowrap;
+      gap: 5px;
+      /* Espace entre l'icône et le texte */
+      font-size: 0.70rem;
+      color: #555;
+    }
+
+    .descrip_appartement ul {
+      list-style: none;
+      /* Supprime les puces de liste */
+      padding: 0;
+      margin-top: 5px;
+      display: flex;
+      /* Affiche les éléments de la liste en ligne */
+      flex-wrap: wrap;
+      /* Permet aux éléments de passer à la ligne si l'espace manque */
+      gap: 10px;
+      /* Espace entre les éléments de la liste */
+    }
+
+    .descrip_appartement ul span {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      font-size: 0.7rem;
+      color: #666;
+    }
+
+    .descrip_appartement p a {
+      padding: 6px;
+      /* Espacement autour du bouton */
+      text-align: center;
+    }
+
+
+    .descrip_appartement p button {
+      max-width: 230px;
+      /* Limite la largeur maximale pour les grands écrans */
+      padding: 2px;
+      border: 2px solid var(--primary);
+      /* Utilisation de la variable primary */
+      background-color: var(--primary);
+      /* Couleur de fond du bouton */
+      color: white;
+      /* Couleur du texte du bouton */
+      border-radius: 6px;
+      /* Bordures arrondies */
+      font-size: 0, 7rem;
+
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    /* .descrip_appartement i {
+      color: var(--success);
+    } */
+
+
+
+    /* Ajustement de la grille pour les propriétés */
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      /* Centre les cartes horizontalement */
+      gap: 10px;
+      /* Espace entre les cartes */
+      padding: 0 5px;
+      /* Ajout d'un petit padding pour les côtés */
+    }
+
+    @media (max-width: 768px) {
+
+      .cart_appartement {
+        width: 100%;
+        /* Les cartes prennent toute la largeur sur mobile */
+        max-width: 330px;
+        /* Limite la largeur sur les écrans intermédiaires */
+      }
+
+      .descrip_appartement ul span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.90rem;
+        color: #666;
+      }
+
+      .descrip_appartement p {
+        gap: 5px;
+        /* Espace entre l'icône et le texte */
+        margin-bottom: 2px;
+        font-size: 0.90rem;
+        color: #555;
+      }
+    }
+
+
+
+    .voitout {
+      color: white;
+      color: black;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 40px;
+    }
+
+
+    /* Benefits section */
+    #benefits {
+      background-color: var(--secondary);
+      padding: 3rem 20px;
+    }
+
+    #benefits .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    #benefits .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+    }
+
+    #benefits .col-md-4 {
+      flex: 1 1 30%;
+      max-width: 30%;
+      background: white;
+      border-radius: 12px;
+      padding: 30px 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    #benefits .feature-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 20px;
+      background: rgba(30, 74, 141, 0.1);
+      border-radius: 50%;
+      color: var(--primary);
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #benefits h4 {
+      margin-bottom: 15px;
+      color: var(--dark);
+    }
+
+    #benefits p {
+      color: #555;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+
+      #benefits .col-md-4 {
+        max-width: 100%;
+        flex-basis: 100%;
+      }
+    }
+
+    /* Footer */
+    footer {
+      background: var(--dark);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 60px 20px 30px;
+    }
+
+    footer .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    footer h4.footer-title {
+      color: white;
+      position: relative;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    footer h4.footer-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    footer p {
+      max-width: 320px;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .social-icons a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: white;
+      margin-right: 10px;
+      transition: all 0.3s;
+      text-decoration: none;
+      font-size: 1.2rem;
+    }
+
+    .social-icons a:hover {
+      background: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    footer ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    footer ul li a {
+      color: rgba(255, 255, 255, 0.7);
+      display: block;
+      padding: 3px 0;
+      transition: color 0.3s;
+      font-size: 0.90rem;
+    }
+
+    footer ul li a:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer ul.list-unstyled li {
+      margin-bottom: 0.4rem;
+    }
+
+    footer .d-flex {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      /* margin-bottom: 1rem; */
+    }
+
+    footer .d-flex i {
+      font-size: 0.7rem;
+      min-width: 10px;
+      color: var(--accent);
+    }
+
+    footer hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <i class="fas fa-home me-2"></i>
+        <span class="logo">IMB</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="fas fa-search me-1"></i> Rechercher</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'proprietaire' %}"> <i class="fas fa-user me-1"></i> Propriétaires</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'about' %}"><i class="fas fa-star me-1"></i> A propos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'superadmin' %}"><i class="fas fa-phone me-1"></i> admin</a>
+          </li>
+
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-accent" href="#login-modal" data-bs-toggle="modal"><i class="fas fa-sign-in-alt me-1"></i>
+              Connexion</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+
+    <section class="py-5 bg-light">
+    <form class="recherche" action="#" method="get">
+      <input type="text" name="recherche" id="rech" placeholder="Recherche...">
+      <button type="submit"><i class="fas fa-search"></i></button>
+    </form>
+
+    <div class="container">
+      <!-- <h2 class="section-title">Communes populaires</h2> -->
+      <h2 class="section-title"></h2>
+      <div class="commune-badges">
+        <span class="commune-badge">
+          <a href="{% url 'maison' %}">
+            <i class="fas fa-home me-2"></i> Maisons
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a href="{% url 'terrain' %}">
+            <i class="fas fa-tree me-2"></i> Terrains
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a href="{% url 'plan' %}">
+            <i class="fas fa-map me-2"></i> Plans
+          </a>
+        </span>
+
+        <span class="commune-badge">
+          <a href="{% url 'courte_video' %}">
+            <i class="fas fa-video me-2"></i> Shorts
+          </a>
+        </span>
+
+        <span class="commune-badge">
+          <a class="nav-link" href="{% url 'mes_messages' %}">
+            <i class="fas fa-envelope me-2"></i> Messagerie
+          </a>
+        </span>
+
+        <!-- <span class="commune-badge">Marcory</span>
+        <span class="commune-badge">Treichville</span> -->
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <!-- <h2 class="section-title">Propriéts disponible</h2> -->
+      <div class="row">
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/maison4.jpg' %}" alt="">
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p> <a href="{% url 'detail_propriete' %}"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+        </div>
+        <!-- collage1 -->
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/maison1.jpg' %}" alt="">
+          </div>
+
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+        </div>
+
+        <!-- collage2 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+
+            <img src="{% static 'images/maison4.jpg' %}" alt="">
+
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+
+        </div>
+
+
+        <!-- collage3 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/terrain1.jpg' %}" alt="">
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+        </div>
+
+
+        <!-- collage4 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+
+            <img src="{% static 'images/maison3.jpg' %}" alt="">
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+        </div>
+
+
+        <!-- collage5 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/maison2.jpg' %}" alt="">
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+
+        </div>
+
+        <!-- collage5 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/terrain2.jpg' %}" alt="">
+
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+
+        </div>
+
+        <!-- collage5 -->
+
+        <div class="cart_appartement">
+          <div class="img_appartement">
+            <img src="{% static 'images/maison2.jpg' %}" alt="">
+            <!-- <span >En location</span> -->
+
+          </div>
+          <div class="descrip_appartement">
+            <h5>Maison moderne à Cocody</h5>
+
+            <p><i class="fas fa-check-circle"></i> Piscine</p>
+            <p><i class="fas fa-check-circle"></i> Jardin paysagé</p>
+            <p><i class="fas fa-check-circle"></i> Garage pour 2 voitures</p>
+            <p><i class="fas fa-check-circle"></i> Cuisine équipée</p>
+
+            <p><a href="detail_propriete.html"> <button>Voir le
+                  détail</button></a></p>
+          </div>
+
+        </div>
+
+      </div>
+      <div style="margin: 20px;">
+        <a href="#" class="voitout">Voir plus --> </a>
+      </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+  </section>
+
+  <section id="benefits" class="py-5">
+    <div class="container">
+      <h2 class="section-title">Pourquoi choisir IMMOBILIER Abidjan ?</h2>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="feature-icon">🏡</div>
+          <h4>Large sélection</h4>
+          <p>Des centaines d’annonces vérifiées à Abidjan pour tous les budgets et besoins.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-icon">⚡</div>
+          <h4>Réponse rapide</h4>
+          <p>Contactez facilement les propriétaires et agences pour une visite rapide.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-icon">🔒</div>
+          <h4>Sécurité</h4>
+          <p>Nos annonces sont contrôlées pour éviter les arnaques et garantir votre tranquillité.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div>
+        <h4 class="footer-title">IMMOBILIER Abidjan</h4>
+        <p>Votre plateforme immobilière de confiance à Abidjan. Trouvez votre logement idéal simplement.</p>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" aria-label="Twitter">🐦</a>
+          <a href="#" aria-label="Instagram">📸</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="footer-title">Liens utiles</h4>
+        <ul class="list-unstyled">
+          <li><a href="#">Accueil</a></li>
+          <li><a href="#">Produits</a></li>
+          <li><a href="{% url 'about' %}">À propos</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-title">Contact</h4>
+        <div class="d-flex"><i>📍</i>
+          <p>Abidjan, Côte d’Ivoire</p>
+        </div>
+        <div class="d-flex"><i>📞</i>
+          <p>+225 01 23 45 67 89</p>
+        </div>
+        <div class="d-flex"><i>✉️</i>
+          <p>contact@immobilierabidjan.ci</p>
+        </div>
+      </div>
+    </div>
+    <hr />
+
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const videos = document.querySelectorAll('.scroll-play');
+
+      const observerOptions = {
+        root: null, // Le viewport est la racine
+        rootMargin: '0px', // Pas de marge supplémentaire
+        threshold: 0.8 // La vidéo se déclenche quand 80% est visible
+      };
+
+      const videoObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(error => {
+              // Gérer l'erreur si la lecture automatique est bloquée
+              console.log("La lecture automatique de la vidéo a été bloquée par le navigateur :", error);
+              // Vous pouvez afficher un bouton de lecture ici si nécessaire
+            });
+          } else {
+            video.pause();
+            video.currentTime = 0; // Remet la vidéo au début quand elle n'est plus visible
+          }
+        });
+      }, observerOptions);
+
+      videos.forEach(video => {
+        videoObserver.observe(video);
+      });
+    });
+  </script>
+
+
+
+
+
+</body>
+
+</html>

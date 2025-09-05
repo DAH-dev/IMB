@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shorts Mobile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background:white;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Barre en haut */
+    .topbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 40px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      z-index: 1000;
+      color: black;
+    }
+
+    .topbar .left i,
+    .topbar .right i {
+      font-size: 20px;
+    }
+
+    .topbar .logo {
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar .logo img {
+      height: 20px;
+      margin-right: 5px;
+    }
+
+    .short {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: scroll;
+      /* padding-bottom: 15px; */
+
+       height: calc(100vh - 40px); /* prend toute la hauteur disponible */
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 360px;
+      width: 100%;
+      height: 640px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+
+    .video-wrapper video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .overlay {
+      position: absolute;
+      bottom: 0;
+      height: 30%;
+      width: 100%;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      z-index: 5;
+    }
+
+    .video-info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 10;
+      width: 80%;
+    }
+
+    .video-info h4 {
+      margin-bottom: 4px;
+    }
+
+    .video-info button {
+      background: red;
+      color: white;
+      border: none;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    .actions {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 10;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .action-btn i {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+ @media (min-width: 769px) {
+  .topbar {
+    height: 40px;
+  }
+
+  body {
+    padding-top: 40px; /* pour ne pas cacher le contenu sous la barre */
+    margin: 0;
+  }
+
+  .short {
+    margin-top: 10px;
+    padding-bottom: 0;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 40px); /* prend toute la hauteur disponible */
+  }
+
+  .video-wrapper {
+    width: 350px; /* ou largeur souhaitée */
+    height: 100%; /* prend toute la hauteur de .short */
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .actions {
+    position: absolute;
+    top: 50%;
+    margin-top: 5px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 11px;
+    z-index: 20;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Barre supérieure -->
+  <div class="topbar">
+    <div class="left">
+      <i class="fa-solid fa-bars"></i>
+    </div>
+    <div class="logo">
+      <i class="fas fa-home me-2"></i>
+        <span class="logo">IMMOBILIER Abidjan</span>
+    </div>
+    <div class="right">
+      <i class="fa-regular fa-circle-user"></i>
+    </div>
+  </div>
+
+  <!-- Vidéo 1 -->
+  <div class="short">
+    <div class="video-wrapper">
+      <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay muted loop playsinline></video>
+      <div class="overlay"></div>
+      <div class="video-info">
+
+        <h4>Caracteristiques </h4>
+        <ul>
+            <li><i class="fas fa-check-circle"></i> Piscine</li>
+            <li><i class="fas fa-check-circle"></i> Jardin paysagé</li>
+            <li><i class="fas fa-check-circle"></i> Garage pour 2 voitures</li>
+            <li><i class="fas fa-check-circle"></i> Cuisine équipée</li>
+            <li><i class="fas fa-check-circle"></i> Système de sécurité</li>
+          </ul>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><i class="fa-solid fa-thumbs-up"></i><div>146</div></div>
+        <div class="action-btn"><i class="fa-solid fa-thumbs-down"></i><div>Je n’aime pas</div></div>
+        <div class="action-btn"><i class="fa-solid fa-comment-dots"></i><div>Commenter</div></div>
+        <div class="action-btn"><i class="fa-solid fa-share"></i><div>Partager</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vidéo 2 -->
+  <div class="short">
+    <div class="video-wrapper">
+      <video src="https://www.w3schools.com/html/movie.mp4" autoplay muted loop playsinline></video>
+      <div class="overlay"></div>
+      <div class="video-info">
+         <h4>Caracteristiques </h4>
+        <ul>
+            <li><i class="fas fa-check-circle"></i> Piscine</li>
+            <li><i class="fas fa-check-circle"></i> Jardin paysagé</li>
+            <li><i class="fas fa-check-circle"></i> Garage pour 2 voitures</li>
+            <li><i class="fas fa-check-circle"></i> Cuisine équipée</li>
+            <li><i class="fas fa-check-circle"></i> Système de sécurité</li>
+          </ul>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><i class="fa-solid fa-thumbs-up"></i><div>210</div></div>
+        <div class="action-btn"><i class="fa-solid fa-thumbs-down"></i><div>Bof</div></div>
+        <div class="action-btn"><i class="fa-solid fa-comment-dots"></i><div>927</div></div>
+        <div class="action-btn"><i class="fa-solid fa-share"></i><div>Partager</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Vidéo 1 -->
+  <div class="short">
+    <div class="video-wrapper">
+      <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay muted loop playsinline></video>
+      <div class="overlay"></div>
+      <div class="video-info">
+        <h4>@dance_secure <button>S’abonner</button></h4>
+        <p>New jam by @Shattawalegh ft 💃🌽</p>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><i class="fa-solid fa-thumbs-up"></i><div>146</div></div>
+        <div class="action-btn"><i class="fa-solid fa-thumbs-down"></i><div>Je n’aime pas</div></div>
+        <div class="action-btn"><i class="fa-solid fa-comment-dots"></i><div>Commenter</div></div>
+        <div class="action-btn"><i class="fa-solid fa-share"></i><div>Partager</div></div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
