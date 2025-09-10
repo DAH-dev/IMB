@@ -315,7 +315,6 @@
       justify-content: space-around;
       margin-left: -10px;
       margin-right: -10px;
-      margin-bottom: 50px;
     }
 
     /* ... (votre code CSS existant) ... */
@@ -533,10 +532,8 @@
     /* Footer */
     footer {
       background: var(--dark);
-      background-color: #f5f7fa;
       color: rgba(255, 255, 255, 0.7);
-      color: #000;
-      padding:20px 30px;
+      padding: 60px 20px 30px;
     }
 
     footer .container {
@@ -550,7 +547,6 @@
 
     footer h4.footer-title {
       color: white;
-      color: #000;
       position: relative;
       padding-bottom: 10px;
       margin-bottom: 10px;
@@ -565,7 +561,6 @@
       width: 50px;
       height: 2px;
       background: var(--accent);
-     
       border-radius: 2px;
     }
 
@@ -580,11 +575,10 @@
       align-items: center;
       justify-content: center;
       width: 40px;
-      height: 20px;
+      height: 40px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       color: white;
-      color: #000;
       margin-right: 10px;
       transition: all 0.3s;
       text-decoration: none;
@@ -603,7 +597,6 @@
 
     footer ul li a {
       color: rgba(255, 255, 255, 0.7);
-      color: #000;
       display: block;
       padding: 3px 0;
       transition: color 0.3s;
@@ -732,7 +725,7 @@
     <div class="container">
         <!-- <h2 class="text-center section-title mb-4">Propriétés récentes</h2> -->
         <div class="row" id="propriete-container">
-            {% for propriete in proprietes_recentes %}
+            {% for propriete in proprietes %}
             <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-2 d-flex">
                 <a href="{% url 'detail_propriete_web' propriete.pk %}" class="cart_appartement flex-fill">
                     <div class="img_appartement">
@@ -762,7 +755,12 @@
             {% endfor %}
         </div>
         
-        
+        <div class="text-center mt-4" id="load-more-btn">
+            <div class="spinner-border text-primary" role="status" style="display: none;">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <button class="btn btn-primary" onclick="loadMore()">Charger plus</button>
+        </div>
     </div>
 </section>
 
@@ -859,7 +857,74 @@
   </script> -->
 
 
-  
+  <script>
+    const proprieteContainer = document.getElementById('propriete-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    let page = 1;
+
+    async function loadMore() {
+        // Afficher l'indicateur de chargement
+        loadMoreBtn.querySelector('.spinner-border').style.display = 'block';
+        loadMoreBtn.querySelector('.btn').style.display = 'none';
+
+        page++;
+        try {
+            const response = await fetch(`/api/proprietes/?page=${page}`);
+            const data = await response.json();
+            
+            if (data.length > 0) {
+                data.forEach(propriete => {
+                    const card = createProprieteCard(propriete);
+                    proprieteContainer.appendChild(card);
+                });
+            } else {
+                // S'il n'y a plus de propriétés, cacher le bouton de chargement
+                loadMoreBtn.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Erreur de chargement des propriétés:', error);
+            // Gérer l'erreur, par exemple, en affichant un message
+        } finally {
+            // Cacher l'indicateur de chargement
+            loadMoreBtn.querySelector('.spinner-border').style.display = 'none';
+            loadMoreBtn.querySelector('.btn').style.display = 'block';
+        }
+    }
+
+    // Fonction pour créer une carte de propriété à partir des données JSON
+    function createProprieteCard(propriete) {
+        const cardHtml = `
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 my-2 d-flex">
+                <a href="/proprietes/${propriete.pk}" class="cart_appartement flex-fill">
+                    <div class="img_appartement">
+                        ${propriete.image ? `<img src="${propriete.image}" alt="Image de ${propriete.titre}">` : ''}
+                        ${propriete.video ? `<video controls muted><source src="${propriete.video}" type="video/mp4"></video>` : ''}
+                        ${!propriete.image && !propriete.video ? `<img src="{% static 'images/placeholder.jpg' %}" alt="Image non disponible">` : ''}
+                    </div>
+                    <div class="descrip_appartement">
+                        <h5>${propriete.titre}</h5>
+                        ${propriete.caracteristiques.slice(0, 3).map(carac => `<p><i class="fas fa-check-circle"></i> ${carac}</p>`).join('')}
+                        <p>
+                            <strong><i class="fas fa-calendar-alt me-2"></i> publié le ${new Date(propriete.date_publication).toLocaleDateString()}</strong>
+                            100 vues
+                        </p>
+                    </div>
+                </a>
+            </div>
+        `;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cardHtml.trim();
+        return tempDiv.firstChild;
+    }
+
+    // Écouter le défilement de la page pour charger plus de contenu
+    window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+            loadMore();
+        }
+    });
+
+</script>
 
 
 

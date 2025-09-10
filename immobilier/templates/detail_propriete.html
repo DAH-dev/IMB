@@ -74,7 +74,9 @@
       color: white;
       text-decoration: none;
     }
-
+.icon_local{
+  color: #007bff;
+}
     .btn-orange {
       background-color: var(--accent);
       color: white;
@@ -290,12 +292,6 @@
     .property-card .card-body {
       padding: 10px;
     }
-
-
-
-
-
-
 
 
     /* Grid for properties */
@@ -605,9 +601,9 @@
     <div class="property-detail">
       <div class="property-info">
 
-        <p><i class="fas fa-map-marker-alt"></i> {{ propriete.commune }}</p>
-                <h2 style="color:#007bff;">{{ propriete.prix }} FCFA <span class="etat">À vendre</span></h2>
-                <div class="property-video">
+        <p><i class="fas fa-map-marker-alt icon_local"  ></i> ville: <strong style="color: #007bff;">{{ propriete.ville }}</strong>   commune <strong style="color: #007bff;">{{ propriete.commune }}</strong> </p>
+                <h2 style="color:#007bff;">{{ propriete.prix }} FCFA <span class="etat">{{ propriete.statut }}</span></h2>
+                <div class="property-video">
           {% if propriete.video %}
           <video id="video" autoplay muted playsinline controls>
             <source src="{{ propriete.video.url }}" type="video/mp4">
@@ -655,32 +651,41 @@
   </div>
 
 
-  <div class="container">
+<div class="container">
     <h2 class="section-title">Propriétés type </h2>
     <div class="row">
-      {% for prop_similaire in proprietes_similaires %}
-      <div class="cart_appartement">
-        <div class="img_appartement">
-          <a href="{% url 'detail_propriete_web' pk=prop_similaire.pk %}">
-            <img src="{{ prop_similaire.image.url }}" alt="{{ prop_similaire.titre }}">
-          </a>
+        {% for prop_similaire in proprietes_similaires %}
+        <div class="cart_appartement">
+            <div class="img_appartement">
+                <a href="{% url 'detail_propriete_web' pk=prop_similaire.pk %}">
+                    {% if prop_similaire.image %}
+                        <img src="{{ prop_similaire.image.url }}" alt="{{ prop_similaire.titre }}">
+                    {% elif prop_similaire.video %}
+                        <video controls muted>
+                            <source src="{{ prop_similaire.video.url }}" type="video/mp4">
+                            Votre navigateur ne supporte pas la balise vidéo.
+                        </video>
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="Image non disponible">
+                    {% endif %}
+                </a>
+            </div>
+            <div class="descrip_appartement">
+                <h5>{{ prop_similaire.titre }}</h5>
+                {% for caracteristique in prop_similaire.caracteristiques|slice:":3" %}
+                <p><i class="fas fa-check-circle"></i> {{ caracteristique }}</p>
+                {% endfor %}
+                <p>
+                    <strong> <i class="fas fa-calendar-alt me-2"></i> publié le {{ prop_similaire.date_publication|date:"d/m/Y" }}</strong>
+                    200 vues
+                </p>
+            </div>
         </div>
-        <div class="descrip_appartement">
-          <h5>{{ prop_similaire.titre }}</h5>
-
-          {% for caracteristique in prop_similaire.caracteristiques.all %}
-          <p><i class="fas fa-check-circle"></i> {{ caracteristique.nom }}</p>
-          {% endfor %}
-
-          <p><strong> <i class="fas fa-calendar-alt me-2"></i> publié le {{ prop_similaire.date_publication|date:"d/m/Y"
-              }}</strong> {{ prop_similaire.nombre_vues }} vues </p>
-        </div>
-      </div>
-      {% empty %}
-      <p>Aucune autre propriété de ce type n'est disponible pour le moment.</p>
-      {% endfor %}
+        {% empty %}
+        <p>Aucune autre propriété de ce type n'est disponible pour le moment.</p>
+        {% endfor %}
     </div>
-  </div>
+</div>
 
   <footer class="footer">
     <div class="footer-content-wrapper">

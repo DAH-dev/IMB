@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,12 +23,6 @@ import os
 # REMPLACEZ 'C:/chemin/vers/votre/dossier/ffmpeg/bin/ffmpeg.exe' par le chemin réel
 os.environ["IMAGEIO_FFMPEG_EXE"] = r"C:\Users\DAH ERIC\Downloads\ffmpeg-8.0-essentials_build\bin\ffmpeg.exe"
 
-
-# Récupère le chemin d'accès à FFmpeg à partir du fichier .env
-
-FFMPEG_EXE_PATH = config('FFMPEG_EXE_PATH', default=None)
-if FFMPEG_EXE_PATH:
-    os.environ["IMAGEIO_FFMPEG_EXE"] = FFMPEG_EXE_PATH
 
 # MEDIA_URL, MEDIA_ROOT etc.
 MEDIA_URL = '/media/'

@@ -90,24 +90,25 @@ def page_accueil(request):
 
 def proprietes_maison(request):
     # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='Maison')
+    proprietes = Propriete.objects.filter(type__iexact='maison')
     
     context = {
         'proprietes': proprietes,
     }
     # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
-    return render(request, 'index.html', context)
+    return render(request, 'index_maison.html', context)
+
 
 
 def proprietes_Terrain(request):
     # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='Terrain')
+    proprietes = Propriete.objects.filter(type='terrain')
     
     context = {
         'proprietes': proprietes,
     }
     # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
-    return render(request, 'index.html', context)
+    return render(request, 'index_maison.html', context)
 
 def video_shorts(request):
     # Filtre pour les propriétés qui ont une vidéo non nulle et dont la durée est <= 60 secondes
@@ -124,21 +125,21 @@ def video_shorts(request):
 
 def detail_propriete_web(request, pk):
     propriete = get_object_or_404(Propriete, pk=pk)
-    
-    # Crée un Q object pour combiner les conditions
-    conditions = Q(type_propriete=propriete.type_propriete) | Q(commune=propriete.commune)
-    
+
+    # Correction : Utiliser 'type' au lieu de 'type_propriete'
+    conditions = Q(type__iexact=propriete.type) | Q(commune__iexact=propriete.commune)
+
     # Vérifie si le champ caracteristiques est une liste
     if isinstance(propriete.caracteristiques, list):
         # Pour chaque caractéristique de la propriété actuelle,
         # on ajoute une condition 'OR' à la requête
         for caracteristique_nom in propriete.caracteristiques:
             conditions |= Q(caracteristiques__icontains=caracteristique_nom)
-    
+
     proprietes_similaires = Propriete.objects.filter(conditions).exclude(
         pk=propriete.pk
     ).distinct()[:8]
-    
+
     context = {
         'propriete': propriete,
         'proprietes_similaires': proprietes_similaires
@@ -147,10 +148,10 @@ def detail_propriete_web(request, pk):
     return render(request, 'detail_propriete.html', context)
 
 
-def detail_propriete_web(request, pk):
-    propriete = get_object_or_404(Propriete, pk=pk)
-    context = {'propriete': propriete}
-    return render(request, 'detail_propriete.html', context)
+# def detail_propriete_web(request, pk):
+#     propriete = get_object_or_404(Propriete, pk=pk)
+#     context = {'propriete': propriete}
+#     return render(request, 'detail_propriete.html', context)
 
 
 

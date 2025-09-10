@@ -51,6 +51,8 @@ class Propriete(models.Model):
     caracteristiques = models.JSONField(default=list, encoder=DjangoJSONEncoder, blank=True)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     prix = models.DecimalField(max_digits=12, decimal_places=2)
+    ville=models.CharField(max_length=50, default=True)
+    commune=models.CharField(max_length=50, default=True)
     # localisation = models.JSONField(default=dict, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
     date_publication = models.DateTimeField(auto_now_add=True)
@@ -132,7 +134,6 @@ class Alerte(models.Model):
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_resolue')
     date_creation = models.DateTimeField(auto_now_add=True)
     admin = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="alertes_traitees")
-
 
 # --- Activité ---
 class Activite(models.Model):
