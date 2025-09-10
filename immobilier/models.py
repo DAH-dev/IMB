@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.serializers.json import DjangoJSONEncoder
+# from moviepy.editor import VideoFileClip
 
 # --- Utilisateur ---
 class Utilisateur(AbstractUser):
@@ -46,17 +48,40 @@ class Propriete(models.Model):
 
     titre = models.CharField(max_length=255)
     description = models.TextField()
-    caracteristiques = models.JSONField(default=dict, blank=True)
+    caracteristiques = models.JSONField(default=list, encoder=DjangoJSONEncoder, blank=True)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     prix = models.DecimalField(max_digits=12, decimal_places=2)
-    localisation = models.CharField(max_length=255)
+    # localisation = models.JSONField(default=dict, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
     date_publication = models.DateTimeField(auto_now_add=True)
     proprietaire = models.ForeignKey("Utilisateur", on_delete=models.CASCADE, related_name="proprietes")
-    
     # Ajout des champs 'image' et 'video'
     image = models.ImageField(upload_to="proprietes/images/", blank=True, null=True)
     video = models.FileField(upload_to="proprietes/videos/", blank=True, null=True)
+    duree_video = models.PositiveIntegerField(
+        help_text="Durée de la vidéo en secondes, calculée automatiquement.",
+        blank=True,
+        null=True
+    )
+
+    def save(self, *args, **kwargs):
+        # Vérifie si un fichier vidéo a été uploadé
+        if self.video:
+            try:
+                # Ouvre le fichier vidéo avec MoviePy pour obtenir sa durée
+                clip = VideoFileClip(self.video.path)
+                self.duree_video = int(clip.duration)
+                clip.close()
+            except Exception as e:
+                # Gère les erreurs si la vidéo est corrompue ou si MoviePy ne peut pas la lire
+                print(f"Erreur lors du calcul de la durée de la vidéo : {e}")
+                self.duree_video = None # S'assure que le champ est vide en cas d'erreur
+
+        # Appelle la méthode save() d'origine pour sauvegarder l'objet
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.titre
 
 
 # --- Annonce ---

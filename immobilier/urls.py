@@ -19,8 +19,10 @@ urlpatterns = [
     # --- URLS POUR LE SITE WEB (VUES HTML) ---
 
     # Vues générales
-    path('', views.page_accueil, name='accueil'),
-    path('proprietes/', views.liste_proprietes_web, name='liste_proprietes_web'),
+    path('', views.page_accueil, name='index'),
+    path('proprietes/maison/', views.proprietes_maison, name='proprietes_maison'),
+    path('proprietes/Terrain/', views.proprietes_Terrain, name='proprietes_Terrain'),
+    path('proprietes/shorts/', views.video_shorts, name='video_shorts'),
     path('proprietes/<int:pk>/', views.detail_propriete_web, name='detail_propriete_web'),
 
     # Vues CRUD pour les propriétés

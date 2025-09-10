@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vidéos courtes</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .video-container {
+            position: relative;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            aspect-ratio: 9/16;
+        }
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+            color: white;
+            padding: 10px;
+        }
+        .video-overlay h3 {
+            margin: 0;
+            font-size: 1em;
+        }
+        .video-overlay p {
+            margin: 0;
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-grid">
+        {% for propriete in proprietes_shorts %}
+            <div class="video-container">
+                <a href="{% url 'detail_propriete_web' pk=propriete.pk %}">
+                    <video controls muted autoplay loop playsinline>
+                        <source src="{{ propriete.video.url }}" type="video/mp4">
+                        Votre navigateur ne supporte pas la vidéo.
+                    </video>
+                    <div class="video-overlay">
+                        <h3>{{ propriete.titre }}</h3>
+                        <p>{{ propriete.commune }}</p>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <p>Aucune vidéo courte disponible pour le moment.</p>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

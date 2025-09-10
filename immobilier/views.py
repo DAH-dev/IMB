@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets, generics
+from django.db.models import Q
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import (
@@ -77,20 +78,81 @@ class RegisterView(generics.CreateAPIView):
 
 # Vues générales du site
 def page_accueil(request):
-    informations = Information.objects.filter(type='presentation').first()
-    temoignages_valides = Temoignage.objects.filter(statut='valide')
-    context = {'informations': informations, 'temoignages': temoignages_valides}
-    return render(request, 'immobilier/index.html', context)
+    # Récupérer les 6 dernières propriétés disponibles
 
-def liste_proprietes_web(request):
-    proprietes = Propriete.objects.filter(statut='disponible').order_by('-date_publication')
-    context = {'proprietes': proprietes}
-    return render(request, 'liste_proprietes.html', context)
+    proprietes_recentes = Propriete.objects.filter(
+        Q(statut='disponible') | Q(statut='en_netoyage') | Q(statut='en_construction')
+    ).order_by('-date_publication')[:6]
+    context = {
+        'proprietes_recentes': proprietes_recentes,
+    }
+    return render(request, 'index.html', context)
+
+def proprietes_maison(request):
+    # Récupère toutes les propriétés où le type est 'Maison'
+    proprietes = Propriete.objects.filter(type='Maison')
+    
+    context = {
+        'proprietes': proprietes,
+    }
+    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
+    return render(request, 'index.html', context)
+
+
+def proprietes_Terrain(request):
+    # Récupère toutes les propriétés où le type est 'Maison'
+    proprietes = Propriete.objects.filter(type='Terrain')
+    
+    context = {
+        'proprietes': proprietes,
+    }
+    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
+    return render(request, 'index.html', context)
+
+def video_shorts(request):
+    # Filtre pour les propriétés qui ont une vidéo non nulle et dont la durée est <= 60 secondes
+    proprietes_shorts = Propriete.objects.filter(
+        Q(video__isnull=False) & Q(duree_video__lte=60)
+    ).order_by('-date_publication')[:20]  # Ordonnez par date et limitez les résultats
+    
+    context = {
+        'proprietes_shorts': proprietes_shorts,
+    }
+    
+    return render(request, 'courtes_videos.html', context)
+
+
+def detail_propriete_web(request, pk):
+    propriete = get_object_or_404(Propriete, pk=pk)
+    
+    # Crée un Q object pour combiner les conditions
+    conditions = Q(type_propriete=propriete.type_propriete) | Q(commune=propriete.commune)
+    
+    # Vérifie si le champ caracteristiques est une liste
+    if isinstance(propriete.caracteristiques, list):
+        # Pour chaque caractéristique de la propriété actuelle,
+        # on ajoute une condition 'OR' à la requête
+        for caracteristique_nom in propriete.caracteristiques:
+            conditions |= Q(caracteristiques__icontains=caracteristique_nom)
+    
+    proprietes_similaires = Propriete.objects.filter(conditions).exclude(
+        pk=propriete.pk
+    ).distinct()[:8]
+    
+    context = {
+        'propriete': propriete,
+        'proprietes_similaires': proprietes_similaires
+    }
+    
+    return render(request, 'detail_propriete.html', context)
+
 
 def detail_propriete_web(request, pk):
     propriete = get_object_or_404(Propriete, pk=pk)
     context = {'propriete': propriete}
     return render(request, 'detail_propriete.html', context)
+
+
 
 # --- Vues de gestion (CRUD) par table ---
 
@@ -150,8 +212,9 @@ def propriete_update(request, pk):
             form.save()
             return redirect('propriete_list')
     else:
-        form = ProprieteForm(instance=objet)
-    return render(request, 'proprietes/form.html', {'form': form, 'action': 'Modifier'})
+        # La ligne cruciale pour la modification
+        form = ProprieteForm(instance=objet) 
+    return render(request, 'proprietes/form.html', {'form': form, 'objet': objet, 'action': 'Modifier'})
 
 def propriete_delete(request, pk):
     objet = get_object_or_404(Propriete, pk=pk)

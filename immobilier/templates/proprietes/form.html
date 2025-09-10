@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ action }} une propriété</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="email"], input[type="file"], select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        .errorlist { color: red; list-style-type: none; padding-left: 0; }
+        ul { list-style-type: disc; margin: 10px 0; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <h1>{{ action }} une propriété</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+        
+        <div class="form-group">
+            <label for="id_titre">Titre</label>
+            {{ form.titre }}
+            {{ form.titre.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_description">Description</label>
+            {{ form.description }}
+            {{ form.description.errors }}
+        </div>
+
+        <div class="form-group">
+            <label>Caractéristiques</label>
+            <input type="text" id="caracteristique_input" placeholder="Ex: Garage, Piscine, Jardin">
+            <button type="button" class="btn btn-primary" onclick="ajouterCaracteristique()">Ajouter</button>
+            <ul id="caracteristiques_liste"></ul>
+            
+            {{ form.caracteristiques }}
+            {{ form.caracteristiques.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="id_type">Type</label>
+            {{ form.type }}
+            {{ form.type.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_prix">Prix</label>
+            {{ form.prix }}
+            {{ form.prix.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_localisation">Localisation</label>
+            {{ form.localisation }}
+            {{ form.localisation.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_statut">Statut</label>
+            {{ form.statut }}
+            {{ form.statut.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_proprietaire">Propriétaire</label>
+            {{ form.proprietaire }}
+            {{ form.proprietaire.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_image">Image</label>
+            {{ form.image }}
+            {{ form.image.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_video">Vidéo</label>
+            {{ form.video }}
+            {{ form.video.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ action }}</button>
+        <a href="{% url 'propriete_list' %}" class="btn">Annuler</a>
+    </form>
+
+    <script>
+        let caracteristiques = [];
+
+        // Référence au champ caché généré par Django
+        const hiddenInput = document.getElementById("id_caracteristiques");
+        
+        // Lire la valeur initiale du champ caché
+        const initialValue = hiddenInput.value;
+        
+        // Charger les caractéristiques existantes si le formulaire est en mode modification
+        if (initialValue && initialValue !== '[]') {
+            try {
+                caracteristiques = JSON.parse(initialValue);
+                majListe(); // Afficher les caractéristiques sur la page
+            } catch (e) {
+                console.error("Erreur lors de la lecture des caractéristiques existantes:", e);
+            }
+        }
+
+        function ajouterCaracteristique() {
+            const input = document.getElementById("caracteristique_input");
+            const value = input.value.trim();
+            if (value) {
+                caracteristiques.push(value);
+                input.value = "";
+                majListe();
+            }
+        }
+
+        function supprimerCaracteristique(index) {
+            caracteristiques.splice(index, 1);
+            majListe();
+        }
+
+        function majListe() {
+            const liste = document.getElementById("caracteristiques_liste");
+            liste.innerHTML = "";
+            caracteristiques.forEach((c, i) => {
+                liste.innerHTML += `<li>${c} <button type="button" class="btn btn-danger" onclick="supprimerCaracteristique(${i})">X</button></li>`;
+            });
+            // Met à jour la valeur du champ caché avec la liste mise à jour
+            hiddenInput.value = JSON.stringify(caracteristiques);
+        }
+    </script>
+</body>
+</html>
