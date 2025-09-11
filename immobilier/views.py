@@ -112,10 +112,8 @@ def proprietes_Terrain(request):
 
 def video_shorts(request):
     # Filtre pour les propriétés qui ont une vidéo non nulle et dont la durée est <= 60 secondes
-    proprietes_shorts = Propriete.objects.filter(
-        Q(video__isnull=False) & Q(duree_video__lte=60)
-    ).order_by('-date_publication')[:20]  # Ordonnez par date et limitez les résultats
-    
+    proprietes_shorts = Propriete.objects.all()
+       
     context = {
         'proprietes_shorts': proprietes_shorts,
     }

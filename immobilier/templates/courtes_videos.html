@@ -2,75 +2,443 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Vidéos courtes</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vidéos Immobilier - Shorts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: sans-serif;
+        /* ====== Base ====== */
+        html, body {
+            height: 100%;
+            margin: 0;
             background-color: #f0f2f5;
-        }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: auto;
-        }
-        .video-container {
-            position: relative;
-            background-color: #000;
-            border-radius: 10px;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .video-container video {
+
+        /* ====== Centrage du "mobile frame" au milieu de l'écran (pc) ====== */
+        .shorts-wrapper {
             width: 100%;
             height: 100%;
-            display: block;
-            object-fit: cover;
-            aspect-ratio: 9/16;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
         }
-        .video-overlay {
+
+        /* Style de la barre de recherche */
+        .search-bar {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
-            color: white;
-            padding: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            z-index: 30;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .video-overlay h3 {
-            margin: 0;
-            font-size: 1em;
+
+        .search-bar form {
+            width: 90%;
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .video-overlay p {
-            margin: 0;
-            font-size: 0.8em;
-            opacity: 0.8;
+
+        .search-bar input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 10px 15px;
+            color: #333;
+            font-size: 1rem;
         }
+        .search-bar input::placeholder {
+            color: #999;
+        }
+
+        .search-bar button {
+            background: transparent;
+            border: none;
+            color: #555;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* zone scrollable (le feed) */
+        .feed {
+            width: 380px;
+            height: 100vh;
+            max-width: 100%;
+            border-radius: 12px;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        /* masquer scrollbar moderne */
+        .feed::-webkit-scrollbar { display: none; }
+        .feed { scrollbar-width: none; }
+
+        /* chaque "post" = vidéo plein écran */
+        .shorts-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            scroll-snap-align: start;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fcf9f9;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+
+        .shorts-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            background: #fcf9f9;
+            background: #555;
+        }
+
+        /* overlay bas - titre + commune */
+        .shorts-overlay {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            z-index: 10;
+            color: #fff;
+        }
+        .shorts-overlay h3 { margin: 0; font-size: 1rem; }
+        .shorts-overlay p { margin: 6px 0 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+        /* Styles ajoutés pour les caractéristiques */
+        .shorts-characteristics {
+            display: flex;
+            gap: 12px; /* Espacement entre les caractéristiques */
+            margin-top: 10px;
+        }
+
+        .shorts-characteristics .char-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            opacity: 0.95;
+            background: rgba(255, 255, 255, 0.1); /* Fond légèrement transparent */
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* actions à droite (like, comment, share, etc.) */
+        .shorts-actions {
+            position: absolute;
+            right: 12px;
+            bottom: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            z-index: 20;
+            align-items: center;
+        }
+        .action-btn {
+            background: rgba(0,0,0,0.2);
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .action-btn .count { font-size: 12px; margin-top: 6px; opacity: 0.95; }
+
+        .action-btn.like.liked {
+            background: linear-gradient(180deg,#ff4d6d,#ff7aa2);
+            transform: scale(1.05);
+        }
+
+        /* spinner de chargement */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 25;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.2);
+            border-top: 4px solid #333;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+        /* animation coeur au double-tap */
+        .heart-pop {
+            position: absolute;
+            z-index: 30;
+            width: 120px;
+            height: 120px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%) scale(0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform .45s cubic-bezier(.2,.9,.2,1), opacity .45s;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff4d6d'><path d='M12 21s-7.5-4.734-9.13-7.04C.99 11.97 3.1 7.5 7.5 7.5c2.1 0 3.4 1.06 4.5 2.18C12.99 8.56 14.4 7.5 16.5 7.5c4.4 0 6.51 4.47 4.63 6.46C19.5 16.266 12 21 12 21z'/></svg>");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .heart-pop.show {
+            transform: translate(-50%,-50%) scale(1);
+            opacity: 1;
+        }
+
+        /* responsive: mobile -> occupe toute la largeur */
+        @media (max-width: 640px) {
+            .feed { width: 100%; border-radius: 0; }
+            .shorts-actions { right: 8px; bottom: 100px; gap: 12px; }
+            .action-btn { width: 48px; height: 48px; }
+            .shorts-overlay { padding: 10px; }
+        }
+
     </style>
 </head>
 <body>
+    <div class="shorts-wrapper">
+        <div class="search-bar">
+            <form action="" method="GET">
+                <input type="search" name="q" placeholder="Rechercher une propriété...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
 
-    <div class="video-grid">
-        {% for propriete in proprietes_shorts %}
-            <div class="video-container">
-                <a href="{% url 'detail_propriete_web' pk=propriete.pk %}">
-                    <video controls muted autoplay loop playsinline>
-                        <source src="{{ propriete.video.url }}" type="video/mp4">
-                        Votre navigateur ne supporte pas la vidéo.
-                    </video>
-                    <div class="video-overlay">
-                        <h3>{{ propriete.titre }}</h3>
-                        <p>{{ propriete.commune }}</p>
-                    </div>
-                </a>
+        <div class="feed" id="feed">
+            {% for propriete in proprietes_shorts %}
+            <div class="shorts-container" data-pk="{{ propriete.pk }}">
+                <div class="loading-spinner"><div class="spinner"></div></div>
+
+                <video preload="metadata" muted playsinline webkit-playsinline>
+                    <source src="{{ propriete.video.url }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la vidéo.
+                </video>
+
+                <div class="heart-pop" aria-hidden="true"></div>
+
+                <div class="shorts-overlay">
+                    <h3><a href="{% url 'detail_propriete_web' pk=propriete.pk %}" style="color:inherit; text-decoration:none;">{{ propriete.titre }}</a></h3>
+                    <p>{{ propriete.commune }}</p>
+
+                    <div class="shorts-characteristics">
+
+                     {% for caracteristique in propriete.caracteristiques|slice:":3" %}
+                            <span class="char-item"> <i class="fas fa-bed"></i> {{ caracteristique }}</span>
+                        {% endfor %}
+</div>
+                    
+                        
+                          
+                        
+                       
+                </div>
+
+                <div class="shorts-actions" aria-hidden="true">
+                    <button class="action-btn like" title="J'aime" aria-label="J'aime">
+                        <i class="fas fa-thumbs-up"></i>
+                        <div class="count">210k</div>
+                    </button>
+
+                    <button class="action-btn dislike" title="Je n'aime pas" aria-label="Je n'aime pas">
+                        <i class="fas fa-thumbs-down"></i>
+                    </button>
+
+                    <button class="action-btn comment" title="Commenter" aria-label="Commenter">
+                        <i class="fas fa-comment"></i>
+                        <div class="count">1 387</div>
+                    </button>
+
+                    <button class="action-btn share" title="Partager" aria-label="Partager">
+                        <i class="fas fa-share"></i>
+                    </button>
+                </div>
             </div>
-        {% empty %}
-            <p>Aucune vidéo courte disponible pour le moment.</p>
-        {% endfor %}
+            {% empty %}
+            <div class="shorts-container">
+                <p style="padding:20px; text-align:center;">Aucune vidéo disponible pour le moment.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
+    <script>
+        (function() {
+            const feed = document.getElementById('feed');
+            const containers = Array.from(document.querySelectorAll('.shorts-container'));
+            const videos = containers.map(c => c.querySelector('video'));
+            let currentIndex = 0;
+            let scrollTimer = null;
+
+            function playAt(index) {
+                if (index < 0 || index >= videos.length) return;
+                currentIndex = index;
+                videos.forEach((v, i) => {
+                    const parent = containers[i];
+                    if (i === index) {
+                        const spinner = parent.querySelector('.loading-spinner');
+                        spinner.style.display = 'flex';
+                        v.play().then(() => {}).catch(() => {});
+                    } else {
+                        v.pause();
+                        const s = parent.querySelector('.loading-spinner');
+                        if (s) s.style.display = 'none';
+                    }
+                });
+            }
+
+            function detectIndex() {
+                const newIndex = Math.round(feed.scrollTop / feed.clientHeight);
+                return Math.max(0, Math.min(newIndex, videos.length - 1));
+            }
+
+            feed.addEventListener('scroll', () => {
+                if (scrollTimer) clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(() => {
+                    const idx = detectIndex();
+                    if (idx !== currentIndex) {
+                        playAt(idx);
+                    }
+                }, 80);
+            });
+
+            window.addEventListener('load', () => {
+                if (videos.length > 0) {
+                    feed.scrollTop = 0;
+                    playAt(0);
+                }
+            });
+
+            videos.forEach((v, idx) => {
+                const parent = containers[idx];
+                const spinner = parent.querySelector('.loading-spinner');
+                v.addEventListener('waiting', () => { if (spinner) spinner.style.display = 'flex'; });
+                v.addEventListener('seeking', () => { if (spinner) spinner.style.display = 'flex'; });
+                v.addEventListener('canplay', () => { if (spinner) spinner.style.display = 'none'; });
+                v.addEventListener('playing', () => { if (spinner) spinner.style.display = 'none'; });
+                v.addEventListener('error', () => { if (spinner) spinner.style.display = 'none'; });
+
+                parent.addEventListener('click', (ev) => {
+                    if (ev.target.closest('.action-btn')) return;
+                    if (v.paused) {
+                        v.play().catch(()=>{});
+                    } else {
+                        v.pause();
+                    }
+                });
+
+                parent.addEventListener('dblclick', (ev) => {
+                    if (ev.target.closest('.action-btn')) return;
+                    triggerLike(parent);
+                });
+
+                let lastTap = 0;
+                parent.addEventListener('touchend', (ev) => {
+                    const now = Date.now();
+                    const dt = now - lastTap;
+                    lastTap = now;
+                    if (dt < 300 && dt > 0) {
+                        triggerLike(parent);
+                    }
+                });
+            });
+
+            function triggerLike(container) {
+                const likeBtn = container.querySelector('.action-btn.like');
+                const countEl = likeBtn.querySelector('.count');
+                if (countEl) {
+                    let raw = countEl.innerText.trim();
+                    let num = 0;
+                    if (raw.toLowerCase().includes('k')) {
+                        const n = parseFloat(raw.toLowerCase().replace('k','').replace(',', '.')) || 0;
+                        num = Math.round(n * 1000);
+                    } else {
+                        num = parseInt(raw.replace(/\s/g, '')) || 0;
+                    }
+                    num += 1;
+                    const formatted = num >= 1000 ? num.toLocaleString('fr-FR') : String(num);
+                    countEl.innerText = formatted;
+                }
+                likeBtn.classList.add('liked');
+
+                const heart = container.querySelector('.heart-pop');
+                if (heart) {
+                    heart.classList.remove('show');
+                    void heart.offsetWidth;
+                    heart.classList.add('show');
+                    setTimeout(()=> heart.classList.remove('show'), 800);
+                }
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    goTo(currentIndex + 1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    goTo(currentIndex - 1);
+                } else if (e.key === ' ') {
+                    const v = videos[currentIndex];
+                    if (v) {
+                        if (v.paused) v.play().catch(()=>{});
+                        else v.pause();
+                    }
+                }
+            });
+
+            function goTo(index) {
+                const target = Math.max(0, Math.min(index, videos.length - 1));
+                feed.scrollTo({ top: target * feed.clientHeight, behavior: 'smooth' });
+                setTimeout(()=> playAt(target), 250);
+            }
+
+            window.addEventListener('resize', () => {
+                feed.scrollTo({ top: currentIndex * feed.clientHeight, behavior: 'instant' });
+            });
+        })();
+    </script>
 </body>
 </html>
