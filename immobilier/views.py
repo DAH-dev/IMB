@@ -93,10 +93,10 @@ def proprietes_maison(request):
     proprietes = Propriete.objects.filter(type__iexact='maison')
     
     context = {
-        'proprietes': proprietes,
+        'proprietes_recentes': proprietes,
     }
     # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
-    return render(request, 'index_maison.html', context)
+    return render(request, 'index.html', context)
 
 
 
@@ -105,10 +105,10 @@ def proprietes_Terrain(request):
     proprietes = Propriete.objects.filter(type='terrain')
     
     context = {
-        'proprietes': proprietes,
+        'proprietes_recentes': proprietes,
     }
     # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
-    return render(request, 'index_maison.html', context)
+    return render(request, 'index.html', context)
 
 def video_shorts(request):
     # Filtre pour les propriétés qui ont une vidéo non nulle et dont la durée est <= 60 secondes
