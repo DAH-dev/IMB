@@ -1,13 +1,26 @@
 from rest_framework import serializers
-from .models import Utilisateur, Propriete, Annonce, Transaction, Visite, Alerte, Activite, Message, Information, Temoignage
+from .models import Utilisateur, Propriete, Annonce, Transaction, Visite, Alerte, Activite, Message, Information, Temoignage,Contact
 
 # --- Sérialiseurs pour les modèles ---
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
-        fields = '__all__'
+        fields = ["id", "username", "email", "password"]
+        extra_kwargs = {"password": {"write_only": True}}
 
+    def create(self, validated_data):
+        user = Utilisateur(
+            username=validated_data["username"],
+            email=validated_data.get("email")
+        )
+        user.set_password(validated_data["password"])  # 🔹 hachage automatique
+        user.save()
+        return user
 
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = '__all__' 
 class ProprieteSerializer(serializers.ModelSerializer):
     proprietaire = serializers.PrimaryKeyRelatedField(queryset=Utilisateur.objects.all())
     

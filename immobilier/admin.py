@@ -1,12 +1,10 @@
 from django.contrib import admin
 from .models import (
     Utilisateur, Propriete, Annonce,
-    Transaction, Visite, Alerte, Activite
+    Transaction, Visite, Alerte, Activite,
+    Message, Information, Temoignage  # <-- Ajout des modèles manquants ici
 )
 
-# ---------------------------
-# Admin pour Utilisateur
-# ---------------------------
 # ---------------------------
 # Admin pour Utilisateur
 # ---------------------------
@@ -28,7 +26,6 @@ class UtilisateurAdmin(admin.ModelAdmin):
             obj.is_staff = True
         super().save_model(request, obj, form, change)
 
-
 # ---------------------------
 # Admin pour Propriete
 # ---------------------------
@@ -39,9 +36,8 @@ class ProprieteAdmin(admin.ModelAdmin):
         "statut", "proprietaire", "date_publication"
     )
     list_filter = ("type", "statut")
-    search_fields = ("titre", "description", "localisation")
+    search_fields = ("titre", "description", "ville", "commune")
     ordering = ("-date_publication",)
-
 
 
 # ---------------------------
@@ -100,3 +96,35 @@ class ActiviteAdmin(admin.ModelAdmin):
     list_filter = ("date_action",)
     search_fields = ("utilisateur__username", "action", "cible")
     ordering = ("-date_action",)
+
+# --- NOUVELLES CLASSES ADMIN AJOUTÉES ---
+
+# ---------------------------
+# Admin pour Message
+# ---------------------------
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("id", "expediteur", "destinataire", "statut", "date_envoi")
+    list_filter = ("statut", "date_envoi")
+    search_fields = ("expediteur__username", "destinataire__username", "contenu")
+    ordering = ("-date_envoi",)
+    
+# ---------------------------
+# Admin pour Information
+# ---------------------------
+@admin.register(Information)
+class InformationAdmin(admin.ModelAdmin):
+    list_display = ("id", "titre", "type", "date_creation", "admin" ,"image")
+    list_filter = ("type",)
+    search_fields = ("titre", "contenu")
+    ordering = ("-date_creation",)
+    
+# ---------------------------
+# Admin pour Temoignage
+# ---------------------------
+@admin.register(Temoignage)
+class TemoignageAdmin(admin.ModelAdmin):
+    list_display = ("id", "nom", "utilisateur", "statut", "date_creation")
+    list_filter = ("statut",)
+    search_fields = ("nom", "contenu")
+    ordering = ("-date_creation",)

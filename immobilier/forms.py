@@ -3,23 +3,57 @@ import json
 from django.core.exceptions import ValidationError
 from .models import (
     Utilisateur, Propriete, Annonce, Transaction,
-    Visite, Alerte, Activite, Message, Information, Temoignage
+    Visite, Alerte, Activite, Message, Information, Temoignage,Contact
 )
+
+
+
+
+
+
+# immobilier/forms.py
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate
+from django.db.models import Q
+
+# Ajoutez le bon import pour le modèle Utilisateur
+from .models import Utilisateur
+from django import forms
+
+class UserLoginForm(AuthenticationForm):
+    username = forms.CharField(label="Nom d'utilisateur ou Email")
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username and password:
+            self.user_cache = authenticate(self.request, username=username, password=password)
+            if self.user_cache is None:
+                raise forms.ValidationError("Nom d'utilisateur/E-mail ou mot de passe incorrect.")
+        return self.cleaned_data
+
 
 # --- Formulaires basés sur les modèles (ModelForms) ---
 
 class UtilisateurForm(forms.ModelForm):
     class Meta:
         model = Utilisateur
-        fields = '__all__'
-        exclude = ('last_login', 'date_joined', 'groups', 'user_permissions')
+        fields = ["username", "email", "password"]
 
-class ProprieteForm(forms.ModelForm):
-    # Ce champ sera utilisé pour capturer la chaîne JSON du front-end
-    caracteristiques_json = forms.CharField(required=False, widget=forms.HiddenInput())
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password"])  # 🔹 hachage automatique
+        if commit:
+            user.save()
+        return user
     
-    # Le champ "caracteristiques" de votre modèle sera traité manuellement
     
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['nom', 'email', 'telephone', 'sujet', 'message']        
+
 class ProprieteForm(forms.ModelForm):
     # Ce champ de formulaire gère la conversion entre la liste Python et la chaîne JSON
     caracteristiques = forms.CharField(required=False, widget=forms.HiddenInput())

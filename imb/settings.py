@@ -40,6 +40,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGOUT_REDIRECT_URL = 'login' 
+# settings.py
+AUTH_USER_MODEL = 'immobilier.Utilisateur'
+
+
+AUTHENTICATION_BACKENDS = [
+    'immobilier.backends.EmailOrUsernameModelBackend',  # login avec email/username
+    'django.contrib.auth.backends.ModelBackend',       # sécurité : fallback
+]
 
 # Application definition
 
@@ -70,7 +79,7 @@ ROOT_URLCONF = 'imb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

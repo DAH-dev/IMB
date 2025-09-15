@@ -1,10 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from django.contrib.auth import views as auth_views
 from . import views
 
 # Création d'un router pour les vues de l'API REST
 router = DefaultRouter()
 router.register(r'utilisateurs', views.UtilisateurViewSet)
+router.register(r'contacts', views.ContactViewSet)
 router.register(r'proprietes', views.ProprieteViewSet)
 router.register(r'annonces', views.AnnonceViewSet)
 router.register(r'transactions', views.TransactionViewSet)
@@ -17,13 +19,19 @@ router.register(r'temoignages', views.TemoignageViewSet)
 
 urlpatterns = [
     # --- URLS POUR LE SITE WEB (VUES HTML) ---
-
+path('connexion/',views.login_view, name='login'),
     # Vues générales
     path('', views.page_accueil, name='index'),
     path('proprietes/maison/', views.proprietes_maison, name='proprietes_maison'),
     path('proprietes/Terrain/', views.proprietes_Terrain, name='proprietes_Terrain'),
     path('proprietes/shorts/', views.video_shorts, name='video_shorts'),
     path('proprietes/<int:pk>/', views.detail_propriete_web, name='detail_propriete_web'),
+
+ # Vues de gestion pour les Contacts
+    path('contact/create/', views.contact_create, name='contact_create'),
+    path('contact/list/', views.contact_list, name='contact_list'),
+    path('contact/update/<int:pk>/', views.contact_update, name='contact_update'),
+    path('contact/delete/<int:pk>/', views.contact_delete, name='contact_delete'),
 
     # Vues CRUD pour les propriétés
     path('gestion/proprietes/', views.propriete_list, name='propriete_list'),
@@ -67,17 +75,24 @@ urlpatterns = [
     path('gestion/activites/<int:pk>/modifier/', views.activite_update, name='activite_update'),
     path('gestion/activites/<int:pk>/supprimer/', views.activite_delete, name='activite_delete'),
     
-    # Vues CRUD pour les messages
+    # Vues CRUD pour les messages (pour les administrateurs)
     path('gestion/messages/', views.message_list, name='message_list'),
     path('gestion/messages/ajouter/', views.message_create, name='message_create'),
     path('gestion/messages/<int:pk>/modifier/', views.message_update, name='message_update'),
     path('gestion/messages/<int:pk>/supprimer/', views.message_delete, name='message_delete'),
+
+    # Vues pour la messagerie (pour les utilisateurs)
+    path('messages/', views.mes_messages, name='mes_messages'),
+    path('messages/<int:contact_pk>/', views.mes_messages, name='mes_messages_detail'),
+    path('send_message/<int:contact_pk>/', views.send_message, name='send_message'),
+     path('success/', views.success_page, name='success_page'),
     
     # Vues CRUD pour les informations
     path('gestion/informations/', views.information_list, name='information_list'),
     path('gestion/informations/ajouter/', views.information_create, name='information_create'),
     path('gestion/informations/<int:pk>/modifier/', views.information_update, name='information_update'),
     path('gestion/informations/<int:pk>/supprimer/', views.information_delete, name='information_delete'),
+    path('about', views.abaut, name='about'),
     
     # Vues CRUD pour les temoignages
     path('gestion/temoignages/', views.temoignage_list, name='temoignage_list'),
@@ -102,12 +117,12 @@ urlpatterns = [
     path('mes_proprietes',views.mes_proprietes, name='mes_proprietes'),
     path('proprietaire_parametres',views.proprietaire_parametres, name='proprietaire_parametres'),
     path('courte_video', views.courte_video, name='courte_video'),
-    path('about', views.abaut, name='about'),
+    # path('about', views.abaut, name='about'),
     path('terrain', views.terrain, name='terrain'),
     path('maison', views.maison, name='maison'),
     path('plan', views.plan, name='plan'),
     path('statistiques', views.statistiques, name='statistiques'),
     path('temoingnages', views.temoingnages, name='temoingnages'),
-    path('mes_messages.html', views.mes_messages, name='mes_messages'),
+    # path('mes_messages.html', views.mes_messages, name='mes_messages'),
     path('nav_bar', views.nav_bar, name='nav_bar')
 ]

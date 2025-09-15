@@ -28,6 +28,53 @@ class Utilisateur(AbstractUser):
         verbose_name='permissions utilisateur'
     )
 
+    # --- Contact ---
+class Contact(models.Model):
+    STATUT_CHOICES = [
+        ('non_lu', 'Non lu'),
+        ('en_cours', 'En cours'),
+        ('traite', 'Traité'),
+    ]
+
+    # Le visiteur (si connecté)
+    utilisateur = models.ForeignKey(
+        'Utilisateur',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="contacts"
+    )
+
+    # Le propriétaire de la propriété ou l'admin
+    proprietaire = models.ForeignKey(
+        'Utilisateur',
+        on_delete=models.CASCADE,
+        related_name="contacts_recus"
+    )
+
+    # Propriété concernée (optionnelle si c'est un contact général)
+    propriete = models.ForeignKey(
+        'Propriete',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="contacts_propriete"
+    )
+
+    # Infos du message
+    nom = models.CharField(max_length=150, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    telephone = models.CharField(max_length=20, blank=True, null=True)
+    sujet = models.CharField(max_length=255, blank=True, null=True)
+    message = models.TextField()
+
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_lu')
+    date_envoi = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        cible = self.propriete.titre if self.propriete else "Contact général"
+        return f"Contact - {self.nom or self.utilisateur} -> {self.proprietaire} ({cible})"
+
 # --- Propriété ---
 class Propriete(models.Model):
     TYPE_CHOICES = [
@@ -51,9 +98,9 @@ class Propriete(models.Model):
     caracteristiques = models.JSONField(default=list, encoder=DjangoJSONEncoder, blank=True)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     prix = models.DecimalField(max_digits=12, decimal_places=2)
-    ville=models.CharField(max_length=50, default=True)
-    commune=models.CharField(max_length=50, default=True)
-    # localisation = models.JSONField(default=dict, blank=True)
+    ville=models.CharField(max_length=50)
+    commune=models.CharField(max_length=50)
+   
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
     date_publication = models.DateTimeField(auto_now_add=True)
     proprietaire = models.ForeignKey("Utilisateur", on_delete=models.CASCADE, related_name="proprietes")
@@ -65,23 +112,6 @@ class Propriete(models.Model):
         blank=True,
         null=True
     )
-
-    def save(self, *args, **kwargs):
-        # Vérifie si un fichier vidéo a été uploadé
-        if self.video:
-            try:
-                # Ouvre le fichier vidéo avec MoviePy pour obtenir sa durée
-                clip = VideoFileClip(self.video.path)
-                self.duree_video = int(clip.duration)
-                clip.close()
-            except Exception as e:
-                # Gère les erreurs si la vidéo est corrompue ou si MoviePy ne peut pas la lire
-                print(f"Erreur lors du calcul de la durée de la vidéo : {e}")
-                self.duree_video = None # S'assure que le champ est vide en cas d'erreur
-
-        # Appelle la méthode save() d'origine pour sauvegarder l'objet
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.titre
 
@@ -149,6 +179,25 @@ class Message(models.Model):
         ('lu', 'Lu'),
         ('supprime', 'Supprimé'),
     ]
+
+    expediteur = models.ForeignKey(
+        'Utilisateur',
+        on_delete=models.CASCADE,
+        related_name="messages_envoyes"
+    )
+    
+    destinataire = models.ForeignKey(
+        'Utilisateur',
+        on_delete=models.CASCADE,
+        related_name="messages_recus"
+    )
+    contact = models.ForeignKey(
+        'Contact',
+        on_delete=models.CASCADE,
+        related_name="messages",
+        null=True,  # Permet aux messages existants de ne pas avoir de contact
+        blank=True
+    )
     expediteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_envoyes")
     destinataire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_recus")
     contenu = models.TextField()
@@ -157,6 +206,8 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message de {self.expediteur} à {self.destinataire} - {self.statut}"
+
+
 
 
 # --- Information ---
@@ -170,6 +221,7 @@ class Information(models.Model):
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     titre = models.CharField(max_length=255)
     contenu = models.TextField()
+    image = models.ImageField(upload_to='information_images/', blank=True, null=True)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_mise_a_jour = models.DateTimeField(auto_now=True)
     admin = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="informations_geres")

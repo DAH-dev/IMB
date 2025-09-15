@@ -631,13 +631,33 @@
 
       <div class="property-contact">
         <h3><i class="fas fa-envelope"></i> Contacter le propriétaire</h3>
-        <input type="text" placeholder="Votre nom complet">
+        <!-- <input type="text" placeholder="Votre nom complet">
         <input type="email" placeholder="Votre email">
         <input type="tel" placeholder="Votre téléphone">
         <textarea rows="3">Bonjour, je suis intéressé...</textarea>
-        <button>Envoyer le message</button>
-        <a href="{% url 'mes_messages' %}"> <button style="background-color: #007bff; cursor: pointer;">demarer une
-            discution</button></a>
+        <button>Envoyer le message</button> -->
+
+                <form method="post" action="{% url 'detail_propriete_web' pk=propriete.pk %}">
+            {% csrf_token %}
+            
+            <input type="text" name="nom" placeholder="Votre nom complet" value="{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}">
+            <input type="email" name="email" placeholder="Votre email" value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+            <input type="tel" name="telephone" placeholder="Votre téléphone" value="{% if request.user.is_authenticated %}{{ request.user.telephone }}{% endif %}">
+            <textarea name="message" rows="3">Bonjour, je suis intéressé par la propriété {{ propriete.titre }} ({{ propriete.prix }} FCFA) à {{ propriete.ville }}, {{ propriete.commune }}.</textarea>
+            
+            <input type="hidden" name="sujet" value="Demande d'information pour la propriété : {{ propriete.titre }}">
+
+            <button type="submit">Envoyer le message</button>
+        </form>
+
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'mes_messages' %}">
+            <button style="background-color: #007bff; cursor: pointer;">Démarrer une discussion</button>
+        </a>
+        {% endif %}
+
+        <!-- <a href="{% url 'mes_messages' %}"> <button style="background-color: #007bff; cursor: pointer;">demarer une
+            discution</button></a> -->
         <div class="carte_google">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d254236.51213307356!2d-4.144482858417774!3d5.348769974316888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sci!4v1752891909877!5m2!1sfr!2sci"
