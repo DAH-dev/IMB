@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
+from django.urls import reverse
 
 from .models import (
     Utilisateur, Propriete, Annonce, Transaction,
@@ -108,14 +109,17 @@ def login_view(request):
             # Redirection selon rôle
             if user.is_staff:
                 # return redirect('admin_dashboard')
-                return redirect('superadmin')
+                # return redirect('superadmin')
+                return redirect('index') 
             
             elif user.role == 'proprietaire':
                 # return redirect('proprietaire_dashboard')
-                return redirect('proprietaire')
+                # return redirect('proprietaire')
+                return redirect('index')
             else:
                 # return redirect('client_dashboard')
-                return redirect('proprietaire')
+                # return redirect('proprietaire')
+                return redirect('index')
     else:
         form = UserLoginForm()
 
@@ -179,6 +183,11 @@ def detail_propriete_web(request, pk):
             pass
 
     if request.method == 'POST':
+        # 🚨 Si l'utilisateur n'est pas connecté → redirection login
+        if not request.user.is_authenticated:
+            # On redirige vers login avec "next" pour revenir après connexion
+            return redirect(f"{reverse('login')}?next={request.path}")
+
         form = ContactForm(request.POST)
         if form.is_valid():
             nom = form.cleaned_data['nom']
@@ -187,20 +196,12 @@ def detail_propriete_web(request, pk):
             sujet = form.cleaned_data['sujet']
             message_content = form.cleaned_data['message']
 
-            contact_fil = None
-            if utilisateur_connecte:
-                contact_fil = Contact.objects.filter(
-                    utilisateur=utilisateur_connecte,
-                    propriete=propriete,
-                    proprietaire=propriete.proprietaire
-                ).first()
-            elif email:
-                contact_fil = Contact.objects.filter(
-                    email=email,
-                    propriete=propriete,
-                    proprietaire=propriete.proprietaire
-                ).first()
-
+            # Création ou récupération du contact
+            contact_fil = Contact.objects.filter(
+                utilisateur=utilisateur_connecte,
+                propriete=propriete,
+                proprietaire=propriete.proprietaire
+            ).first()
             if not contact_fil:
                 contact_fil = Contact.objects.create(
                     utilisateur=utilisateur_connecte,
@@ -213,28 +214,21 @@ def detail_propriete_web(request, pk):
                     message=message_content, 
                     statut='en_cours'
                 )
-            
-            # --- MODIFICATION CLÉ ICI ---
-            # Le code de création de Message doit être conditionné.
-            if utilisateur_connecte:
-                # Crée un message seulement si l'utilisateur est connecté.
-                Message.objects.create(
-                    contact=contact_fil,
-                    expediteur=utilisateur_connecte, # C'est maintenant sûr, car l'utilisateur est connecté
-                    destinataire=propriete.proprietaire,
-                    contenu=message_content
-                )
-            
-            # La redirection doit aussi être conditionnée.
-            if utilisateur_connecte:
-                return redirect('mes_messages_detail', contact_pk=contact_fil.pk)
-            else:
-                return redirect('success_page')
 
-    # Le reste du code pour l'affichage de la page
+            # Création du message
+            Message.objects.create(
+                contact=contact_fil,
+                expediteur=utilisateur_connecte,
+                destinataire=propriete.proprietaire,
+                contenu=message_content
+            )
+            
+            return redirect('mes_messages_detail', contact_pk=contact_fil.pk)
+
     else:
         form = ContactForm()
     
+    # Récupération des propriétés similaires
     conditions = Q(type__iexact=propriete.type) | Q(commune__iexact=propriete.commune)
     if isinstance(propriete.caracteristiques, list):
         for caracteristique_nom in propriete.caracteristiques:

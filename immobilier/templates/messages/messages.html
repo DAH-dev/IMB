@@ -7,6 +7,7 @@
     <title>IMMO ABIDJAN - Messages</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    {% load static %}
     <style>
         /* (Conserver votre CSS ici, il n'y a pas de changement) */
         :root {
@@ -232,37 +233,38 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-                width: 250px;
-            }
-
-            .sidebar a {
-                font-size: 18px;
-                font-weight: 500;
-                padding: 5px 20px;
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
             .messaging-layout {
-                flex-direction: column;
+                display: block !important;
+                /* pas de flex gauche/droite */
+                width: 100% !important;
             }
 
-            .conversations-list,
+            .conversations-list {
+                display: none;
+                /* cachée par défaut */
+                width: 100% !important;
+                /* plein écran si active */
+                max-width: 100% !important;
+            }
+
+            .conversations-list.active {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100% !important;
+                height: 100vh;
+                background: white;
+                z-index: 1200;
+                overflow-y: auto;
+            }
+
             .chat-window {
-                width: 100%;
-            }
-
-            .chat-messages {
-                width: 100%;
+                display: block !important;
+                flex: none !important;
+                width: 100% !important;
+                /* occupe toute la largeur */
+                max-width: 100% !important;
             }
         }
     </style>
@@ -279,7 +281,8 @@
                 <i class="fas fa-home me-2 text-primary"></i> IMMO ABIDJAN
             </h4>
             <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
-                <img src="https://ui-avatars.com/api/?name={{ utilisateur.first_name }}+{{ utilisateur.last_name }}&background=1e4a8d&color=fff" class="rounded-circle me-3" width="40" height="40">
+                <img src="https://ui-avatars.com/api/?name={{ utilisateur.first_name }}+{{ utilisateur.last_name }}&background=1e4a8d&color=fff"
+                    class="rounded-circle me-3" width="40" height="40">
                 <div class="identity">
                     <h6 class="mb-0">{{ utilisateur.get_full_name }}</h6>
                     <small class="text-muted">{{ utilisateur.role }}</small>
@@ -287,12 +290,18 @@
             </div>
 
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link" href="{% url 'proprietaire' %}"><i class="fas fa-tachometer-alt me-2"></i> Tableau de bord</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'mes_proprietes' %}"><i class="fas fa-home me-2"></i> Mes propriétés</a></li>
-                <li class="nav-item"><a class="nav-link active" href="{% url 'mes_messages'%}"><i class="fas fa-envelope me-2"></i> Messages</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'statistiques' %}"><i class="fas fa-chart-line me-2"></i> Statistiques</a></li>
-                <li class="nav-item mt-3"><a class="nav-link" href="{% url 'proprietaire_parametres' %}"><i class="fas fa-cog me-2"></i> Paramètres</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'proprietaire' %}"><i
+                            class="fas fa-tachometer-alt me-2"></i> Tableau de bord</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'mes_proprietes' %}"><i
+                            class="fas fa-home me-2"></i> Mes propriétés</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'mes_messages'%}"><i
+                            class="fas fa-envelope me-2"></i> Messages</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'statistiques' %}"><i
+                            class="fas fa-chart-line me-2"></i> Statistiques</a></li>
+                <li class="nav-item mt-3"><a class="nav-link" href="{% url 'proprietaire_parametres' %}"><i
+                            class="fas fa-cog me-2"></i> Paramètres</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-sign-out-alt me-2"></i>
+                        Déconnexion</a></li>
             </ul>
         </div>
     </div>
@@ -303,7 +312,12 @@
                 <div class="d-none d-md-block me-auto">
                     <h5 class="mb-0 margin">Messages</h5>
                 </div>
+
                 <div>
+                    <!-- Bouton pour afficher les conversations (mobile uniquement) -->
+                    <button id="toggleConversations" class="btn btn-primary d-md-none mb-2">
+                        <i class="fas fa-comments"></i> Discussions
+                    </button>
                     <a class="nav-link" href="{% url 'index'%}">
                         <i class="fas fa-home me-2"></i>
                     </a>
@@ -316,12 +330,56 @@
 
         <div class="container-fluid px-3 toutechange">
             <div class="dashboard-card messaging-layout">
+
+
                 <div class="conversations-list list-group">
+    {% for conversation in conversations %}
+    <a href="{% url 'mes_messages_detail' contact_pk=conversation.pk %}"
+       class="list-group-item d-flex align-items-center {% if conversation.pk == contact_actuel.pk %}active{% endif %}">
+
+        <div class="icon-badge bg-primary d-flex align-items-center justify-content-center"
+             style="width:40px; height:40px; overflow:hidden; border-radius:50%;">
+
+            {% if conversation.utilisateur == utilisateur %}
+                {% if conversation.proprietaire.photo %}
+                    <img src="{{ conversation.proprietaire.photo.url }}" alt="Photo"
+                         style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                    <i class="fas fa-user" style="font-size:18px; color:white;"></i>
+                {% endif %}
+            {% else %}
+                {% if conversation.utilisateur.photo %}
+                    <img src="{{ conversation.utilisateur.photo.url }}" alt="Photo"
+                         style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                    <i class="fas fa-user" style="font-size:18px; color:white;"></i>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="ms-2">
+            <strong>
+                {% if conversation.utilisateur == utilisateur %}
+                    {{ conversation.proprietaire.get_full_name }}
+                {% else %}
+                    {{ conversation.utilisateur.get_full_name|default:"Visiteur" }}
+                {% endif %}
+            </strong><br>
+            <small>{{ conversation.propriete.titre }}</small>
+        </div>
+    </a>
+    {% empty %}
+    <p class="text-center p-3">Aucune conversation pour le moment.</p>
+    {% endfor %}
+</div>
+
+                <!-- <div class="conversations-list list-group">
                     {% for conversation in conversations %}
                     <a href="{% url 'mes_messages_detail' contact_pk=conversation.pk %}"
                        class="list-group-item d-flex align-items-center {% if conversation.pk == contact_actuel.pk %}active{% endif %}">
                         <div class="icon-badge bg-primary">
                             <i class="fas fa-home"></i>
+                            <img src="" alt="">
                         </div>
                         <div>
                             <strong>{% if conversation.utilisateur == utilisateur %}{{ conversation.proprietaire.get_full_name }}{% else %}{{ conversation.utilisateur.get_full_name|default:"Visiteur" }}{% endif %}</strong><br>
@@ -331,7 +389,7 @@
                     {% empty %}
                     <p class="text-center p-3">Aucune conversation pour le moment.</p>
                     {% endfor %}
-                </div>
+                </div> -->
 
                 <div class="chat-window">
                     {% if contact_actuel %}
@@ -347,7 +405,8 @@
                         <form method="post" action="{% url 'send_message' contact_pk=contact_actuel.pk %}">
                             {% csrf_token %}
                             <div class="input-group">
-                                <input type="text" name="contenu" class="form-control" placeholder="Écrire un message..." required />
+                                <input type="text" name="contenu" class="form-control"
+                                    placeholder="Écrire un message..." required />
                                 <button class="btn btn-primary" type="submit">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
@@ -370,7 +429,18 @@
             mobileMenuBtn.addEventListener("click", function () {
                 sidebar.classList.toggle("active");
             });
+
+            // Nouveau : bouton pour afficher les conversations
+            const toggleConversations = document.getElementById("toggleConversations");
+            const conversationsList = document.querySelector(".conversations-list");
+
+            if (toggleConversations) {
+                toggleConversations.addEventListener("click", function () {
+                    conversationsList.classList.toggle("active");
+                });
+            }
         });
+
     </script>
 </body>
 

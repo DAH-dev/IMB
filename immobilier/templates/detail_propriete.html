@@ -448,7 +448,7 @@
       .cart_appartement {
         width: 100%;
         /* Les cartes prennent toute la largeur sur mobile */
-        max-width: 330px;
+         max-width: 330px; 
         /* Limite la largeur sur les écrans intermédiaires */
 
       }
@@ -538,18 +538,25 @@
 
     @media (max-width: 768px) {
 
-
+  
       .property-video {
         height: 300px;
+        margin: 0;
 
       }
+ 
+ 
+  
 
+  
+ 
+ 
+ 
       .nav-toggle {
         display: block;
         display: flex;
         color: white;
       }
-
       nav {
         display: none;
         flex-direction: column;
@@ -590,8 +597,8 @@
       <a href="#">Rechercher</a>
       <a href="#">Propriétaires</a>
       <a href="#">Avantages</a>
-      <a href="#">Contact</a>
-      <a href="#" class="btn-orange">Connexion</a>
+      <a href="#" >Contact</a>
+      <a href="{% url 'login' %}" class="btn-orange">Connexion</a>
     </nav>
   </header>
 
