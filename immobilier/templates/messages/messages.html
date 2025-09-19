@@ -231,60 +231,64 @@ color: white; /* Texte blanc */
 }
 
        
+/* ... (votre CSS existant, sans changement) ... */
+
 @media (max-width: 768px) {
-.messaging-layout {
- display: block !important;
- width: 100% !important;
- }
+    .messaging-layout {
+        display: block !important;
+        width: 100% !important;
+    }
 
- .conversations-list {
- display: none;
- width: 100% !important;
- max-width: 100% !important;
- }
+    .conversations-list {
+        display: none;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 
-.conversations-list.active {
- display: block;
- position: absolute;
- top: 0;
- left: 0;
- width: 100% !important;
- height: 100vh;
- background: white;
- z-index: 1200;
- overflow-y: auto;
+    .conversations-list.active {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100vh;
+        background: white;
+        z-index: 1200;
+        overflow-y: auto;
+    }
+
+    .chat-window {
+        width: 100% !important;
+        height: 100vh !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative; /* Important pour que le formulaire fixe se positionne par rapport à ce conteneur */
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        /* Ajout d'un padding pour que le dernier message ne soit pas caché par le formulaire */
+        padding-bottom: 70px; /* Ajustez cette valeur si la hauteur du formulaire change */
+    }
+
+    .fixed-bottom-input {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: white;
+        padding: 10px;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+    }
 }
- 
- .chat-window {
- width: 100% !important;
- height: 100vh !important;
- display: flex;
- flex-direction: column;
-}
-
- .chat-container {
- display: flex;
- flex-direction: column;
- height: 100%;
- }
- 
- .chat-messages {
- flex-grow: 1;
- overflow-y: auto;
- padding-bottom: 60px;
- }
-
-.fixed-bottom-input {
- position: fixed;
- bottom: 0;
- left: 0;
- width: 100%;
- background-color: white;
- padding: 10px;
- box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
- z-index: 999;
- }
-        }
     </style>
 </head>
 
