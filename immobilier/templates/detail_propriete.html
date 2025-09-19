@@ -557,7 +557,7 @@
         display: flex;
         color: white;
       }
-      nav {
+     nav {
         display: none;
         flex-direction: column;
         gap: 10px;
@@ -567,11 +567,12 @@
         left: 0;
         width: 100%;
         padding: 10px 20px;
-      }
+        z-index: 1000; /* Ajoutez cette ligne pour le mettre au premier plan */
+    }
 
-      nav.active {
+    nav.active {
         display: flex;
-      }
+    }
 
       .property-detail {
         flex-direction: column;

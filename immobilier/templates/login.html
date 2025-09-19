@@ -55,20 +55,28 @@
             margin-top: -10px;
             margin-bottom: 10px;
         }
+        /* Nouvelle règle CSS pour le lien d'inscription */
+        .login-container p {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
 <div class="login-container">
     <h2>Connexion</h2>
-   <form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    {{ form.as_p }}
-    <button type="submit">Se connecter</button>
-</form>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        {{ form.as_p }}
+        <button type="submit">Se connecter</button>
+    </form>
+    
+    <p>
+        Pas encore inscrit ? <a href="{% url 'utilisateur_create' %}">Créer un compte</a>
+    </p>
 </div>
 
 </body>

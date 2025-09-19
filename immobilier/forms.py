@@ -1,6 +1,7 @@
 from django import forms
 import json
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
 from .models import (
     Utilisateur, Propriete, Annonce, Transaction,
     Visite, Alerte, Activite, Message, Information, Temoignage,Contact
@@ -36,17 +37,15 @@ class UserLoginForm(AuthenticationForm):
 
 # --- Formulaires basés sur les modèles (ModelForms) ---
 
-class UtilisateurForm(forms.ModelForm):
+class UtilisateurCreationForm(UserCreationForm):
     class Meta:
         model = Utilisateur
-        fields = ["username", "email", "password"]
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])  # 🔹 hachage automatique
-        if commit:
-            user.save()
-        return user
+        fields = ('username', 'email', 'first_name', 'last_name', 'telephone', 'role')
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Limitez le choix du rôle pour l'inscription
+        self.fields['role'].choices = [('client', 'Client'), ('proprietaire', 'Propriétaire')]
     
     
 class ContactForm(forms.ModelForm):

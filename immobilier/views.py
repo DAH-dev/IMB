@@ -17,9 +17,10 @@ from .serializers import (
     MessageSerializer, InformationSerializer, TemoignageSerializer,ContactSerializer
 )
 from .forms import (
-    UtilisateurForm, ProprieteForm, AnnonceForm, TransactionForm,
-    VisiteForm, AlerteForm, ActiviteForm, MessageForm, InformationForm, TemoignageForm,ContactForm
+     ProprieteForm, AnnonceForm, TransactionForm,
+    VisiteForm, AlerteForm, ActiviteForm, MessageForm, InformationForm, TemoignageForm,ContactForm,UtilisateurCreationForm
 )
+
 
 # --- VUES POUR L'API REST (JSON) ---
 
@@ -250,30 +251,44 @@ def detail_propriete_web(request, pk):
 # --- Vues de gestion (CRUD) par table ---
 
 # Utilisateur
+
+def register(request):
+    if request.method == 'POST':
+        form = UtilisateurCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Le rôle est déjà défini dans le formulaire
+            return redirect('login')  # Redirigez l'utilisateur après l'inscription
+    else:
+        form = UtilisateurCreationForm()
+
+    return render(request, 'utilisateurs/form.html', {'form': form})
+
 def utilisateur_list(request):
     objets = Utilisateur.objects.all()
     return render(request, 'utilisateurs/list.html', {'objets': objets})
 
-def utilisateur_create(request):
-    if request.method == 'POST':
-        form = UtilisateurForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('utilisateur_list')
-    else:
-        form = UtilisateurForm()
-    return render(request, 'utilisateurs/form.html', {'form': form, 'action': 'Créer'})
 
-def utilisateur_update(request, pk):
-    objet = get_object_or_404(Utilisateur, pk=pk)
-    if request.method == 'POST':
-        form = UtilisateurForm(request.POST, request.FILES, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('utilisateur_list')
-    else:
-        form = UtilisateurForm(instance=objet)
-    return render(request, 'utilisateurs/form.html', {'form': form, 'action': 'Modifier'})
+# def utilisateur_create(request):
+#     if request.method == 'POST':
+#         form = UtilisateurForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('utilisateur_list')
+#     else:
+#         form = UtilisateurForm()
+#     return render(request, 'utilisateurs/form.html', {'form': form, 'action': 'Créer'})
+
+# def utilisateur_update(request, pk):
+#     objet = get_object_or_404(Utilisateur, pk=pk)
+#     if request.method == 'POST':
+#         form = UtilisateurForm(request.POST, request.FILES, instance=objet)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('utilisateur_list')
+#     else:
+#         form = UtilisateurForm(instance=objet)
+#     return render(request, 'utilisateurs/form.html', {'form': form, 'action': 'Modifier'})
 
 def utilisateur_delete(request, pk):
     objet = get_object_or_404(Utilisateur, pk=pk)

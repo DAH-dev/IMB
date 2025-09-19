@@ -184,88 +184,106 @@
             padding: 5px;
         }
 
-        .chat-window {
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            height: calc(100% - 20px);
-            flex: 1;
-        }
+/* Corrections pour la partie chat */
+.chat-window {
+ width: 70%;
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+}
 
-        .nom {
-            font-size: 11px;
-        }
+.chat-container {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+}
 
-        .chat-messages {
-            flex-grow: 1;
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background: #fff;
-            border-radius: 10px;
-        }
+.chat-messages {
+ flex-grow: 1;
+ overflow-y: auto;
+ padding: 15px;
+ background: #fff;
+ border-radius: 10px;
+}
 
-        .chat-message {
-            margin-bottom: 12px;
-        }
+.chat-input {
+ margin-top: 10px;
+ margin-bottom: 0;
+}
 
-        .chat-message.from-user {
-            text-align: right;
-        }
+/* Règle pour les messages reçus (par défaut) */
+.chat-message p {
+     display: inline-block;
+padding: 5px 10px;
+ border-radius: 15px;
+ background-color: var(--light); /* Fond clair pour les messages de l'autre utilisateur */
+ max-width: 70%;
+}
 
-        .chat-message p {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 15px;
-            background-color: var(--light);
-            max-width: 70%;
-        }
+/* Règle pour les messages envoyés par l'utilisateur */
+.chat-message.from-user {
+ text-align: right;
+}
 
-        .chat-message.from-user p {
-            background-color: var(--primary);
-            color: white;
-        }
+.chat-message.from-user p {
+ background-color: var(--primary); /* Fond principal (bleu) pour les messages envoyés */
+color: white; /* Texte blanc */
+}
 
-        .chat-input {
-            margin-top: 10px;
-            margin-bottom: 0;
-        }
+       
+@media (max-width: 768px) {
+.messaging-layout {
+ display: block !important;
+ width: 100% !important;
+ }
 
-        @media (max-width: 768px) {
-            .messaging-layout {
-                display: block !important;
-                /* pas de flex gauche/droite */
-                width: 100% !important;
-            }
+ .conversations-list {
+ display: none;
+ width: 100% !important;
+ max-width: 100% !important;
+ }
 
-            .conversations-list {
-                display: none;
-                /* cachée par défaut */
-                width: 100% !important;
-                /* plein écran si active */
-                max-width: 100% !important;
-            }
+.conversations-list.active {
+ display: block;
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100% !important;
+ height: 100vh;
+ background: white;
+ z-index: 1200;
+ overflow-y: auto;
+}
+ 
+ .chat-window {
+ width: 100% !important;
+ height: 100vh !important;
+ display: flex;
+ flex-direction: column;
+}
 
-            .conversations-list.active {
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100% !important;
-                height: 100vh;
-                background: white;
-                z-index: 1200;
-                overflow-y: auto;
-            }
+ .chat-container {
+ display: flex;
+ flex-direction: column;
+ height: 100%;
+ }
+ 
+ .chat-messages {
+ flex-grow: 1;
+ overflow-y: auto;
+ padding-bottom: 60px;
+ }
 
-            .chat-window {
-                display: block !important;
-                flex: none !important;
-                width: 100% !important;
-                /* occupe toute la largeur */
-                max-width: 100% !important;
-            }
+.fixed-bottom-input {
+ position: fixed;
+ bottom: 0;
+ left: 0;
+ width: 100%;
+ background-color: white;
+ padding: 10px;
+ box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+ z-index: 999;
+ }
         }
     </style>
 </head>
@@ -385,32 +403,36 @@
 
 
 
-                <div class="chat-window">
-                    {% if contact_actuel %}
-                    <div class="chat-messages">
-                        {% for message in messages %}
-                        <div class="chat-message {% if message.expediteur == utilisateur %}from-user{% endif %}">
-                            <p>{{ message.contenu }}</p>
-                            <small class="text-muted d-block">{{ message.date_envoi|date:"H:i" }}</small>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="chat-input">
-                        <form method="post" action="{% url 'send_message' contact_pk=contact_actuel.pk %}">
-                            {% csrf_token %}
-                            <div class="input-group">
-                                <input type="text" name="contenu" class="form-control"
-                                    placeholder="Écrire un message..." required />
-                                <button class="btn btn-primary" type="submit">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    {% else %}
-                    <p class="text-center p-5">Sélectionnez une conversation pour commencer à discuter.</p>
-                    {% endif %}
+<div class="chat-window">
+    {% if contact_actuel %}
+    <div class="chat-container">
+        <div class="chat-messages">
+            {% for message in messages %}
+            <div class="chat-message {% if message.expediteur == utilisateur %}from-user{% endif %}">
+                <p>{{ message.contenu }}</p>
+                <small class="text-muted d-block">{{ message.date_envoi|date:"H:i" }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chat-input fixed-bottom-input">
+            <form method="post" action="{% url 'send_message' contact_pk=contact_actuel.pk %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="contenu" class="form-control"
+                        placeholder="Écrire un message..." required />
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-center p-5">Sélectionnez une conversation pour commencer à discuter.</p>
+    {% endif %}
+</div>
+
+
             </div>
         </div>
     </div>

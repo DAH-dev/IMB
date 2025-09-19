@@ -47,8 +47,10 @@ path('connexion/',views.login_view, name='login'),
 
     # Vues CRUD pour les utilisateurs
     path('gestion/utilisateurs/', views.utilisateur_list, name='utilisateur_list'),
-    path('gestion/utilisateurs/ajouter/', views.utilisateur_create, name='utilisateur_create'),
-    path('gestion/utilisateurs/<int:pk>/modifier/', views.utilisateur_update, name='utilisateur_update'),
+    # path('gestion/utilisateurs/ajouter/', views.utilisateur_create, name='utilisateur_create'),
+    path('gestion/utilisateurs/ajouter/', views.register, name='utilisateur_create'),
+
+    # path('gestion/utilisateurs/<int:pk>/modifier/', views.utilisateur_update, name='utilisateur_update'),
     path('gestion/utilisateurs/<int:pk>/supprimer/', views.utilisateur_delete, name='utilisateur_delete'),
     
     # Vues CRUD pour les transactions
