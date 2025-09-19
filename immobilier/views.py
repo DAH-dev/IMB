@@ -589,44 +589,58 @@ def message_delete(request, pk):
 
 @login_required
 def mes_messages(request, contact_pk=None):
-    """
-    Vue principale pour le système de messagerie.
-    Affiche la liste des conversations et le contenu d'une conversation spécifique.
-    """
-    if not request.user.is_authenticated:
-        return redirect('login') # Redirige vers la page de connexion
-    
-    utilisateur = Utilisateur.objects.get(pk=request.user.id)
+    utilisateur = request.user
 
-    # Récupérer les conversations (fils de discussion) de l'utilisateur
-    # L'utilisateur peut être l'expéditeur initial (utilisateur) ou le destinataire (propriétaire)
+    # Récupérer les conversations où l'utilisateur est soit le "contact" soit le "proprietaire"
+    # ET la conversation n'a pas été marquée comme "supprimée" par l'utilisateur actuel.
     conversations = Contact.objects.filter(
-        Q(utilisateur=utilisateur) | Q(proprietaire=utilisateur)
-    ).order_by('-date_envoi')
+        Q(utilisateur=utilisateur, supprime_par_utilisateur=False) |
+        Q(proprietaire=utilisateur, supprime_par_proprietaire=False)
+    )
 
     messages_du_fil = []
     contact_actuel = None
-    
+
     if contact_pk:
-        # Si un ID de contact est fourni dans l'URL, on récupère ce fil de discussion
         contact_actuel = get_object_or_404(Contact, pk=contact_pk)
-        
-        # S'assurer que l'utilisateur a le droit d'accéder à ce fil
+
+        # Vérification des droits pour accéder à cette conversation
         if contact_actuel.utilisateur != utilisateur and contact_actuel.proprietaire != utilisateur:
-            return redirect('mes_messages') # Redirection vers la liste s'il n'a pas les droits
+            return redirect('mes_messages')
+
+        # Si l'utilisateur a marqué cette conversation comme supprimée, on la masque aussi
+        if (contact_actuel.utilisateur == utilisateur and contact_actuel.supprime_par_utilisateur) or \
+           (contact_actuel.proprietaire == utilisateur and contact_actuel.supprime_par_proprietaire):
+            return redirect('mes_messages')
             
-        # Récupérer tous les messages liés à ce fil de discussion
+        # Récupérer les messages du fil
         messages_du_fil = Message.objects.filter(contact=contact_actuel).order_by('date_envoi')
-        
+
     context = {
         'utilisateur': utilisateur,
-        'conversations': conversations,
+        'conversations': conversations.order_by('-date_envoi'),  # C'est mieux de trier par date d'envoi que par ID
         'messages': messages_du_fil,
         'contact_actuel': contact_actuel,
     }
-    
     return render(request, 'messages/messages.html', context)
 
+@login_required
+def supprimer_conversation(request, contact_pk):
+    contact = get_object_or_404(Contact, pk=contact_pk)
+    utilisateur = request.user
+
+    if utilisateur == contact.utilisateur:
+        contact.supprime_par_utilisateur = True
+    elif utilisateur == contact.proprietaire:
+        contact.supprime_par_proprietaire = True
+    else:
+        # Empêcher un utilisateur de supprimer une conversation qui n'est pas la sienne
+        return redirect('mes_messages')
+
+    contact.save()
+    return redirect("mes_messages")
+
+@login_required(login_url='login')
 def send_message(request, contact_pk):
     if request.method == 'POST' and request.user.is_authenticated:
         contact = get_object_or_404(Contact, pk=contact_pk)
@@ -641,7 +655,29 @@ def send_message(request, contact_pk):
             )
     return redirect('mes_messages_detail', contact_pk=contact_pk)
 
+@login_required
+def supprimer_message(request, message_pk, mode):
+    message = get_object_or_404(Message, pk=message_pk)
+    utilisateur = request.user
+    contact_pk = message.contact.pk
 
+    # L'utilisateur doit être l'expéditeur ou le destinataire du message
+    if utilisateur != message.expediteur and utilisateur != message.contact.proprietaire and utilisateur != message.contact.utilisateur:
+        return redirect('mes_messages_detail', contact_pk=contact_pk)
+
+    # Logique de suppression
+    if mode == 'pour_moi':
+        if utilisateur == message.expediteur:
+            message.supprime_par_expediteur = True
+        else: # C'est le destinataire
+            message.supprime_par_destinataire = True
+        message.save()
+    elif mode == 'pour_tous' and utilisateur == message.expediteur:
+        # Seul l'expéditeur peut choisir de supprimer pour tout le monde
+        message.supprime_pour_tous = True
+        message.save()
+    
+    return redirect('mes_messages_detail', contact_pk=contact_pk)
 
 def success_page(request):
     return render(request, 'success_message.html')

@@ -334,62 +334,56 @@
 
                 <div class="conversations-list list-group">
     {% for conversation in conversations %}
-    <a href="{% url 'mes_messages_detail' contact_pk=conversation.pk %}"
-       class="list-group-item d-flex align-items-center {% if conversation.pk == contact_actuel.pk %}active{% endif %}">
-
-        <div class="icon-badge bg-primary d-flex align-items-center justify-content-center"
-             style="width:40px; height:40px; overflow:hidden; border-radius:50%;">
-
-            {% if conversation.utilisateur == utilisateur %}
-                {% if conversation.proprietaire.photo %}
-                    <img src="{{ conversation.proprietaire.photo.url }}" alt="Photo"
-                         style="width:100%; height:100%; object-fit:cover;">
-                {% else %}
-                    <i class="fas fa-user" style="font-size:18px; color:white;"></i>
-                {% endif %}
-            {% else %}
-                {% if conversation.utilisateur.photo %}
-                    <img src="{{ conversation.utilisateur.photo.url }}" alt="Photo"
-                         style="width:100%; height:100%; object-fit:cover;">
-                {% else %}
-                    <i class="fas fa-user" style="font-size:18px; color:white;"></i>
-                {% endif %}
-            {% endif %}
-        </div>
-
-        <div class="ms-2">
-            <strong>
+    <div class="list-group-item d-flex align-items-center {% if conversation.pk == contact_actuel.pk %}active{% endif %}">
+        
+        <!-- Lien vers la conversation -->
+        <a href="{% url 'mes_messages_detail' contact_pk=conversation.pk %}"
+           class="d-flex align-items-center flex-grow-1 text-decoration-none text-dark">
+            <div class="icon-badge bg-primary d-flex align-items-center justify-content-center"
+                 style="width:40px; height:40px; overflow:hidden; border-radius:50%;">
                 {% if conversation.utilisateur == utilisateur %}
-                    {{ conversation.proprietaire.get_full_name }}
+                    {% if conversation.proprietaire.photo %}
+                        <img src="{{ conversation.proprietaire.photo.url }}" alt="Photo"
+                             style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                        <i class="fas fa-user" style="font-size:18px; color:white;"></i>
+                    {% endif %}
                 {% else %}
-                    {{ conversation.utilisateur.get_full_name|default:"Visiteur" }}
+                    {% if conversation.utilisateur.photo %}
+                        <img src="{{ conversation.utilisateur.photo.url }}" alt="Photo"
+                             style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                        <i class="fas fa-user" style="font-size:18px; color:white;"></i>
+                    {% endif %}
                 {% endif %}
-            </strong><br>
-            <small>{{ conversation.propriete.titre }}</small>
-        </div>
-    </a>
+            </div>
+            <div class="ms-2">
+                <strong>
+                    {% if conversation.utilisateur == utilisateur %}
+                        {{ conversation.proprietaire.get_full_name }}
+                    {% else %}
+                        {{ conversation.utilisateur.get_full_name|default:"Visiteur" }}
+                    {% endif %}
+                </strong><br>
+                <small>{{ conversation.propriete.titre }}</small>
+            </div>
+        </a>
+
+        <!-- Bouton supprimer -->
+        <form method="post" action="{% url 'supprimer_conversation' contact_pk=conversation.pk %}" 
+              onsubmit="return confirm('Supprimer cette conversation ?');" class="ms-auto">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+    </div>
     {% empty %}
     <p class="text-center p-3">Aucune conversation pour le moment.</p>
     {% endfor %}
 </div>
 
-                <!-- <div class="conversations-list list-group">
-                    {% for conversation in conversations %}
-                    <a href="{% url 'mes_messages_detail' contact_pk=conversation.pk %}"
-                       class="list-group-item d-flex align-items-center {% if conversation.pk == contact_actuel.pk %}active{% endif %}">
-                        <div class="icon-badge bg-primary">
-                            <i class="fas fa-home"></i>
-                            <img src="" alt="">
-                        </div>
-                        <div>
-                            <strong>{% if conversation.utilisateur == utilisateur %}{{ conversation.proprietaire.get_full_name }}{% else %}{{ conversation.utilisateur.get_full_name|default:"Visiteur" }}{% endif %}</strong><br>
-                            <small>{{ conversation.propriete.titre }}</small>
-                        </div>
-                    </a>
-                    {% empty %}
-                    <p class="text-center p-3">Aucune conversation pour le moment.</p>
-                    {% endfor %}
-                </div> -->
+
 
                 <div class="chat-window">
                     {% if contact_actuel %}

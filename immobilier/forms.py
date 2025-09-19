@@ -52,7 +52,7 @@ class UtilisateurForm(forms.ModelForm):
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        fields = ['nom', 'email', 'telephone', 'sujet', 'message']        
+        fields = ['nom', 'email', 'telephone', 'sujet', 'message', 'supprime_par_utilisateur', 'supprime_par_proprietaire']        
 
 class ProprieteForm(forms.ModelForm):
     # Ce champ de formulaire gère la conversion entre la liste Python et la chaîne JSON

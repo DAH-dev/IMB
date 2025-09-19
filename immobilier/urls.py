@@ -85,7 +85,10 @@ path('connexion/',views.login_view, name='login'),
     path('messages/', views.mes_messages, name='mes_messages'),
     path('messages/<int:contact_pk>/', views.mes_messages, name='mes_messages_detail'),
     path('send_message/<int:contact_pk>/', views.send_message, name='send_message'),
-     path('success/', views.success_page, name='success_page'),
+     path('messages/supprimer/<int:message_pk>/<str:mode>/', views.supprimer_message, name='supprimer_message'),
+    path("messages/<int:contact_pk>/supprimer/", views.supprimer_conversation, name="supprimer_conversation"),
+    path('success/', views.success_page, name='success_page'),
+     
     
     # Vues CRUD pour les informations
     path('gestion/informations/', views.information_list, name='information_list'),

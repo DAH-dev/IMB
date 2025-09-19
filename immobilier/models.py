@@ -71,6 +71,10 @@ class Contact(models.Model):
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_lu')
     date_envoi = models.DateTimeField(auto_now_add=True)
 
+    # 🚨 Nouveaux champs pour suppression côté utilisateur
+    supprime_par_utilisateur = models.BooleanField(default=False)
+    supprime_par_proprietaire = models.BooleanField(default=False)
+
     def __str__(self):
         cible = self.propriete.titre if self.propriete else "Contact général"
         return f"Contact - {self.nom or self.utilisateur} -> {self.proprietaire} ({cible})"
@@ -203,6 +207,13 @@ class Message(models.Model):
     contenu = models.TextField()
     date_envoi = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='envoye')
+     # 🚨 Nouveaux champs pour la suppression
+    supprime_par_expediteur = models.BooleanField(default=False)
+    supprime_par_destinataire = models.BooleanField(default=False)
+    
+    # Champ pour la suppression pour tout le monde (visible par les deux)
+    # L'expéditeur peut choisir de le rendre invisible pour les deux
+    supprime_pour_tous = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Message de {self.expediteur} à {self.destinataire} - {self.statut}"
