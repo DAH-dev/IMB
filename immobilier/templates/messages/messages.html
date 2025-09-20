@@ -186,7 +186,7 @@
 
 /* Corrections pour la partie chat */
 .chat-window {
- width: 70%;
+ width: 80%;
  display: flex;
  flex-direction: column;
  height: 100%;
@@ -201,7 +201,7 @@
 .chat-messages {
  flex-grow: 1;
  overflow-y: auto;
- padding: 15px;
+ padding: 10px;
  background: #fff;
  border-radius: 10px;
 }
@@ -213,21 +213,38 @@
 
 /* Règle pour les messages reçus (par défaut) */
 .chat-message p {
-     display: inline-block;
-padding: 5px 10px;
- border-radius: 15px;
- background-color: var(--light); /* Fond clair pour les messages de l'autre utilisateur */
- max-width: 70%;
+    display: inline-block;
+    padding: 8px 10px 20px 10px; /* Ajout d'un padding en bas pour l'heure */
+    border-radius: 15px;
+    max-width: 70%;
+    position: relative; /* Indispensable pour positionner l'heure */
+    font-size: 14px;
+     background-color: #f0f0f0; /* Nouveau fond gris très clair */
+    border: 1px solid #ddd; /* Ajout d'une bordure très claire */
 }
 
+ /* Règle pour l'heure à l'intérieur de la bulle */
+.message-time {
+    font-size: 10px; /* Taille de police plus petite */
+    color: rgba(0, 0, 0, 0.5); /* Couleur plus discrète pour les messages de l'autre utilisateur */
+    position: absolute; /* Positionne l'heure par rapport à la bulle de message */
+    bottom: 4px; /* Espace du bas de la bulle */
+    right: 8px; /* Espace de la droite de la bulle */
+}
 /* Règle pour les messages envoyés par l'utilisateur */
 .chat-message.from-user {
  text-align: right;
+ color: white; /* Texte blanc */
 }
 
 .chat-message.from-user p {
- background-color: var(--primary); /* Fond principal (bleu) pour les messages envoyés */
-color: white; /* Texte blanc */
+  background-color: var(--primary); /* Fond principal (bleu) pour les messages envoyés */
+  color: white; /* Texte blanc */
+   border: none; /* Pas de bordure pour la bulle bleue */
+}
+.chat-message.from-user .message-time {
+    color: rgba(255, 255, 255, 0.842); /* Couleur claire pour un meilleur contraste */
+   
 }
 
        
@@ -276,6 +293,12 @@ color: white; /* Texte blanc */
         overflow-y: auto;
         /* Ajout d'un padding pour que le dernier message ne soit pas caché par le formulaire */
         padding-bottom: 70px; /* Ajustez cette valeur si la hauteur du formulaire change */
+    }
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 90px; /* On garde ce padding pour le mobile aussi */
+       
     }
 
     .fixed-bottom-input {
@@ -413,8 +436,10 @@ color: white; /* Texte blanc */
         <div class="chat-messages">
             {% for message in messages %}
             <div class="chat-message {% if message.expediteur == utilisateur %}from-user{% endif %}">
-                <p>{{ message.contenu }}</p>
-                <small class="text-muted d-block">{{ message.date_envoi|date:"H:i" }}</small>
+                <p>{{ message.contenu }}
+                    <small class="message-time">{{ message.date_envoi|date:"H:i" }}</small>
+                </p>
+                
             </div>
             {% endfor %}
         </div>
@@ -442,26 +467,36 @@ color: white; /* Texte blanc */
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-            const sidebar = document.getElementById("sidebar");
+    document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+        const sidebar = document.getElementById("sidebar");
 
-            mobileMenuBtn.addEventListener("click", function () {
-                sidebar.classList.toggle("active");
-            });
-
-            // Nouveau : bouton pour afficher les conversations
-            const toggleConversations = document.getElementById("toggleConversations");
-            const conversationsList = document.querySelector(".conversations-list");
-
-            if (toggleConversations) {
-                toggleConversations.addEventListener("click", function () {
-                    conversationsList.classList.toggle("active");
-                });
-            }
+        mobileMenuBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("active");
         });
 
-    </script>
+        const toggleConversations = document.getElementById("toggleConversations");
+        const conversationsList = document.querySelector(".conversations-list");
+
+        if (toggleConversations) {
+            toggleConversations.addEventListener("click", function () {
+                conversationsList.classList.toggle("active");
+            });
+        }
+
+        // --- Début du nouveau code pour le défilement ---
+        function scrollToBottom() {
+            const chatMessages = document.querySelector(".chat-messages");
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Appeler la fonction au chargement initial de la page
+        scrollToBottom();
+        // --- Fin du nouveau code pour le défilement ---
+    });
+</script>
 </body>
 
 </html>
