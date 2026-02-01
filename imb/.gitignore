@@ -1,0 +1,14 @@
+# Fichiers de base de données
+db.sqlite3
+
+# Fichiers de cache et binaires
+*.pyc
+__pycache__/
+*venv*/ # Ajout pour être plus sûr
+
+# Dossiers d'environnement virtuel
+venv/
+env/
+
+# Fichiers de médias locaux (images/vidéos utilisateur)
+media/

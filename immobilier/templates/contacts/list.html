@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Contacts</title>
+</head>
+<body>
+    <h1>Liste des Contacts</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sujet</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Statut</th>
+                <th>Date d'envoi</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for objet in objets %}
+            <tr>
+                <td>{{ objet.pk }}</td>
+                <td>{{ objet.sujet }}</td>
+                <td>{{ objet.nom|default:"Non renseigné" }}</td>
+                <td>{{ objet.email|default:"Non renseigné" }}</td>
+                <td>{{ objet.get_statut_display }}</td>
+                <td>{{ objet.date_envoi|date:"d M Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'contact_update' pk=objet.pk %}">Modifier</a>
+                    <a href="{% url 'contact_delete' pk=objet.pk %}">Supprimer</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Aucun contact trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

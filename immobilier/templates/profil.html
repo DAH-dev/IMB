@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMMO ABIDJAN - Profil client</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary: #1e4a8d;
+      --accent: #ff6b00;
+      --light: #f8f9fa;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    .logo {
+      font-size: 15px;
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+    }
+
+    .main-content {
+      margin-left: 250px;
+    }
+
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      font-size: 12px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .info-value {
+      color: #333;
+    }
+
+    .btn-accent {
+      background-color: #198754;
+      color: white;
+      padding: 7px 15px;
+      border-radius: 10px;
+      font-size: 12px;
+      border: none;
+      transition: background 0.3s;
+    }
+
+    .btn-accent:hover {
+      background-color: #146c43;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .sidebar a {
+        font-size: 16px;
+        font-weight: 500;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Bouton menu mobile -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <div class="sidebar p-4" id="sidebar">
+    <h4 class="text-center mb-4 logo">
+      <i class="fas fa-home me-2 text-primary"></i> IMMO ABIDJAN
+    </h4>
+
+    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
+         <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=1e4a8d&color=fff{% endif %}"
+           class="rounded-circle me-3" width="40" height="40">
+       <div class="identity">
+        <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+        <small class="text-muted">{{ user.role|capfirst }}</small>
+      </div>
+    </div>
+
+  <ul class="nav flex-column">
+
+  <!-- Mon profil : visible pour tout utilisateur -->
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'profil' %}">
+      <i class="fas fa-user me-2"></i> Mon profil
+    </a>
+  </li>
+
+  <!-- Ces deux liens s’affichent uniquement si l’utilisateur est propriétaire -->
+  {% if user.role == "proprietaire" %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'proprietaire' %}">
+        <i class="fas fa-cog me-2"></i> Paramètres
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'mes_proprietes' %}">
+        <i class="fas fa-building"></i> Mes propriétés
+      </a>
+    </li>
+  {% endif %}
+
+  <!-- Les liens suivants sont visibles pour tout le monde (client ou propriétaire) -->
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'mes_messages' %}">
+      <i class="fas fa-envelope me-2"></i> Messages
+    </a>
+  </li>
+
+  <!-- <li class="nav-item">
+    <a class="nav-link" href="#">
+      <i class="fas fa-calendar-check me-2"></i> Réservations
+    </a>
+  </li> -->
+   <li class="nav-item ">
+          <a class="nav-link" href="{% url 'index' %}">
+           <i class="fas fa-home me-2"></i> Accueil
+          </a>
+        </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'logout' %}">
+      <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+    </a>
+  </li>
+
+</ul>
+
+  </div>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0">Profil utilisateur</h5>
+        </div>
+
+        <div>
+          <a class="nav-link d-inline-block me-3" href="{% url 'index' %}">
+            <i class="fas fa-home me-2"></i>
+          </a>
+          <a href="{% url 'modifier_profil' %}" class="btn btn-accent">
+            <i class="fas fa-user-edit me-1"></i> Modifier mon profil
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid p-4">
+      <div class="dashboard-card">
+        <h5 class="mb-4"><i class="fas fa-user-circle me-2 text-primary"></i> Informations du compte</h5>
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=1e4a8d&color=fff{% endif %}"
+                 alt="Avatar"
+                 style="width: 120px; height: 120px;">
+          </div>
+
+          <div class="col-md-8">
+            <p><span class="info-label">Nom d’utilisateur :</span> <span class="info-value">{{ user.username }}</span></p>
+            <p><span class="info-label">Nom complet :</span> <span class="info-value">{{ user.get_full_name }}</span></p>
+            <p><span class="info-label">Email :</span> <span class="info-value">{{ user.email }}</span></p>
+            <p><span class="info-label">Téléphone :</span> <span class="info-value">{{ user.telephone }}</span></p>
+            <p><span class="info-label">Rôle :</span> <span class="info-value">{{ user.role|capfirst }}</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS menu mobile -->
+  <script>
+    const btn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+</html>

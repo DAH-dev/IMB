@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier mon profil</title> 
+    
+    <style>
+        /* ------------------------------------------- */
+        /* STYLES GÉNÉRAUX POUR LE FORMULAIRE (Inchangés) */
+        /* ------------------------------------------- */
+        
+        body {
+            background-color: #f5f7fa; 
+            font-family: Arial, sans-serif;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #1e4a8d;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #ff6b00; 
+            display: block;
+            width: fit-content;
+            margin: 0 auto 25px auto;
+            padding-bottom: 5px;
+        }
+
+        .form-container form p {
+            margin-bottom: 15px;
+        }
+
+        /* ------------------------------------------- */
+        /* NOUVEAU: Style de la photo de profil */
+        /* ------------------------------------------- */
+        .profile-photo {
+            display: block;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ff6b00;
+            margin: 0 auto 10px auto;
+        }
+
+        /* ------------------------------------------- */
+        /* STYLES DES CHAMPS (form-control) et LABELS (Inchangés) */
+        /* ------------------------------------------- */
+        .form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #343a40;
+            font-size: 0.9rem;
+        }
+
+        .form-container .form-control {
+            width: 100%;
+            padding: 7px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; 
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-container .form-control:focus {
+            border-color: #1e4a8d;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 74, 141, 0.2);
+        }
+
+        .form-container input[type="file"] {
+            padding: 5px;
+            background-color: #f8f9fa;
+        }
+
+        /* ------------------------------------------- */
+        /* STYLES DU BOUTON (Légèrement modifiés) */
+        /* ------------------------------------------- */
+        .form-container button[type="submit"] {
+            width: 100%;
+            padding: 8px;
+            background-color: #1e4a8d; /* Changement de couleur pour une action de sauvegarde */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 20px;
+        }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #15386d;
+        }
+        
+        /* ------------------------------------------- */
+        /* RESPONSIVE MOBILE (Inchangés) */
+        /* ------------------------------------------- */
+
+        @media (max-width: 600px) {
+            .form-container {
+                margin: 0;
+                padding: 15px;
+                box-shadow: none; 
+                border-radius: 0;
+                max-width: 100%; 
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container"> 
+        <h2>Modifier mon profil</h2>
+
+        {% if utilisateur.photo %}
+            <img src="{{ utilisateur.photo.url }}" alt="Photo de profil actuelle" class="profile-photo">
+            <p style="text-align: center; font-size: 0.8rem; margin-bottom: 15px;">
+                Ceci est votre photo actuelle. Chargez une nouvelle photo pour la remplacer.
+            </p>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    
+                    {% for error in field.errors %}
+                        <small style="color: red; display: block;">{{ error }}</small>
+                    {% endfor %}
+
+                    {% if field.help_text %}
+                        <small style="color: #6c757d; display: block;">{{ field.help_text }}</small>
+                    {% endif %}
+                </p>
+            {% endfor %}
+            
+            {% if form.non_field_errors %}
+                <div style="color: red; margin-bottom: 10px; font-weight: bold;">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <button type="submit">Enregistrer les modifications</button>
+            
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="{% url 'profil' %}" style="color: #1e4a8d; text-decoration: none;">
+                    Annuler
+                </a>
+            </p>
+        </form>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 💡 Assurez-vous que l'ID ci-dessous correspond au nom de votre champ 'photo'
+        const fileInput = document.getElementById('id_photo'); 
+        const MAX_SIZE_MB = 5; 
+        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+        
+        if (fileInput) { // Vérifie si le champ existe
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileSize = this.files[0].size;
+                    if (fileSize > MAX_SIZE_BYTES) {
+                        alert(`Attention : La photo est trop grande. La taille maximale est de ${MAX_SIZE_MB} Mo.`);
+                        this.value = ""; // Réinitialise le champ
+                    }
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

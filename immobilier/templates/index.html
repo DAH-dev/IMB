@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IMMOBILIER Abidjan - Plateforme immobilière</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    crossorigin="anonymous">
+
+  {% load static %}
+
+  <style>
+    :root {
+      --primary: #1e4a8d;
+      --secondary: #f8f9fa;
+      /* --accent: #ff6b00; */
+      --success: #28a745;
+      --light: #ffffff;
+      --dark: #343a40;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa23;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* NAVBAR HAUT */
+    nav.navbar {
+      background: linear-gradient(to right, var(--primary), #2c5ba8);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    nav.navbar .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 40px;
+    }
+
+    .logo {
+      font-size: 20px;
+    }
+
+    nav.navbar .navbar-brand {
+      color: white;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    nav.navbar .navbar-brand i {
+      font-size: 1rem;
+    }
+
+    /* Navigation de bureau - cachée sur mobile */
+    nav.navbar ul.navbar-nav {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    nav.navbar ul.navbar-nav li a.nav-link {
+      color: white;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    nav.navbar ul.navbar-nav li a.nav-link.active,
+    nav.navbar ul.navbar-nav li a.nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Style du bouton Accent/Connexion (conservé) */
+    nav.navbar ul.navbar-nav li.ms-lg-3 a.btn-accent {
+      background-color: var(--accent);
+      border: none;
+      color: white;
+      padding: 4px 10px;
+      font-weight: 500;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.7rem;
+      text-align: center;
+      white-space: nowrap;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    nav.navbar ul.navbar-nav li.ms-lg-3 a.btn-accent:hover {
+      background-color: #e05a00;
+    }
+
+    /* Toggles Mobile (Menu et Recherche) */
+    .mobile-toggles {
+      display: flex;
+      gap: 10px;
+    }
+
+    nav.navbar .mobile-toggles button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.2rem;
+      display: none;
+      /* Caché par défaut sur grand écran */
+    }
+
+    /* Conteneurs de Menu/Recherche Mobile (Panneaux déroulants) */
+    .mobile-dropdown-panel {
+      display: none;
+      /* Caché par défaut */
+      /* CHANGEMENT CLÉ: position: fixed; au lieu de position: absolute; pour qu'il reste visible lors du scroll. */
+      position: fixed;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 80;
+    }
+
+    .mobile-dropdown-panel.show {
+      display: block;
+    }
+
+    /* Styles spécifiques pour le contenu des panneaux */
+    #searchContent .recherche {
+      max-width: 90%;
+      margin: 10px auto;
+    }
+
+    .mobile-links {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+      padding-bottom: 5px;
+    }
+
+    .mobile-links li a {
+      display: block;
+      padding: 8px 0;
+      color: var(--dark);
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* BARRE DE NAVIGATION INFÉRIEURE (MOBILE) */
+    .bottom-nav {
+      display: none;
+      /* Caché par défaut sur les grands écrans */
+    }
+
+
+
+
+    .recherche {
+      max-width: 300px;
+      margin: 0 auto 20px;
+      display: flex;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .recherche input {
+      flex: 1;
+      padding: 2px 3px;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      background-color: #fff;
+      padding: 8px;
+    }
+
+    .recherche button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 6px 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .recherche button:hover {
+      background-color: #153a70;
+    }
+
+    .recherche button i {
+      pointer-events: none;
+    }
+
+    /* Section Communes */
+    section.py-5.bg-light {
+      background-color: var(--secondary);
+      padding: 3rem 0;
+    }
+
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    .commune-badges {
+      justify-content: center;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .commune-badge {
+      display: inline-block;
+      background: rgba(255, 106, 0, 0.205);
+      color: var(--accent);
+      padding: 3px 7px;
+      margin: 0 3px 4px 3px;
+      border-radius: 5px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s, color 0.3s;
+      font-size: 0, 80rem;
+    }
+
+    .commune-badge:hover,
+    .commune-badge.active {
+      background: rgba(240, 108, 13, 0.568);
+      color: white;
+    }
+
+    .commune-badge a {
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .py-5 .container {
+      margin-top: 15px;
+    }
+
+    /* Grid for properties */
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 50px;
+      padding-top: 10px;
+    }
+
+    /* Ajustements pour les cartes de propriété */
+    .cart_appartement {
+      width: 230px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+
+    .img_appartement {
+      padding: 5px;
+      width: 100%;
+      height: 170px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .img_appartement img,
+    .img_appartement video {
+      width: 100%;
+      height: 170px;
+      margin: auto;
+      border-radius: 3px;
+      border-style: none;
+      object-fit: cover;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+
+    .video-indicator {
+    position: absolute;
+    top: 50%; /* Centre verticalement */
+    left: 50%; /* Centre horizontalement */
+    transform: translate(-50%, -50%); /* Ajuste le positionnement pour un centrage parfait */
+    width: 45px; /* Taille du cercle */
+    height: 45px;
+    background-color: rgba(0, 0, 0, 0.6); /* Fond noir semi-transparent */
+    border-radius: 50%; /* Rend le conteneur rond */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10; /* Assure qu'il est au-dessus de l'image/vidéo */
+    pointer-events: none; /* Ignore les clics sur le bouton pour que le lien principal fonctionne */
+}
+
+.video-indicator i {
+    color: white; /* Couleur de l'icône */
+    font-size: 1.2rem; /* Taille de l'icône */
+    /* Décale légèrement l'icône de la flèche pour qu'elle semble centrée dans le cercle */
+    transform: translateX(2px); 
+}
+
+    .descrip_appartement {
+      padding: 4px;
+      flex-grow: 1;
+    }
+
+
+    .descrip_appartement h5 {
+      font-size: 0, 8rem;
+      margin-bottom: 2px;
+      color: var(--primary);
+    }
+
+    .descrip_appartement p {
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 5px;
+      font-size: 0.70rem;
+      color: #555;
+    }
+
+    .descrip_appartement ul span {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      font-size: 0.7rem;
+      color: #666;
+    }
+
+    .descrip_appartement p a {
+      padding: 6px;
+      text-align: center;
+    }
+
+
+    .descrip_appartement p button {
+      max-width: 230px;
+      padding: 2px;
+      border: 2px solid var(--primary);
+      background-color: var(--primary);
+      color: white;
+      border-radius: 6px;
+      font-size: 0, 7rem;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .descrip_appartement i {
+      color: var(--success);
+    }
+
+
+    .voitout {
+      color: black;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin: 40px;
+    }
+
+    /* --- NOUVEAUX STYLES POUR LA CARTE DU PROPRIÉTAIRE --- */
+
+    .owner-info {
+      /* Utilise Flexbox pour aligner l'image et le nom sur une seule ligne */
+      display: flex;
+      align-items: center;
+      /* Centre verticalement la photo et le texte */
+      gap: 8px;
+      /* Espacement entre la photo et le nom */
+      margin-bottom: 8px;
+      /* Espace sous cette ligne */
+    }
+
+    .owner-photo-wrapper {
+      /* Conteneur pour la photo (pour garantir la forme ronde et la taille fixe) */
+      width: 27px;
+      /* Petite taille pour la vignette */
+      height: 27px;
+      border-radius: 50%;
+      /* Rend le conteneur rond */
+      overflow: hidden;
+      /* Coupe l'image pour qu'elle soit bien ronde */
+      background-color: #ccc;
+      /* Couleur de fond si la photo ne charge pas */
+      display: flex;
+      /* Centrer l'icône de l'utilisateur si aucune photo */
+      justify-content: center;
+      align-items: center;
+    }
+
+    .owner-photo-wrapper img {
+      /* S'assurer que l'image remplit parfaitement le conteneur */
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .owner-name {
+      /* Style pour le nom complet */
+      font-size: 0.75rem;
+      /* Réduit légèrement la taille de la police */
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    /* Style de l'icône de substitution (utilisateur) */
+    .owner-photo-wrapper .fas.fa-user {
+      font-size: 0.8rem !important;
+      /* Réduit la taille de l'icône */
+      color: #fff;
+      /* Couleur blanche pour l'icône par défaut */
+    }
+
+    /* Mise à jour des règles existantes (facultatif mais recommandé pour la propreté) */
+    .descrip_appartement .h5 {
+      font-size: 0.9rem;
+      /* Légèrement plus grand que votre 0.8rem précédent */
+      margin-bottom: 5px;
+      /* Ajuste l'espace */
+      color: var(--primary);
+    
+    }
+
+
+
+    /* Styles pour le Footer uniquement pour pc*/
+    .footer {
+      background: var(--dark);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 20px 0 10px;
+      margin-top: 20px;
+      width: 100%;
+      /* S'assure que le footer prend 100% de la largeur de son parent (body) */
+    }
+
+    .footer-content-wrapper {
+      max-width: 950px;
+      /* Limite la largeur du contenu à l'intérieur du footer */
+      margin: 0 auto;
+      /* Centre le contenu du footer */
+      padding: 0 20px;
+      /* Ajoute un padding interne au contenu du footer */
+    }
+
+    .footer-columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      /* Assurez-vous qu'aucun style ici ne restreint la largeur */
+    }
+
+    .footer-column {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .footer .socials i {
+      margin-right: 15px;
+    }
+
+
+
+
+    /* Footer (conservé) */
+    footer {
+      background-color: #65686b60;
+      color: #000;
+      padding: 20px 30px;
+    }
+
+    footer .container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    footer h4.footer-title {
+      color: #000;
+      position: relative;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    footer h4.footer-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* ... (le reste du footer n'est pas modifié) ... */
+
+    /* ****************************************************** */
+    /* RESPONSIVE (PETIT ÉCRAN) - MAX-WIDTH: 768px */
+    /* ****************************************************** */
+    @media (max-width: 768px) {
+
+      /* Cache les liens de la navbar du haut sur mobile */
+      nav.navbar #navbarNav {
+        display: none;
+      }
+
+      /* Rend les deux boutons mobiles visibles */
+      nav.navbar .mobile-toggles button {
+        display: block;
+      }
+
+      /* Ajuste le padding du body pour que le contenu ne soit pas caché par la barre du bas */
+      body {
+        padding-bottom: 50px;
+      }
+
+      /* BARRE DE NAVIGATION INFÉRIEURE FIXE */
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        background-color: white;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #777;
+        font-size: 0.65rem;
+        font-weight: 500;
+        text-decoration: none;
+        flex-grow: 1;
+        height: 100%;
+        padding: 2px;
+      }
+
+      .bottom-nav a i {
+        font-size: 1.1rem;
+        margin-bottom: 3px;
+      }
+
+      .bottom-nav a.active {
+        color: var(--primary);
+      }
+
+      /* Cache la section de badges sur mobile, car ils sont dans le menu déroulant de recherche */
+      .commune-badges {
+        display: none;
+      }
+
+      /* Cacher la barre de recherche du hero pour éviter le doublon */
+      section.py-5.bg-light>.recherche {
+        display: none;
+      }
+
+      /* NOUVELLE RÈGLE POUR RÉDUIRE L'ESPACE AU-DESSUS DES PROPRIÉTÉS */
+      section.py-5.bg-light {
+        /* Réduire le padding vertical à 1rem (ou moins) sur mobile */
+        padding-top: 1rem;
+        /* Réduit l'espace avec la navbar du haut */
+        padding-bottom: 1rem;
+        /* Optionnel: Réduit l'espace en bas */
+      }
+
+      /* Optionnel: Si vous avez aussi un padding sur le conteneur à l'intérieur de cette section */
+      .py-5 .container {
+        margin-top: 5px;
+        /* Réduit l'espace au-dessus du contenu du conteneur */
+      }
+
+      .row {
+        gap: 3px;
+      }
+
+      .cart_appartement {
+        width: 99%;
+        margin-bottom: 5px;
+      }
+
+      .img_appartement {
+        height: 200px;
+      }
+
+      .img_appartement img,
+      .img_appartement video {
+        height: 200px;
+      }
+
+      .descrip_appartement {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .descrip_appartement .h5 {
+        font-size: 1.1rem;
+      }
+      .descrip_appartement p  {
+      font-size: 13px;
+
+    }
+
+      .owner-photo-wrapper {
+        width: 40px;
+        /* Légèrement plus grand sur mobile */
+        height: 40px;
+      }
+
+      .owner-name {
+        font-size: 0.9rem;
+      }
+
+      /* Masque le footer */
+      footer {
+        display: none;
+      }
+    }
+
+    /* Styles pour la navigation de bureau: assurer qu'ils sont visibles */
+    @media (min-width: 769px) {
+      nav.navbar #navbarNav {
+        display: flex !important;
+        /* Force l'affichage sur desktop */
+      }
+
+      nav.navbar .mobile-toggles button {
+        display: none;
+        /* Cache les boutons mobiles sur desktop */
+      }
+    }
+  </style>
+</head>
+
+<script>
+  // Script JS pour gérer l'ouverture/fermeture des deux menus mobiles
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchToggler = document.getElementById('search-toggler');
+    const menuToggler = document.getElementById('menu-toggler');
+    const searchContent = document.getElementById('searchContent');
+    const menuContent = document.getElementById('menuContent');
+
+    function togglePanel(panelToShow, panelToHide) {
+      // Inverse l'état du panneau à afficher
+      panelToShow.classList.toggle('show');
+
+      // Ferme l'autre panneau si ouvert
+      if (panelToHide.classList.contains('show')) {
+        panelToHide.classList.remove('show');
+      }
+    }
+
+    if (searchToggler && menuToggler) {
+      searchToggler.addEventListener('click', function () {
+        togglePanel(searchContent, menuContent);
+      });
+
+      menuToggler.addEventListener('click', function () {
+        togglePanel(menuContent, searchContent);
+      });
+    }
+  });
+</script>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <i class="fa-solid fa-house me-2"></i>
+        <span class="logo">IMB</span>
+      </a>
+
+      <div class="mobile-toggles">
+        <button id="search-toggler" type="button" aria-label="Toggle Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <button id="menu-toggler" type="button" aria-label="Toggle Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#"><i class="fa-solid fa-magnifying-glass me-1"></i> Rechercher</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-1"></i> Propriétaires</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'about' %}"><i class="fa-solid fa-star me-1"></i> A propos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact"><i class="fa-solid fa-phone me-1"></i> Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'superadmin' %}"><i class="fa-solid fa-phone me-1"></i> admin</a>
+          </li>
+
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-accent" href="{% url 'connexion' %}">
+              <i class="fa-solid fa-right-to-bracket me-1"></i> Connexion
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-dropdown-panel" id="searchContent">
+
+    <form class="recherche" action="#" method="get">
+      <input type="text" name="recherche" id="rech_mobile" placeholder="Recherche de propriété par titre, commune...">
+      <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+
+    <ul class="mobile-links">
+      <li>
+        <a href="{% url 'proprietes_maison' %}">
+          <i class="fa-solid fa-house-chimney me-2"></i> Maisons
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'proprietes_Terrain' %}">
+          <i class="fa-solid fa-tree me-2"></i> Terrains
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'proprietes_plan' %}">
+          <i class="fa-solid fa-map me-2"></i> Plans
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'index' %}">
+          <i class="fa-solid fa-film"></i> toutes sortes
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="mobile-dropdown-panel" id="menuContent">
+    <ul class="mobile-links">
+      <li>
+        <a href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-2"></i> Propriétaires</a>
+      </li>
+      <li>
+        <a href="{% url 'about' %}"><i class="fa-solid fa-star me-2"></i> À propos</a>
+      </li>
+      <li>
+        <a href="#contact"><i class="fa-solid fa-phone me-2"></i> Contact</a>
+      </li>
+      <li>
+        <a href="{% url 'superadmin' %}"><i class="fa-solid fa-user-shield me-2"></i> Admin</a>
+      </li>
+      <hr />
+      <li>
+        <a href="{% url 'connexion' %}"><i class="fa-solid fa-right-to-bracket me-2"></i> Connexion / Inscription</a>
+      </li>
+    </ul>
+  </div>
+
+
+
+
+  <section class="py-5 bg-light">
+
+    <form class="recherche" action="#" method="get">
+      <input type="text" name="recherche" id="rech" placeholder="Recherche...">
+      <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+
+    <div class="container">
+      <h2 class="section-title"></h2>
+      <div class="commune-badges">
+        <span class="commune-badge">
+          <a href="{% url 'proprietes_maison' %}">
+            <i class="fa-solid fa-house-chimney me-2"></i> Maisons
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a href="{% url 'proprietes_Terrain' %}">
+            <i class="fa-solid fa-tree me-2"></i> Terrains
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a href="{% url 'proprietes_plan' %}">
+            <i class="fa-solid fa-map me-2"></i> Plans
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a href="{% url 'video_shorts' %}">
+            <i class="fa-solid fa-video me-2"></i> Shorts
+          </a>
+        </span>
+        <span class="commune-badge">
+          <a class="nav-link" href="{% url 'mes_messages' %}">
+            <i class="fa-solid fa-envelope me-2"></i> Messagerie
+          </a>
+        </span>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="container">
+    <div class="row" id="propriete-container">
+      {% for propriete in proprietes_recentes %}
+      
+        <div class="cart_appartement">
+          <a href="{% url 'detail_propriete_web' propriete.pk %}" class="cart_appartement flex-fill "
+        style="text-decoration: none;">
+         <div class="img_appartement">
+       {% if propriete.image %}
+ 
+                {% if propriete.video %}
+                <div class="video-indicator">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                {% endif %}
+                
+        <img src="{{ propriete.image.url }}" alt="Image de {{ propriete.titre }}">
+                
+        {% elif propriete.video %}
+                 <video controls muted>
+         <source src="{{ propriete.video.url }}" type="video/mp4">
+            Votre navigateur ne supporte pas la balise vidéo.
+         </video>
+        {% else %}
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Image non disponible">
+          {% endif %}
+         </div>
+           </a>
+          <div class="descrip_appartement">
+            
+            <div class="owner-info">
+               <a href="{% url 'propriete_par_proprietaire' propriete.proprietaire.id %}">
+              <div class="owner-photo-wrapper">
+                {% if propriete.proprietaire.photo %}
+               
+                <img src="{{ propriete.proprietaire.photo.url }}"
+                  alt="Photo de {{ propriete.proprietaire.nom_complet }}">
+                {% else %}
+                <i class="fas fa-user"></i>
+               
+                {% endif %}
+              </div>
+             </a>
+              <span class="owner-name">
+
+                <span class="h5">{{ propriete.titre }}</span> <br>
+                {% if propriete.proprietaire.first_name %}
+                Posteur(se) {{ propriete.proprietaire.first_name }} {{ propriete.proprietaire.last_name }}</span>
+                {% else %}
+                 Posteur(se) Anonyme
+                {% endif %}
+              </span>
+            </div>
+            {% for caracteristique in propriete.caracteristiques|slice:":2" %}
+            <p><i class="fa-solid fa-circle-check"></i> {{ caracteristique }}</p>
+            {% endfor %}
+            <p>
+              <strong> <i class="fa-solid fa-calendar-alt me-2"></i> publié le {{propriete.date_publication|date:"d/m/Y" }}</strong>
+            </p>
+          </div>
+        </div>
+     
+      {% endfor %}
+    </div>
+  </div>
+
+
+  <nav class="bottom-nav">
+    <a href="#" class="active">
+      <i class="fa-solid fa-house"></i>
+      <span>Accueil</span>
+    </a>
+    <a href="{% url 'video_shorts' %}">
+      <!-- <i class="fa-solid fa-right-to-bracket"></i> -->
+      <i class="fa-solid fa-bolt"></i>
+      <span>scroll</span>
+    </a>
+    <a href="{% url 'mes_messages' %}">
+      <i class="fa-solid fa-envelope"></i>
+      <span>Messages</span>
+    </a>
+    <!-- <a href="{% url 'proprietaire' %}">
+      <i class="fa-solid fa-user"></i>
+      <span>Vous</span>
+    </a> -->
+   {% if user.is_authenticated %}
+    {% if user_role == "admin" %}
+        <!-- Redirection si l'utilisateur est admin -->
+        <a href="{% url 'superadmin' %}">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Admin</span>
+        </a>
+      {% elif user_role == "proprietaire" %}
+        <!-- Redirection si l'utilisateur est propriétaire -->
+        <a href="{% url 'profil' %}">
+            <i class="fa-solid fa-building-user"></i>
+            <span>Propriétaire</span>
+        </a>
+    {% else %}
+        <!-- Redirection si c’est un client -->
+        <a href="{% url 'profil' %}">
+            <i class="fa-solid fa-user"></i>
+            <span>Client</span>
+        </a>
+    {% endif %}
+{% else %}
+    <!-- Redirection si la personne n’est pas connectée -->
+    <a href="{% url 'connexion' %}">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Connexion</span>
+    </a>
+{% endif %}
+
+
+  </nav>
+
+    <footer class="footer">
+    <div class="footer-content-wrapper">
+      <div class="footer-columns">
+        <div class="footer-column">
+          <h4>IMMOBILIER Abidjan</h4>
+          <p>Plateforme innovante pour faciliter la recherche et la présentation de propriétés à Abidjan.</p>
+          <div class="socials">
+            <i class="fab fa-facebook"></i>
+            <i class="fab fa-twitter"></i>
+            <i class="fab fa-instagram"></i>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4>Liens rapides</h4>
+          <a href="#">Accueil</a>
+          <a href="#">Rechercher une propriété</a>
+          <a href="#">Devenir propriétaire</a>
+          <a href="#">À propos</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-column">
+          <h4>Contactez-nous</h4>
+          <p><i class="fas fa-map-marker-alt"></i> Plateau, Abidjan, Côte d’Ivoire</p>
+          <p><i class="fas fa-phone"></i> +225 20 30 40 50</p>
+          <p><i class="fas fa-envelope"></i> contact@immobilier-abidjan.ci</p>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:20px;">© 2023 IMMOBILIER Abidjan. Tous droits réservés.</p>
+  </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Supprimer l'information</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; }
+        .btn-danger { background-color: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Supprimer l'information</h1>
+    <p>Êtes-vous sûr de vouloir supprimer cette information n° **"{{ objet.pk }}"** ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a href="{% url 'information_list' %}" class="btn">Annuler</a>
+    </form>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>À Propos - IMMOBILIER Abidjan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        crossorigin="anonymous">
+
+    {% load static %}
+
+    <style>
+        /* Définition des variables de couleurs de votre projet */
+        :root {
+            --primary: #1e4a8d;
+            --secondary: #f8f9fa;
+            --accent: #ff6b00; /* Assuré d'être défini ici */
+            --success: #28a745;
+            --light: #ffffff;
+            --dark: #343a40;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa23;
+            color: #333;
+            line-height: 1.5;
+            padding-bottom: 0; /* On enlève le padding du body ici */
+        }
+        
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 10px;
+        }
+
+        /* --- STYLES SPÉCIFIQUES À LA PAGE À PROPOS --- */
+
+        .about-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2c5ba8 100%);
+            color: var(--light);
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .about-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--light);
+        }
+
+        .about-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Sections de contenu */
+        .section {
+            padding: 40px 0;
+            margin-bottom: 20px;
+            background-color: var(--light);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-inverse {
+            background-color: var(--secondary);
+            box-shadow: none;
+            border: 1px solid #eee;
+        }
+
+        .section h2 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .section h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* Mise en page des valeurs et de l'équipe */
+        .grid-3-cols {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            flex: 1 1 300px; /* Base pour 3 colonnes sur desktop */
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: var(--light);
+            transition: transform 0.3s;
+        }
+        
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-item i {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .grid-item h3 {
+            color: var(--dark);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        /* --- NOUVEAUX STYLES POUR LA SECTION HISTOIRE AVEC IMAGE --- */
+        .story-content {
+            display: flex;
+            flex-direction: row; /* Texte à gauche, image à droite par défaut */
+            gap: 30px;
+            align-items: center; /* Centrer verticalement le contenu */
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .story-text {
+            flex: 2; /* Prend plus d'espace */
+            text-align: justify;
+        }
+
+        .story-image {
+            flex: 1; /* Prend moins d'espace */
+            text-align: center;
+        }
+
+        .story-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 50px 0;
+            background-color: var(--primary);
+            color: white;
+            margin-top: 30px;
+            border-radius: 8px;
+        }
+        
+        .cta-section h2 {
+            color: var(--light);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .cta-button:hover {
+            background-color: #e05a00;
+            text-decoration: none;
+        }
+
+        /* --- RESPONSIVE : Mobile (ajustement des colonnes) --- */
+        @media (max-width: 768px) {
+            
+            body {
+                padding-bottom: 50px; /* Pour laisser de la place à la bottom-nav */
+            }
+            
+            .about-header {
+                padding: 40px 0;
+            }
+            
+            .about-header h1 {
+                font-size: 2rem;
+            }
+
+            .grid-3-cols {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .grid-item {
+                flex: 1 1 100%;
+            }
+            
+            .section {
+                padding: 30px 0;
+                margin-bottom: 15px;
+            }
+
+            /* Histoire : image au-dessus du texte sur mobile */
+            .story-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .story-text, .story-image {
+                flex: none; /* Ne prend plus d'espace flex */
+                width: 100%; /* Prend toute la largeur */
+            }
+            
+            .bottom-nav { /* S'assurer que le bottom-nav de votre projet est ici */
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 50px;
+                background-color: white;
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                justify-content: space-around;
+                align-items: center;
+            }
+
+            .bottom-nav a {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #777;
+                font-size: 0.65rem;
+                font-weight: 500;
+                text-decoration: none;
+                flex-grow: 1;
+                height: 100%;
+                padding: 2px;
+            }
+
+            .bottom-nav a i {
+                font-size: 1.1rem;
+                margin-bottom: 3px;
+            }
+
+            .bottom-nav a.active {
+                color: var(--primary);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- 
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+                <i class="fa-solid fa-house me-2"></i>
+                <span class="logo">IMB</span>
+            </a>
+            
+            <div class="mobile-toggles" style="display: none;"> 
+                 <button id="menu-toggler" type="button" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" style="display: flex; list-style: none; gap: 15px; align-items: center;">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}" style="color: white;"><i class="fa-solid fa-magnifying-glass me-1"></i> Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'proprietaire' %}" style="color: white;"><i class="fa-solid fa-user me-1"></i> Propriétaires</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-accent" href="{% url 'connexion' %}" style="background-color: var(--accent); color: white; border-radius: 30px; padding: 4px 10px;">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i> Connexion
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav> -->
+    
+    <div class="about-header">
+        <div class="container">
+            <h1>IMMOBILIER Abidjan : Construire votre avenir ici.</h1>
+            <p>Nous sommes la plateforme immobilière de référence, dédiée à simplifier l'achat, la vente et la location de biens à Abidjan et dans toute la Côte d'Ivoire.</p>
+        </div>
+    </div>
+
+    <main class="container">
+
+        <section class="section">
+            <h2>Notre Mission</h2>
+            <div class="content">
+                <p style="text-align: center; font-size: 1.1rem; color: #555; max-width: 800px; margin: 0 auto 20px;">
+                    Notre objectif est de rendre le marché immobilier plus transparent et accessible. Nous connectons directement les propriétaires et les acheteurs/locataires, éliminant les intermédiaires inutiles.
+                </p>
+                <div class="grid-3-cols">
+                    <div class="grid-item">
+                        <i class="fa-solid fa-handshake"></i>
+                        <h3>Fiabilité</h3>
+                        <p>Des annonces vérifiées pour une confiance totale dans chaque transaction.</p>
+                    </div>
+                    <div class="grid-item">
+                        <i class="fa-solid fa-shield-alt"></i>
+                        <h3>Sécurité</h3>
+                        <p>Des outils sécurisés pour le contact direct et la gestion des documents.</p>
+                    </div>
+                    <div class="grid-item">
+                        <i class="fa-solid fa-search"></i>
+                        <h3>Simplicité</h3>
+                        <p>Une interface intuitive pour trouver le bien parfait en quelques clics.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section section-inverse">
+            <h2>Notre Histoire</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <p>
+                        IMMOBILIER Abidjan est né d'une simple observation : trouver un logement de qualité à Abidjan était souvent un parcours long et semé d'embûches. En **[Année de création, ex: 2018]**, notre fondateur a eu la vision de créer une plateforme où la technologie simplifierait la recherche de biens immobiliers.
+                    </p>
+                    <p style="margin-top: 15px;">
+                        Depuis, nous avons grandi pour devenir une communauté de milliers de propriétaires et de chercheurs de logement. Chaque ligne de code, chaque nouvelle fonctionnalité est dédiée à un seul but : vous aider à franchir le pas de la propriété ou de la location en toute sérénité. Nous croyons que trouver un foyer devrait être une expérience excitante et non stressante.
+                    </p>
+                </div>
+              <div class="story-image">
+    <img src="http://googleusercontent.com/image_collection/image_retrieval/8586912958774767253_0" 
+         alt="Deux hommes professionnels en collaboration" 
+         title="Équipe Fondatrice">
+</div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2>Prêt à trouver votre prochaine propriété ?</h2>
+            <p>Rejoignez la plateforme et découvrez des milliers d'annonces exclusives.</p>
+            <a href="{% url 'connexion' %}" class="cta-button">Commencer maintenant</a>
+        </section>
+
+    </main>
+    
+    <nav class="bottom-nav">
+        <a href="{% url 'index' %}" class="active">
+            <i class="fa-solid fa-house"></i>
+            <span>Accueil</span>
+        </a>
+        <a href="{% url 'video_shorts' %}">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Scroll</span>
+        </a>
+        <a href="{% url 'mes_messages' %}">
+            <i class="fa-solid fa-envelope"></i>
+            <span>Messages</span>
+        </a>
+        <a href="{% url 'proprietaire' %}">
+            <i class="fa-solid fa-user"></i>
+            <span>Vous</span>
+        </a>
+    </nav>
+
+    <footer> 
+    </footer>
+    
+</body>
+
+</html>

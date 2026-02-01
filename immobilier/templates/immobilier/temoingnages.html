@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Témoignages - ImmoPlus</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f9ff;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #007bffbe;
+      background-color: #153a70;
+      color: white;
+      padding: 2px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 18px;
+    }
+     h2,p {
+    font-size: 16px;
+     }
+
+    .temoignages {
+      padding: 15px 10px;
+      text-align: center;
+    }
+
+    .temoignages h2 {
+      color: #007BFF;
+       color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .temoignage {
+      background-color: white;
+      border-left: 5px solid #153a70;
+      
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 700px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .temoignage p {
+      font-style: italic;
+      color: #333;
+    }
+
+    .temoignage h4 {
+      margin-top: 8px;
+      color: #007BFF;
+      
+    }
+
+    .form-temoignage {
+      max-width: 600px;
+      margin: 15px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      border-left: 4px solid #153a70;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .form-temoignage h3 {
+      color: #007BFF;
+    }
+
+    .form-temoignage input,
+    .form-temoignage textarea {
+      width: 96%;
+      padding: 5px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .form-temoignage button {
+      background-color: #007BFF;
+       background-color: #153970e0;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏆 Témoignages clients et partenaires</h1>
+</header>
+
+<!-- Formulaire -->
+<form class="form-temoignage" onsubmit="ajouterTemoignage(event)">
+  <h3>Laisser un témoignage</h3>
+  <label>Nom :</label>
+  <input type="text" id="nom" placeholder="ex: Yao Franck" required>
+
+  <label>Témoignage :</label>
+  <textarea id="texte" rows="4" placeholder="Votre expérience avec ImmoPlus..." required></textarea>
+
+  <button type="submit">Envoyer</button>
+</form>
+
+
+<section class="temoignages">
+  <h2>Ce que disent nos clients</h2>
+
+  <div class="temoignage">
+    <p>"Grâce à ImmoPlus, j'ai trouvé mon terrain à Bouaké en 3 jours seulement. Service rapide et professionnel !"</p>
+    <h4>- Koffi Stéphane</h4>
+  </div>
+
+  <div class="temoignage">
+    <p>"Je ne fais plus mes démarches seul. ImmoPlus m’a accompagné dans l’obtention de mes documents juridiques."</p>
+    <h4>- Awa Diomandé</h4>
+  </div>
+
+  <div class="temoignage">
+    <p>"L’espace client est clair, j’ai pu suivre l’évolution de mon dossier en ligne sans me déplacer."</p>
+    <h4>- Moussa Touré</h4>
+  </div>
+
+  <div id="nouveaux-temoignages"></div>
+</section>
+
+
+<script>
+  function ajouterTemoignage(event) {
+    event.preventDefault(); // Empêche le rechargement
+
+    const nom = document.getElementById('nom').value.trim();
+    const texte = document.getElementById('texte').value.trim();
+
+    if (nom === "" || texte === "") {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'temoignage';
+    div.innerHTML = `<p>"${texte}"</p><h4>- ${nom}</h4>`;
+
+    document.getElementById('nouveaux-temoignages').appendChild(div);
+
+    // Réinitialiser les champs
+    document.getElementById('nom').value = "";
+    document.getElementById('texte').value = "";
+  }
+</script>
+
+</body>
+</html>

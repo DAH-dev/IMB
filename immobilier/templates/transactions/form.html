@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ action }} une transaction</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .btn { padding: 8px 12px; text-decoration: none; border-radius: 4px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], input[type="date"], select { width: 100%; padding: 8px; box-sizing: border-box; }
+        .errorlist { color: red; }
+    </style>
+</head>
+<body>
+    <h1>{{ action }} une transaction</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">{{ action }}</button>
+        <a href="{% url 'transaction_list' %}" class="btn">Annuler</a>
+    </form>
+</body>
+</html>

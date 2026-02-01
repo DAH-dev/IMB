@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    
+    <style>
+        /* ------------------------------------------- */
+        /* STYLES GÉNÉRAUX POUR LE FORMULAIRE */
+        /* ------------------------------------------- */
+        
+        body {
+            /* Un fond légèrement gris pour contraster avec le formulaire blanc */
+            background-color: #f5f7fa; 
+            font-family: Arial, sans-serif;
+        }
+
+        /* Le conteneur principal: gère la largeur et le centrage */
+        .form-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Titre du formulaire */
+        .form-container h2 {
+            text-align: center;
+            color: #1e4a8d; /* Couleur primaire */
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #ff6b00; /* Couleur accent */
+            display: block;
+            width: fit-content;
+            margin: 0 auto 25px auto;
+            padding-bottom: 5px;
+        }
+
+        /* Styles des paragraphes (générés par {{ form.as_p }}) */
+        .form-container form p {
+            margin-bottom: 15px;
+        }
+
+        /* ------------------------------------------- */
+        /* STYLES DES CHAMPS (form-control) et LABELS */
+        /* ------------------------------------------- */
+
+        .form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #343a40;
+            font-size: 0.9rem;
+        }
+
+        /* Styles appliqués à la classe 'form-control' ajoutée dans Django */
+        .form-container .form-control {
+            width: 100%;
+            padding: 7px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; 
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-container .form-control:focus {
+            border-color: #1e4a8d;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 74, 141, 0.2);
+        }
+
+        /* Styles spécifiques pour le champ de fichier (Photo de profil) */
+        .form-container input[type="file"] {
+            padding: 5px; /* Moins de padding pour les champs file */
+            background-color: #f8f9fa;
+        }
+
+        /* ------------------------------------------- */
+        /* STYLES DU BOUTON S'INSCRIRE */
+        /* ------------------------------------------- */
+
+        .form-container button[type="submit"] {
+            width: 100%;
+            padding: 8px;
+            background-color: #ff6b00; /* Couleur accent */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 20px;
+        }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #e05a00;
+        }
+        
+        /* ------------------------------------------- */
+        /* RESPONSIVE MOBILE */
+        /* ------------------------------------------- */
+
+        @media (max-width: 600px) {
+            .form-container {
+                margin: 0;
+                padding: 15px;
+                box-shadow: none; 
+                border-radius: 0;
+                max-width: 100%; 
+                min-height: 100vh; /* Utilise toute la hauteur sur mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container"> 
+        <h2>Inscription</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    {{ form.as_p }}
+
+    <button type="submit">S’inscrire</button>
+</form>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ciblez votre champ de fichier (Photo de profil)
+        const fileInput = document.getElementById('id_photo'); 
+        const MAX_SIZE_MB = 5; // Définissez la même limite que dans settings.py (5 Mo)
+        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const fileSize = this.files[0].size;
+                if (fileSize > MAX_SIZE_BYTES) {
+                    alert(`Attention : La photo est trop grande. La taille maximale est de ${MAX_SIZE_MB} Mo.`);
+                    this.value = ""; // Réinitialise le champ pour empêcher l'envoi
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
