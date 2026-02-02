@@ -64,7 +64,7 @@
                 </div>
                 <div class="text-end">
                   <span class="badge bg-success me-2">{{ propriete.get_statut_display }}</span>
-                  <a href="{% url 'modifier_propriete' propriete.id %}" class="badge bg-warning text-dark me-2">Modifier</a>
+                  <a href="{% url 'modifier_propriete' propriete.id %}" class="badge bg-warning text-dark me-2">Modifier </a>
                   <a href="{% url 'supprimer_propriete' propriete.id %}" class="badge bg-danger">Supprimer</a>
                   <span class="text-primary ms-2">{{ propriete.prix|floatformat:0 }} FCFA</span>
                 </div>

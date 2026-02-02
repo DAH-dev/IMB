@@ -191,6 +191,8 @@ def page_accueil(request):
 
     proprietes_recentes = Propriete.objects.filter(
         Q(statut='disponible') | Q(statut='en_netoyage') | Q(statut='en_construction')
+    ).annotate(
+        nb_vues=Count('visites', distinct=True)
     ).order_by('-date_publication')[:6]
 
     context = {

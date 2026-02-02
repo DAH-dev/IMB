@@ -242,7 +242,13 @@
             {% endfor %}
             <p>
               <strong> <i class="fa-solid fa-calendar-alt me-2"></i> publié le {{propriete.date_publication|date:"d/m/Y" }}</strong>
+              <strong>
+              <i class="fa-solid fa-eye"></i>
+                 {{ propriete.nb_vues|default:0 }} vues
+                 </strong>
             </p>
+
+       
           </div>
         </div>
      

@@ -133,11 +133,11 @@
     .property-info p,
     .property-info h4,
     .property-info ul {
-      font-size: 14px;
+      font-size: 17px;
     }
 
     .property-info h1 {
-      font-size: 15px;
+      font-size: 20px;
       color: #007bff;
     }
 
@@ -300,7 +300,7 @@
 
     /* Ajustements pour les cartes de propriété */
     .cart_appartement {
-      width: 200px;
+      width: 300px;
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
       background: white;
       border-radius: 10px;
@@ -319,6 +319,7 @@
       width: 100%;
       /* L'image prend toute la largeur de la carte */
       height: 170px;
+      height: 190px;
       /* Hauteur fixe pour toutes les images */
       overflow: hidden;
       /* Masque tout ce qui dépasse */
@@ -326,7 +327,7 @@
 
     .img_appartement img {
       width: 100%;
-      height: 170px;
+      height: 190px;
       margin: auto;
       border-radius: 3px;
       border-style: none;
@@ -356,7 +357,7 @@
     }
 
     .descrip_appartement h5 {
-      font-size: 0, 8rem;
+       font-size: 0.95rem;
       /* Taille de police légèrement plus grande pour le titre */
       margin-bottom: 2px;
       color: var(--primary);
@@ -370,7 +371,7 @@
       flex-wrap: nowrap;
       gap: 5px;
       /* Espace entre l'icône et le texte */
-      font-size: 0.70rem;
+      font-size: 0.90rem;
       color: #555;
     }
 
