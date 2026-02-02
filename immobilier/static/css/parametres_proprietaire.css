@@ -1,0 +1,121 @@
+
+    :root {
+      --primary: #1e4a8d;
+      --accent: #ff6b00;
+      --light: #f8f9fa;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    .logo {
+      font-size: 15px;
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+    }
+
+    .main-content {
+      margin-left: 250px;
+    }
+
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      font-size: 12px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      padding: 7px 15px;
+      border-radius: 10px;
+      font-size: 10px;
+      background-color: #198754;
+      color: white;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+    }
+
+    .navbar h5 {
+      font-size: 15px;
+    }
+
+    .nav {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        width: 250px;
+      }
+
+      .sidebar a {
+        font-size: 18px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+    }
