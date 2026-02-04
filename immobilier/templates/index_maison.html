@@ -126,7 +126,10 @@
                         {% endfor %}
                         <p>
                             <strong> <i class="fas fa-calendar-alt me-2"></i> publié le {{ propriete.date_publication|date:"d/m/Y" }}</strong>
-                            100 vues
+                            <strong>
+              <i class="fa-solid fa-eye"></i>
+                 {{ propriete.nb_vues|default:0 }} vues
+                 </strong>
                         </p>
                     </div>
                 </a>

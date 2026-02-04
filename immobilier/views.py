@@ -205,7 +205,9 @@ def page_accueil(request):
 
 def proprietes_maison(request):
     # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type__iexact='maison')
+    proprietes = Propriete.objects.filter(type__iexact='maison').annotate(
+        nb_vues=Count('visites', distinct=True)
+    )
     
     context = {
         'proprietes_recentes': proprietes,
@@ -217,7 +219,21 @@ def proprietes_maison(request):
 
 def proprietes_Terrain(request):
     # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='terrain')
+    proprietes = Propriete.objects.filter(type='terrain').annotate(
+        nb_vues=Count('visites', distinct=True)
+    )
+    
+    context = {
+        'proprietes_recentes': proprietes,
+    }
+    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
+    return render(request, 'index.html', context)
+
+def magasin(request):
+    # Récupère toutes les propriétés où le type est 'Maison'
+    proprietes = Propriete.objects.filter(type='magasin').annotate(
+        nb_vues=Count('visites', distinct=True)
+    )
     
     context = {
         'proprietes_recentes': proprietes,
@@ -227,7 +243,9 @@ def proprietes_Terrain(request):
 
 def proprietes_plan(request):
     # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='terrain')
+    proprietes = Propriete.objects.filter(type='magasin').annotate(
+        nb_vues=Count('visites', distinct=True)
+    )
     
     context = {
         'proprietes_recentes': proprietes,
@@ -249,7 +267,12 @@ def video_shorts(request):
 
 
 def detail_propriete_web(request, pk):
-    propriete = get_object_or_404(Propriete, pk=pk)
+    propriete = get_object_or_404(
+        Propriete.objects.annotate(
+            nb_vues=Count('visites', distinct=True)
+        ), 
+        pk=pk
+    )
     
     utilisateur_connecte = None
     if request.user.is_authenticated and request.user.id:
@@ -487,8 +510,6 @@ def propriete_create(request):
         del form.fields['proprietaire'] 
             
     return render(request, 'proprietes/form.html', {'form': form, 'action': 'Créer'})
-
-
 
 @login_required(login_url='connexion')
 def propriete_update(request, pk):
