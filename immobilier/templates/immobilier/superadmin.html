@@ -1,531 +1,775 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin </title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/superadmin.css' %}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMMO ABIDJAN - Super Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Variables de couleurs du superadmin */
+    :root {
+      --primary: #2c3e50; /* Couleur principale bleu foncé */
+      --secondary: #f39c12; /* Couleur secondaire orange */
+      --danger: #e74c3c; /* Rouge */
+      --success: #2ecc71; /* Vert */
+      --warning: #f1c40f; /* Jaune */
+      --light-bg: #f5f7fa; /* Fond clair */
+      --accent: #ff6b00; /* Accent orange vif */
+    }
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+      background-color: #f8f9fa;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    /* Sidebar avec couleurs du superadmin */
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar a:hover,
+    .sidebar .nav-item.active a {
+      background-color: #f8f9fa;
+      color: var(--primary);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .main-content {
+      margin-left: 200px;
+    }
+
+    /* Barre de navigation supérieure */
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cartes de dashboard avec style superadmin */
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      height: 100%;
+      font-size: 12px;
+    }
+
+    /* Couleurs des bordures pour les cartes */
+    .dashboard-card.critical {
+      border-top: 4px solid var(--danger);
+    }
+    
+    .dashboard-card.warning {
+      border-top: 4px solid var(--warning);
+    }
+    
+    .dashboard-card.success {
+      border-top: 4px solid var(--success);
+    }
+    
+    .dashboard-card.info {
+      border-top: 4px solid var(--primary);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .dashboard-card h3 {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      padding: 5px 20px;
+      border-radius: 30px;
+    }
+
+    .btn-accent {
+      font-size: 10px;
+      background-color: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
+    .btn-accent:hover {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    /* Bouton menu mobile */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .navbar h5 {
+      font-size: 15px;
+      color: var(--primary);
+    }
+
+    .nav {
+      width: 100%;
+    }
+
+    /* Table */
+    .table {
+      margin-bottom: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table thead th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody td {
+      vertical-align: middle;
+    }
+
+    /* Badges de statut comme dans superadmin */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .status-badge.resolved {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.active {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.suspended {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Boutons d'action */
+    .btn-approve {
+      background-color: var(--success);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+
+    .btn-reject {
+      background-color: var(--danger);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .btn-suspend {
+      background-color: var(--warning);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    /* Alertes et activités */
+    .alert-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* Placeholder pour graphiques */
+    .chart-placeholder {
+      height: 200px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: #999;
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+      }
+
+      .sidebar a {
+        font-size: 18px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+
+      .dashboard-card {
+        font-size: 15px;
+        padding: 15px;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+    
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .btn-accent {
+        font-size: 14px;
+        padding: 10px 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .dashboard-card h3 {
+        font-size: 24px;
+      }
+      
+      .table-responsive {
+        font-size: 13px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <button class="sidebar-toggle" onclick="toggleSidebar()">
+  <!-- Bouton menu mobile -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
     <i class="fas fa-bars"></i>
-</button>
+  </button>
 
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="logo">IMMO<span>ABIDJAN</span> <small>Admin</small></div>
-        <ul>
-            <li class="active"><a href="#dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-            <li><a href="#moderation"><i class="fas fa-flag"></i> <span>Modération</span></a></li>
-            <li><a href="#users"><i class="fas fa-users-cog"></i> <span>Utilisateurs</span></a></li>
-            <li><a href="#analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></a></li>
-        </ul>
-        <div style="padding: 20px; margin-top: auto;">
-            <a href="#" id="logout" style="color: white; text-decoration: none;"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="p-4 menu">
+      <!-- Logo -->
+      <h4 class="text-center mb-4 logo">
+        <i class="fas fa-crown me-2" style="color: var(--secondary);"></i> IMMO<span style="color: var(--secondary);">ABIDJAN</span> <small>Admin</small>
+      </h4>
+
+      <!-- Section profil Super Admin -->
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed=SuperAdmin&background=2c3e50&color=fff"
+          class="rounded-circle me-3" width="40" height="40" alt="Super Admin">
+        <div class="identity">
+          <h6 class="mb-0">Super Admin</h6>
+          <small class="text-muted">Administrateur Principal</small>
         </div>
-    </div>
+      </div>
 
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <!-- Top Bar -->
-        <div class="top-bar">
-            <div class="search">
-                <input type="text" placeholder="Rechercher...">
-                <i class="fas fa-search"></i>
-            </div>
-            <div class="admin-profile">
-                <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin" alt="Admin">
-                <span>Super Admin</span>
-            </div>
+      <!-- Menu navigation Super Admin -->
+      <ul class="nav flex-column">
+        <li class="nav-item active">
+          <a class="nav-link" href="#dashboard">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+        </li>
+         <li class="nav-item active">
+          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fas fa-building me-2"></i> Propriétés
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#moderation">
+            <i class="fas fa-flag me-2"></i> Modération
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
+  <i class="fas fa-users-cog me-2"></i> Utilisateurs
+</a>
+
+        </li>
+       
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-home me-2"></i> Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="logout">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <!-- Barre de navigation supérieure -->
+    <nav class="navbar navbar-expand-lg nav">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0">Tableau de Bord Super Admin</h5>
         </div>
+        <div class="search me-3 d-none d-md-block">
+          <input type="text" placeholder="Rechercher...">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="admin-profile">
+          <span>Super Admin</span>
+        </div>
+      </div>
+    </nav>
 
-        <!-- Dashboard Tab -->
-        <section id="dashboard" class="tab-content active">
-            <h1>Tableau de Bord</h1>
-            
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card critical">
-                    <h3 id="pending-alerts">0</h3>
-                    <p>Annonces à modérer</p>
-                </div>
-                <div class="stat-card warning">
-                    <h3 id="banned-users">0</h3>
-                    <p>Utilisateurs suspendus</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="total-visits">0</h3>
-                    <p>Visites aujourd'hui</p>
-                </div>
-                <div class="stat-card success">
-                    <h3 id="transactions">0</h3>
-                    <p>Transactions</p>
-                </div>
+    <!-- Onglet Dashboard -->
+    <section id="dashboard" class="tab-content active">
+      <h1>Dashboard Global</h1>
+      
+      <!-- Statistiques Globales -->
+      <div class="row mb-4">
+        <!-- Propriétés totales -->
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card info">
+            <div class="card-icon">
+              <i class="fas fa-home"></i>
             </div>
-
-            <!-- Critical Alerts -->
-            <div class="stat-card" style="margin-bottom: 20px;">
-                <h3><i class="fas fa-exclamation-triangle"></i> Alertes Critiques</h3>
-                <div id="critical-alerts" style="margin-top: 15px;">
-                    <!-- Filled by JavaScript -->
-                </div>
+            <h3>{{ total_proprietes|default:"0" }}</h3>
+            <p class="text-muted mb-0">Propriétés totales</p>
+          </div>
+        </div>
+        
+        <!-- Utilisateurs total -->
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card info">
+            <div class="card-icon">
+              <i class="fas fa-users"></i>
             </div>
-
-            <!-- Recent Activity -->
-            <div class="stat-card">
-                <h3><i class="fas fa-history"></i> Activité Récente</h3>
-                <div id="activity-log" style="margin-top: 15px;">
-                    <!-- Filled by JavaScript -->
-                </div>
+            <h3>{{ total_utilisateurs|default:"0" }}</h3>
+            <p class="text-muted mb-0">Utilisateurs inscrits</p>
+          </div>
+        </div>
+        
+        <!-- Vues totales -->
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card info">
+            <div class="card-icon">
+              <i class="fas fa-eye"></i>
             </div>
-        </section>
-
-        <!-- Moderation Tab -->
-        <section id="moderation" class="tab-content">
-            <h1>Modération des Annonces</h1>
-            
-            <!-- Filters -->
-            <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-                <select id="commune-filter" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                    <option value="all">Toutes les communes</option>
-                    <option value="Cocody">Cocody</option>
-                    <option value="Yopougon">Yopougon</option>
-                    <option value="Marcory">Marcory</option>
-                </select>
-                
-                <select id="status-filter" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
-                    <option value="all">Tous les statuts</option>
-                    <option value="pending">En attente</option>
-                    <option value="resolved">Résolu</option>
-                </select>
-                
-                <button id="export-csv" style="margin-left: auto;">
-                    <i class="fas fa-file-export"></i> Exporter CSV
-                </button>
+            <h3>{{ total_vues|default:"0" }}</h3>
+            <p class="text-muted mb-0">Vues totales</p>
+          </div>
+        </div>
+        
+        <!-- Messages totaux -->
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card info">
+            <div class="card-icon">
+              <i class="fas fa-envelope"></i>
             </div>
-            
-            <!-- Properties Table -->
-            <table id="moderation-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="select-all"></th>
-                        <th>ID</th>
-                        <th>Titre</th>
-                        <th>Commune</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filled by JavaScript -->
-                </tbody>
-            </table>
-        </section>
+            <h3>{{ total_messages|default:"0" }}</h3>
+            <p class="text-muted mb-0">Messages échangés</p>
+          </div>
+        </div>
+      </div>
 
-        <!-- Users Tab -->
-        <section id="users" class="tab-content">
-            <h1>Gestion des Utilisateurs</h1>
-            
-            <table id="users-table">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Statut</th>
-                        <th>Dernière connexion</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filled by JavaScript -->
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Analytics Tab -->
-        <section id="analytics" class="tab-content">
-            <h1>Analytics</h1>
-            
-            <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-                <div class="stat-card" style="flex: 1;">
-                    <h3>Visites</h3>
-                    <div style="height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">
-                        [Graphique des visites]
-                    </div>
-                </div>
-                <div class="stat-card" style="flex: 1;">
-                    <h3>Transactions</h3>
-                    <div style="height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">
-                        [Graphique des transactions]
-                    </div>
-                </div>
+      <!-- Statistiques Avancées -->
+      <div class="row mb-4">
+        <!-- Propriétés à modérer -->
+        <div class="col-md-4 mb-3">
+          <div class="dashboard-card critical">
+            <div class="card-icon">
+              <i class="fas fa-flag"></i>
             </div>
-            
-            <div class="stat-card">
-                <h3>Export de données</h3>
-                <div style="margin-top: 15px;">
-                    <button id="export-users-csv" style="margin-right: 10px;">
-                        <i class="fas fa-users"></i> Export Utilisateurs
-                    </button>
-                    <button id="export-properties-csv">
-                        <i class="fas fa-home"></i> Export Propriétés
-                    </button>
-                </div>
+            <h3>{{ proprietes_a_moderer|default:"0" }}</h3>
+            <p class="text-muted mb-0">À modérer</p>
+          </div>
+        </div>
+        
+        <!-- Utilisateurs suspendus -->
+        <div class="col-md-4 mb-3">
+          <div class="dashboard-card warning">
+            <div class="card-icon">
+              <i class="fas fa-user-slash"></i>
             </div>
-        </section>
-    </div>
+            <h3>{{ utilisateurs_suspendus|default:"0" }}</h3>
+            <p class="text-muted mb-0">Utilisateurs suspendus</p>
+          </div>
+        </div>
+        
+        <!-- Transactions -->
+        <div class="col-md-4 mb-3">
+          <div class="dashboard-card success">
+            <div class="card-icon">
+              <i class="fas fa-exchange-alt"></i>
+            </div>
+            <h3>{{ transactions_totales|default:"0" }}</h3>
+            <p class="text-muted mb-0">Transactions</p>
+          </div>
+        </div>
+      </div>
 
-    <script>
-        // Données simulées
-        const APP_DATA = {
-            stats: {
-                pending: 12,
-                bannedUsers: 3,
-                visits: 1248,
-                transactions: 42
-            },
-            properties: [
-                {
-                    id: 789,
-                    title: "Villa suspecte à Cocody",
-                    commune: "Cocody",
-                    status: "pending",
-                    reportedBy: "user123"
-                },
-                {
-                    id: 790,
-                    title: "Terrain à Yopougon (prix anormal)",
-                    commune: "Yopougon",
-                    status: "pending",
-                    reportedBy: "user456"
-                },
-                {
-                    id: 791,
-                    title: "Appartement meublé à Marcory",
-                    commune: "Marcory",
-                    status: "resolved",
-                    reportedBy: "user789"
-                }
-            ],
-            users: [
-                {
-                    id: "user123",
-                    name: "Jean Dupont",
-                    email: "jean@example.com",
-                    status: "active",
-                    lastLogin: "2023-11-20 14:30"
-                },
-                {
-                    id: "user456",
-                    name: "Marie Konan",
-                    email: "marie@example.com",
-                    status: "suspended",
-                    lastLogin: "2023-11-15 09:12"
-                },
-                {
-                    id: "user789",
-                    name: "Paul Akpa",
-                    email: "paul@example.com",
-                    status: "active",
-                    lastLogin: "2023-11-21 16:45"
-                }
-            ],
-            activityLog: [
-                {
-                    action: "delete_property",
-                    admin: "superadmin",
-                    target: "Villa suspecte (ID: 789)",
-                    timestamp: "2023-11-20 14:30"
-                },
-                {
-                    action: "suspend_user",
-                    admin: "superadmin",
-                    target: "Marie Konan (user456)",
-                    timestamp: "2023-11-18 11:20"
-                }
-            ]
-        };
+      <!-- Alertes Critiques -->
+      <div class="dashboard-card mb-4">
+        <h6><i class="fas fa-exclamation-triangle me-2"></i> Alertes Critiques Récentes</h6>
+        <div id="critical-alerts" class="mt-3">
+          {% for alerte in alertes_critiques %}
+          <div class="alert-item">
+            <div>
+              <strong>{{ alerte.titre }}</strong><br>
+              <small class="text-muted">{{ alerte.type }} • {{ alerte.date }}</small>
+            </div>
+            <button class="btn-approve btn-sm" onclick="resoudreAlerte('{{ alerte.id }}')">
+              <i class="fas fa-check me-1"></i> Résoudre
+            </button>
+          </div>
+          {% empty %}
+          <p class="text-muted">Aucune alerte critique pour le moment.</p>
+          {% endfor %}
+        </div>
+      </div>
 
-        // Fonctions utilitaires
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString('fr-FR', options);
+      <!-- Activité Récente -->
+      <div class="dashboard-card">
+        <h6><i class="fas fa-history me-2"></i> Activité Récente</h6>
+        <div id="activity-log" class="mt-3">
+          {% for activite in activite_recente %}
+          <div class="activity-item">
+            <div class="d-flex justify-content-between">
+              <strong>{{ activite.action }}</strong>
+              <small class="activity-time">{{ activite.date }}</small>
+            </div>
+            <div class="text-muted">{{ activite.details }}</div>
+            <small>Par {{ activite.utilisateur }}</small>
+          </div>
+          {% empty %}
+          <p class="text-muted">Aucune activité récente.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Onglet Modération -->
+    <section id="moderation" class="tab-content">
+      <h1>Modération des Annonces</h1>
+      
+      <!-- Filtres -->
+      <div class="row mb-4">
+        <div class="col-md-4 mb-2">
+          <select id="commune-filter" class="form-select form-select-sm">
+            <option value="all">Toutes les communes</option>
+            <option value="Cocody">Cocody</option>
+            <option value="Yopougon">Yopougon</option>
+            <option value="Marcory">Marcory</option>
+          </select>
+        </div>
+        <div class="col-md-4 mb-2">
+          <select id="status-filter" class="form-select form-select-sm">
+            <option value="all">Tous les statuts</option>
+            <option value="pending">En attente</option>
+            <option value="resolved">Résolu</option>
+          </select>
+        </div>
+        <div class="col-md-4 mb-2 text-end">
+          <button id="export-csv" class="btn btn-sm btn-accent">
+            <i class="fas fa-file-export me-1"></i> Exporter CSV
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tableau de modération -->
+      <div class="dashboard-card">
+        <div class="table-responsive">
+          <table id="moderation-table" class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th style="width: 5%;"><input type="checkbox" id="select-all"></th>
+                <th style="width: 10%;">ID</th>
+                <th style="width: 35%;">Titre</th>
+                <th style="width: 20%;">Propriétaire</th>
+                <th style="width: 15%;">Statut</th>
+                <th style="width: 15%;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for propriete in proprietes_a_moderer_liste %}
+              <tr data-id="{{ propriete.id }}">
+                <td><input type="checkbox" class="select-row"></td>
+                <td>{{ propriete.id }}</td>
+                <td>{{ propriete.titre }}</td>
+                <td>{{ propriete.proprietaire.username }}</td>
+                <td><span class="status-badge {{ propriete.statut }}">{{ propriete.get_statut_display }}</span></td>
+                <td>
+                  <button class="btn-approve btn-sm" onclick="approuverPropriete('{{ propriete.id }}')">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-reject btn-sm" onclick="rejeterPropriete('{{ propriete.id }}')">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted">Aucune propriété à modérer pour le moment.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Onglet Utilisateurs -->
+    <section id="users" class="tab-content">
+      <h1>Gestion des Utilisateurs</h1>
+      
+      <div class="dashboard-card">
+        <div class="table-responsive">
+          <table id="users-table" class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Nom</th>
+                <th style="width: 25%;">Email</th>
+                <th style="width: 15%;">Rôle</th>
+                <th style="width: 15%;">Statut</th>
+                <th style="width: 20%;">Actions</th>
+              </tr>
+            </thead>
+           <!-- Corrigez toute cette section (lignes 630-647) -->
+<tbody>
+  {% for utilisateur in utilisateurs_liste %}
+  <tr data-id="{{ utilisateur.id }}">
+    <td>{{ utilisateur.get_full_name|default:utilisateur.username }}</td>
+    <td>{{ utilisateur.email }}</td>
+    <td>{{ utilisateur.get_role_display }}</td>
+    <td>
+      <!-- CORRECTION ICI AUSSI pour le statut badge -->
+      <span class="status-badge {% if utilisateur.statut %}active{% else %}suspended{% endif %}">
+        {% if utilisateur.statut %}Actif{% else %}Suspendu{% endif %}
+      </span>
+    </td>
+    <td>
+      <!-- CORRECTION ICI - Ligne 637 -->
+      <button class="btn-sm {% if utilisateur.statut %}btn-suspend{% else %}btn-approve{% endif %}" 
+              onclick="toggleStatutUtilisateur('{{ utilisateur.id }}')">
+        {% if utilisateur.statut %}Suspendre{% else %}Activer{% endif %}
+      </button>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="5" class="text-center text-muted">Aucun utilisateur trouvé.</td>
+  </tr>
+  {% endfor %}
+</tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Onglet Analytics -->
+    <section id="analytics" class="tab-content">
+      <h1>Analytics Globales</h1>
+      
+      <!-- Graphiques -->
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <div class="dashboard-card">
+            <h6>Visites par jour (30 derniers jours)</h6>
+            <div class="chart-placeholder">
+              [Graphique des visites]
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="dashboard-card">
+            <h6>Nouvelles propriétés par mois</h6>
+            <div class="chart-placeholder">
+              [Graphique des nouvelles propriétés]
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Statistiques par type -->
+      <div class="dashboard-card mb-4">
+        <h6>Répartition par type de propriété</h6>
+        <div class="row mt-3">
+          {% for type_stat in stats_par_type %}
+          <div class="col-md-3 col-sm-6 mb-3">
+            <div class="text-center">
+              <h4>{{ type_stat.count }}</h4>
+              <p class="text-muted mb-0">{{ type_stat.type }}</p>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12">
+            <p class="text-muted">Aucune statistique disponible.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Export de données -->
+      <div class="dashboard-card">
+        <h6>Export de données</h6>
+        <div class="mt-3">
+          <button id="export-users-csv" class="btn btn-accent me-2">
+            <i class="fas fa-users me-1"></i> Export Utilisateurs
+          </button>
+          <button id="export-properties-csv" class="btn btn-accent me-2">
+            <i class="fas fa-home me-1"></i> Export Propriétés
+          </button>
+          <button id="export-visits-csv" class="btn btn-accent">
+            <i class="fas fa-eye me-1"></i> Export Visites
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+ <script>
+  // Gestion du menu mobile
+  const btn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.getElementById('sidebar');
+
+  btn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+      sidebar.classList.remove('active');
+    }
+  });
+
+  // Gestion des onglets - MODIFIÉ
+  document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      
+      // Si c'est un lien vers un onglet interne (#dashboard, #moderation, etc.)
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        
+        // Masquer tous les onglets
+        document.querySelectorAll('.tab-content').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        
+        // Retirer active de tous les liens
+        document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        
+        // Activer le lien cliqué
+        this.parentElement.classList.add('active');
+        
+        // Afficher l'onglet cible
+        const targetId = href.substring(1);
+        if (targetId) {
+          document.getElementById(targetId).classList.add('active');
         }
+      }
+      // Si c'est un lien externe (comme gestion_utilisateurs_admin), on laisse faire
+      // Le navigateur suivra normalement le lien
+    });
+  });
 
-        // Gestion des onglets
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                
-                // Masquer tous les onglets
-                document.querySelectorAll('.tab-content').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                // Afficher l'onglet cible
-                document.getElementById(targetId).classList.add('active');
-                
-                // Mettre à jour le menu actif
-                document.querySelectorAll('.sidebar li').forEach(item => {
-                    item.classList.remove('active');
-                });
-                this.parentElement.classList.add('active');
-                
-                // Charger les données si nécessaire
-                if (targetId === 'moderation') renderModerationTable();
-                if (targetId === 'users') renderUsersTable();
-            });
-        });
-
-        // Dashboard - Chargement des données
-        function loadDashboard() {
-            // Stats
-            document.getElementById('pending-alerts').textContent = APP_DATA.stats.pending;
-            document.getElementById('banned-users').textContent = APP_DATA.stats.bannedUsers;
-            document.getElementById('total-visits').textContent = APP_DATA.stats.visits.toLocaleString();
-            document.getElementById('transactions').textContent = APP_DATA.stats.transactions;
-            
-            // Alertes critiques
-            const criticalAlerts = APP_DATA.properties.filter(p => p.status === 'pending');
-            const alertsContainer = document.getElementById('critical-alerts');
-            
-            if (criticalAlerts.length === 0) {
-                alertsContainer.innerHTML = '<p>Aucune alerte critique pour le moment.</p>';
-            } else {
-                alertsContainer.innerHTML = criticalAlerts.map(alert => `
-                    <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${alert.title}</strong> (${alert.commune})
-                        </div>
-                        <button onclick="resolveAlert(${alert.id})" style="padding: 5px 10px; background: var(--success); color: white; border: none; border-radius: 4px;">
-                            Marquer comme résolu
-                        </button>
-                    </div>
-                `).join('');
-            }
-            
-            // Activité récente
-            const activityLog = document.getElementById('activity-log');
-            activityLog.innerHTML = APP_DATA.activityLog.map(log => `
-                <div style="padding: 10px; border-bottom: 1px solid #eee;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <strong>${log.action.replace('_', ' ')}</strong>
-                        <small>${formatDate(log.timestamp)}</small>
-                    </div>
-                    <div>${log.target}</div>
-                    <div style="font-size: 0.8em; color: #666;">Par ${log.admin}</div>
-                </div>
-            `).join('');
-        }
-
-        // Modération - Affichage du tableau
-        function renderModerationTable() {
-            const tableBody = document.querySelector('#moderation-table tbody');
-            tableBody.innerHTML = APP_DATA.properties.map(prop => `
-                <tr data-id="${prop.id}" class="${prop.status}">
-                    <td><input type="checkbox" class="select-row"></td>
-                    <td>${prop.id}</td>
-                    <td>${prop.title}</td>
-                    <td>${prop.commune}</td>
-                    <td><span class="status-badge ${prop.status}">${prop.status === 'pending' ? 'En attente' : 'Résolu'}</span></td>
-                    <td>
-                        <button class="btn-approve" onclick="approveProperty(${prop.id})">
-                            <i class="fas fa-check"></i> Approuver
-                        </button>
-                        <button class="btn-reject" onclick="rejectProperty(${prop.id})">
-                            <i class="fas fa-times"></i> Rejeter
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Gestion des utilisateurs
-        function renderUsersTable() {
-            const tableBody = document.querySelector('#users-table tbody');
-            tableBody.innerHTML = APP_DATA.users.map(user => `
-                <tr data-id="${user.id}">
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
-                    <td><span class="status-badge ${user.status}">${user.status === 'active' ? 'Actif' : 'Suspendu'}</span></td>
-                    <td>${formatDate(user.lastLogin)}</td>
-                    <td>
-                        <button class="${user.status === 'active' ? 'btn-suspend' : 'btn-approve'}" onclick="toggleUserStatus('${user.id}')">
-                            ${user.status === 'active' ? 'Suspendre' : 'Activer'}
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Fonctions d'action
-        window.resolveAlert = function(id) {
-            const property = APP_DATA.properties.find(p => p.id === id);
-            if (property) {
-                property.status = 'resolved';
-                APP_DATA.stats.pending--;
-                
-                // Log l'action
-                APP_DATA.activityLog.unshift({
-                    action: "resolve_alert",
-                    admin: "superadmin",
-                    target: `Annonce ${id}`,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`Annonce ${id} marquée comme résolue !`);
-                loadDashboard();
-                renderModerationTable();
-            }
-        };
-
-        window.approveProperty = function(id) {
-            const property = APP_DATA.properties.find(p => p.id === id);
-            if (property) {
-                property.status = 'resolved';
-                APP_DATA.stats.pending--;
-                
-                // Log l'action
-                APP_DATA.activityLog.unshift({
-                    action: "approve_property",
-                    admin: "superadmin",
-                    target: `Annonce ${id}`,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`Annonce ${id} approuvée !`);
-                renderModerationTable();
-                loadDashboard();
-            }
-        };
-
-        window.rejectProperty = function(id) {
-            if (confirm(`Voulez-vous vraiment rejeter l'annonce ${id} ?`)) {
-                const index = APP_DATA.properties.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    APP_DATA.properties.splice(index, 1);
-                    APP_DATA.stats.pending--;
-                    
-                    // Log l'action
-                    APP_DATA.activityLog.unshift({
-                        action: "reject_property",
-                        admin: "superadmin",
-                        target: `Annonce ${id}`,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    alert(`Annonce ${id} rejetée !`);
-                    renderModerationTable();
-                    loadDashboard();
-                }
-            }
-        };
-
-        window.toggleUserStatus = function(userId) {
-            const user = APP_DATA.users.find(u => u.id === userId);
-            if (user) {
-                const newStatus = user.status === 'active' ? 'suspended' : 'active';
-                user.status = newStatus;
-                
-                // Mise à jour des stats
-                if (newStatus === 'suspended') {
-                    APP_DATA.stats.bannedUsers++;
-                } else {
-                    APP_DATA.stats.bannedUsers--;
-                }
-                
-                // Log l'action
-                APP_DATA.activityLog.unshift({
-                    action: newStatus === 'suspended' ? "suspend_user" : "activate_user",
-                    admin: "superadmin",
-                    target: `${user.name} (${user.id})`,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`Utilisateur ${user.name} ${newStatus === 'suspended' ? 'suspendu' : 'activé'} !`);
-                renderUsersTable();
-                loadDashboard();
-            }
-        };
-
-        // Export CSV
-        document.getElementById('export-csv').addEventListener('click', () => {
-            let csv = 'ID,Titre,Commune,Statut\n';
-            APP_DATA.properties.forEach(prop => {
-                csv += `${prop.id},${prop.title},${prop.commune},${prop.status}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'moderation_export.csv';
-            a.click();
-        });
-
-        document.getElementById('export-users-csv').addEventListener('click', () => {
-            let csv = 'Nom,Email,Statut,Dernière connexion\n';
-            APP_DATA.users.forEach(user => {
-                csv += `${user.name},${user.email},${user.status},${user.lastLogin}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'users_export.csv';
-            a.click();
-        });
-
-        // Filtres
-        document.getElementById('commune-filter').addEventListener('change', function() {
-            const commune = this.value;
-            const status = document.getElementById('status-filter').value;
-            
-            document.querySelectorAll('#moderation-table tbody tr').forEach(row => {
-                const rowCommune = row.querySelector('td:nth-child(4)').textContent;
-                const rowStatus = row.classList.contains('pending') ? 'pending' : 'resolved';
-                
-                const showCommune = commune === 'all' || rowCommune === commune;
-                const showStatus = status === 'all' || rowStatus === status;
-                
-                row.style.display = showCommune && showStatus ? '' : 'none';
-            });
-        });
-
-        document.getElementById('status-filter').addEventListener('change', function() {
-            document.getElementById('commune-filter').dispatchEvent(new Event('change'));
-        });
-
-        // Sélection multiple
-        document.getElementById('select-all').addEventListener('change', function() {
-            document.querySelectorAll('.select-row').forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-
-        // Déconnexion
-        document.getElementById('logout').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                alert('Déconnexion réussie !');
-                // Redirection vers la page de login
-                // window.location.href = 'login.html';
-            }
-        });
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDashboard();
-        });
-        function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('active');
-   }
-
-    </script>
+  // ... reste de votre JavaScript ...
+</script>
 </body>
 </html>

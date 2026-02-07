@@ -116,7 +116,7 @@ path('deconnexion/', views.deconnexion, name='logout'),
     # urls pour la partie dinamique à rendre statique 
 
     path('detail_propriete', views.detail_propriete , name='detail_propriete'),
-    path('superadmin',views.superadmin, name='superadmin'),
+   
     path('proprietaire',views.proprietaire, name='proprietaire'),
     path('espace-client/', views.espace_client, name='espace_client'),
     path('mes_proprietes',views.mes_proprietes, name='mes_proprietes'),
@@ -131,4 +131,15 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('temoingnages', views.temoingnages, name='temoingnages'),
     
   
+
+    # Gestion des utilisateurs (admin)
+    path('superadmin',views.superadmin, name='superadmin'),
+    path('superadmin/utilisateurs/', views.gestion_utilisateurs_admin, name='gestion_utilisateurs_admin'),
+    path('superadmin/utilisateurs/creer/', views.creer_utilisateur_admin, name='creer_utilisateur_admin'),
+    path('superadmin/utilisateurs/<int:pk>/modifier/', views.modifier_utilisateur_admin, name='modifier_utilisateur_admin'),
+    path('superadmin/utilisateurs/<int:pk>/supprimer/', views.supprimer_utilisateur_admin, name='supprimer_utilisateur_admin'),
+    path('superadmin/utilisateurs/<int:pk>/toggle-statut/', views.toggle_statut_utilisateur, name='toggle_statut_utilisateur'),
+    # Gestion des proprietes (admin)
+    path('superadmin/proprietes/', views.gestion_proprietes_admin, name='gestion_proprietes_admin'),
+     path('superadmin/proprietes/<int:pk>/modifier/', views.propriete_update_admin, name='propriete_update_admin'),
 ]

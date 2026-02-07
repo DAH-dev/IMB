@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestion des Utilisateurs - IMMO ABIDJAN Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Variables de couleurs du superadmin */
+    :root {
+      --primary: #2c3e50; /* Couleur principale bleu foncé */
+      --secondary: #f39c12; /* Couleur secondaire orange */
+      --danger: #e74c3c; /* Rouge */
+      --success: #2ecc71; /* Vert */
+      --warning: #f1c40f; /* Jaune */
+      --light-bg: #f5f7fa; /* Fond clair */
+      --accent: #ff6b00; /* Accent orange vif */
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+      background-color: #f8f9fa;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    /* Sidebar avec couleurs du superadmin */
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar a:hover,
+    .sidebar .nav-item.active a {
+      background-color: #f8f9fa;
+      color: var(--primary);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .main-content {
+      margin-left: 200px;
+    }
+
+    /* Barre de navigation supérieure */
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cartes de dashboard avec style superadmin */
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      height: 100%;
+      font-size: 12px;
+      border-top: 4px solid var(--primary);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .dashboard-card h3 {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      padding: 5px 20px;
+      border-radius: 30px;
+    }
+
+    .btn-accent {
+      font-size: 10px;
+      background-color: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
+    .btn-accent:hover {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    /* Bouton menu mobile */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .navbar h5 {
+      font-size: 15px;
+      color: var(--primary);
+    }
+
+    .nav {
+      width: 100%;
+    }
+
+    /* Table */
+    .table {
+      margin-bottom: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table thead th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody td {
+      vertical-align: middle;
+    }
+
+    /* Badges de statut */
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+    }
+
+    .badge.bg-primary {
+      background-color: var(--primary) !important;
+    }
+
+    .badge.bg-success {
+      background-color: var(--success) !important;
+    }
+
+    .badge.bg-danger {
+      background-color: var(--danger) !important;
+    }
+
+    .badge.bg-warning {
+      background-color: var(--warning) !important;
+      color: #333;
+    }
+
+    /* Boutons d'action */
+    .btn-group .btn {
+      margin-right: 5px;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+      }
+
+      .sidebar a {
+        font-size: 18px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+
+      .dashboard-card {
+        font-size: 15px;
+        padding: 15px;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+    
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .btn-accent {
+        font-size: 14px;
+        padding: 10px 15px;
+      }
+
+      .table-responsive {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .dashboard-card h3 {
+        font-size: 24px;
+      }
+    }
+
+    /* Styles spécifiques pour cette page */
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .action-buttons {
+      white-space: nowrap;
+    }
+
+    .search-box {
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Bouton menu mobile -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="p-4 menu">
+      <!-- Logo -->
+      <h4 class="text-center mb-4 logo">
+        <i class="fas fa-crown me-2" style="color: var(--secondary);"></i> IMMO<span style="color: var(--secondary);">ABIDJAN</span> <small>Admin</small>
+      </h4>
+
+      <!-- Section profil Super Admin -->
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin&background=2c3e50&color=fff"
+          class="rounded-circle me-3" width="40" height="40" alt="Admin">
+        <div class="identity">
+          <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+          <small class="text-muted">Administrateur</small>
+        </div>
+      </div>
+
+      <!-- Menu navigation -->
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'superadmin' %}">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
+            <i class="fas fa-users-cog me-2"></i> Utilisateurs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fas fa-flag me-2"></i> Propriétés
+          </a>
+        </li>
+         <li class="nav-item active">
+          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fas fa-building me-2"></i> Propriétés
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fas fa-flag me-2"></i> Modération
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fas fa-chart-line me-2"></i> Analytics
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-home me-2"></i> Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <!-- Barre de navigation supérieure -->
+    <nav class="navbar navbar-expand-lg nav">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0">Gestion des Utilisateurs</h5>
+        </div>
+        <div class="search me-3 d-none d-md-block">
+          <input type="text" placeholder="Rechercher un utilisateur..." class="search-box" id="searchInput">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="admin-profile">
+          <span>{{ user.username }}</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container-fluid p-4">
+      <!-- En-tête -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <h1 class="h3 mb-0">Gestion des Utilisateurs</h1>
+          <p class="text-muted">Liste complète de tous les utilisateurs du système</p>
+        </div>
+      </div>
+
+      <!-- Statistiques rapides -->
+      <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>{{ utilisateurs|length }}</h3>
+            <p class="text-muted mb-0">Utilisateurs totaux</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <h3>{{ utilisateurs_actifs }}</h3>
+            <p class="text-muted mb-0">Utilisateurs actifs</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <h3>{{ utilisateurs_admin }}</h3>
+            <p class="text-muted mb-0">Administrateurs</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <h3>{{ utilisateurs_proprietaires }}</h3>
+            <p class="text-muted mb-0">Propriétaires</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{% url 'creer_utilisateur_admin' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i> Créer un nouvel utilisateur
+              </a>
+              <a href="{% url 'superadmin' %}" class="btn btn-secondary ms-2">
+                <i class="fas fa-arrow-left me-2"></i> Retour au Dashboard
+              </a>
+            </div>
+                    <!-- Formulaire de recherche -->
+        <form method="GET" action="{% url 'gestion_utilisateurs_admin' %}" class="d-flex me-3">
+          <div class="input-group">
+<input type="text" 
+       class="form-control" 
+       name="q" 
+       placeholder="Rechercher par nom, prénom, email, téléphone, rôle (client/propriétaire/admin)..." 
+       value="{{ search_query }}"
+       style="min-width: 300px;">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+            {% if search_query %}
+            <a href="{% url 'gestion_utilisateurs_admin' %}" class="btn btn-outline-secondary" title="Effacer la recherche">
+              <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+          </div>
+        </form>
+            <div>
+              <button class="btn btn-outline-primary" id="exportBtn">
+                <i class="fas fa-file-export me-2"></i> Exporter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau des utilisateurs -->
+      <div class="dashboard-card">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped" id="usersTable">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Photo</th>
+                <th>Nom d'utilisateur</th>
+                <th>Nom complet</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Date d'inscription</th>
+                <th>Dernière connexion</th>
+                <th>Superuser</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for utilisateur in utilisateurs %}
+              <tr>
+                <td>{{ utilisateur.id }}</td>
+                <td>
+                  {% if utilisateur.photo %}
+                    <img src="{{ utilisateur.photo.url }}" alt="{{ utilisateur.username }}" 
+                         class="user-avatar">
+                  {% else %}
+                    <div class="avatar-placeholder">
+                      {{ utilisateur.username|first|upper }}
+                    </div>
+                  {% endif %}
+                </td>
+                <td>
+                  <strong>{{ utilisateur.username }}</strong>
+                  {% if utilisateur == user %}
+                    <span class="badge bg-info ms-1">Vous</span>
+                  {% endif %}
+                </td>
+                <td>{{ utilisateur.get_full_name|default:"-" }}</td>
+                <td>{{ utilisateur.email|default:"-" }}</td>
+                <td>{{ utilisateur.telephone|default:"-" }}</td>
+                <td>
+                  <span class="badge bg-primary">
+                    {{ utilisateur.get_role_display }}
+                  </span>
+                </td>
+                <td>
+                  {% if utilisateur.statut %}
+                    <span class="badge bg-success">Actif</span>
+                  {% else %}
+                    <span class="badge bg-danger">Inactif</span>
+                  {% endif %}
+                </td>
+                <td>{{ utilisateur.date_joined|date:"d/m/Y H:i" }}</td>
+                <td>
+                  {% if utilisateur.last_login %}
+                    {{ utilisateur.last_login|date:"d/m/Y H:i" }}
+                  {% else %}
+                    <span class="text-muted">Jamais</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if utilisateur.is_superuser %}
+                    <span class="badge bg-warning text-dark">Oui</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Non</span>
+                  {% endif %}
+                </td>
+                <td class="action-buttons">
+                  <div class="btn-group" role="group">
+                    <!-- Bouton Modifier -->
+                    <a href="{% url 'modifier_utilisateur_admin' utilisateur.pk %}" 
+                       class="btn btn-sm btn-primary" title="Modifier">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    
+                    <!-- Bouton Activer/Désactiver -->
+                    <a href="{% url 'toggle_statut_utilisateur' utilisateur.pk %}" 
+                       class="btn btn-sm {% if utilisateur.statut %}btn-warning{% else %}btn-success{% endif %}" 
+                       title="{% if utilisateur.statut %}Désactiver{% else %}Activer{% endif %}">
+                      {% if utilisateur.statut %}
+                        <i class="fas fa-user-slash"></i>
+                      {% else %}
+                        <i class="fas fa-user-check"></i>
+                      {% endif %}
+                    </a>
+                    
+                    <!-- Bouton Supprimer -->
+                    {% if utilisateur != user %}
+                    <a href="{% url 'supprimer_utilisateur_admin' utilisateur.pk %}" 
+                       class="btn btn-sm btn-danger" title="Supprimer"
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer l\\'utilisateur {{ utilisateur.username }} ? Cette action est irréversible.')">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                    {% else %}
+                    <button class="btn btn-sm btn-danger" disabled title="Vous ne pouvez pas vous supprimer">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="12" class="text-center py-4">
+                  <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                  <p class="text-muted">Aucun utilisateur trouvé.</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if utilisateurs.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if utilisateurs.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ utilisateurs.previous_page_number }}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            {% for num in utilisateurs.paginator.page_range %}
+              {% if utilisateurs.number == num %}
+              <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+              </li>
+              {% elif num > utilisateurs.number|add:'-3' and num < utilisateurs.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if utilisateurs.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ utilisateurs.next_page_number }}">Suivant</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Gestion du menu mobile
+    const btn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Recherche en temps réel
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#usersTable tbody tr');
+        
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(filter) ? '' : 'none';
+        });
+      });
+    }
+
+    // Export des données
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
+      // Créer un CSV
+      let csv = 'ID,Username,Nom complet,Email,Téléphone,Rôle,Statut,Date inscription,Dernière connexion,Superuser\n';
+      
+      document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+        if (row.style.display !== 'none') {
+          const cells = row.querySelectorAll('td');
+          const rowData = [
+            cells[0].textContent.trim(),
+            cells[2].querySelector('strong')?.textContent.trim() || '',
+            cells[3].textContent.trim(),
+            cells[4].textContent.trim(),
+            cells[5].textContent.trim(),
+            cells[6].textContent.trim(),
+            cells[7].textContent.trim(),
+            cells[8].textContent.trim(),
+            cells[9].textContent.trim(),
+            cells[10].textContent.trim()
+          ];
+          
+          // Nettoyer les données (enlever les virgules dans les textes)
+          const cleanData = rowData.map(data => 
+            data.includes(',') ? `"${data}"` : data
+          );
+          
+          csv += cleanData.join(',') + '\n';
+        }
+      });
+      
+      // Télécharger le fichier
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'utilisateurs_export.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert('Export terminé !');
+    });
+
+    // Gestion des liens actifs dans la sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.sidebar .nav-link');
+      
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

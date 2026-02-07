@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supprimer Utilisateur - IMMO ABIDJAN Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Mêmes styles que les autres templates */
+    :root {
+      --primary: #2c3e50;
+      --secondary: #f39c12;
+      --danger: #e74c3c;
+      --light-bg: #f5f7fa;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+    }
+
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar a:hover,
+    .sidebar .nav-item.active a {
+      background-color: #f8f9fa;
+      color: var(--primary);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .main-content {
+      margin-left: 200px;
+    }
+
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .confirmation-container {
+      background: white;
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      max-width: 600px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    .warning-icon {
+      font-size: 80px;
+      color: var(--danger);
+      margin-bottom: 20px;
+    }
+
+    .user-details {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: left;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Bouton menu mobile -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="p-4 menu">
+      <!-- Logo -->
+      <h4 class="text-center mb-4" style="font-size: 15px; font-weight: bold; color: var(--primary);">
+        <i class="fas fa-crown me-2" style="color: var(--secondary);"></i> IMMO<span style="color: var(--secondary);">ABIDJAN</span> <small>Admin</small>
+      </h4>
+
+      <!-- Section profil -->
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ user.username }}&background=2c3e50&color=fff"
+          class="rounded-circle me-3" width="40" height="40" alt="Admin">
+        <div>
+          <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+          <small class="text-muted">{{ user.get_role_display }}</small>
+        </div>
+      </div>
+
+      <!-- Menu navigation -->
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'superadmin' %}">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
+            <i class="fas fa-users-cog me-2"></i> Utilisateurs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-home me-2"></i> Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <!-- Barre de navigation supérieure -->
+    <nav class="navbar navbar-expand-lg nav">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0">Supprimer l'utilisateur</h5>
+        </div>
+        <div class="admin-profile">
+          <span>{{ user.username }}</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container-fluid p-4">
+      <!-- En-tête -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="{% url 'superadmin' %}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{% url 'gestion_utilisateurs_admin' %}">Utilisateurs</a></li>
+              <li class="breadcrumb-item active">Supprimer l'utilisateur</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Confirmation de suppression -->
+      <div class="confirmation-container">
+        <div class="warning-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h2 class="mb-4 text-danger">Confirmation de suppression</h2>
+        
+        <p class="lead mb-4">
+          Vous êtes sur le point de supprimer définitivement un utilisateur.
+        </p>
+
+        <!-- Détails de l'utilisateur -->
+        <div class="user-details">
+          <h5 class="mb-3">Informations sur l'utilisateur :</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Nom d'utilisateur :</strong> {{ utilisateur.username }}</p>
+              <p><strong>Nom complet :</strong> {{ utilisateur.get_full_name|default:"Non défini" }}</p>
+              <p><strong>Email :</strong> {{ utilisateur.email|default:"Non défini" }}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Rôle :</strong> {{ utilisateur.get_role_display }}</p>
+              <p><strong>Statut :</strong> 
+                {% if utilisateur.statut %}
+                  <span class="badge bg-success">Actif</span>
+                {% else %}
+                  <span class="badge bg-danger">Inactif</span>
+                {% endif %}
+              </p>
+              <p><strong>Inscrit le :</strong> {{ utilisateur.date_joined|date:"d/m/Y" }}</p>
+            </div>
+          </div>
+          
+          {% if utilisateur.proprietes.exists %}
+          <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Attention !</strong> Cet utilisateur possède {{ utilisateur.proprietes.count }} propriété(s).
+            Ces propriétés seront orphelines si vous supprimez cet utilisateur.
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Avertissement -->
+        <div class="alert alert-danger mt-4">
+          <h5 class="alert-heading">
+            <i class="fas fa-radiation me-2"></i> Action irréversible
+          </h5>
+          <p class="mb-0">
+            Cette action ne peut pas être annulée. Toutes les données associées à cet utilisateur 
+            seront définitivement supprimées, y compris :
+          </p>
+          <ul class="mb-0 mt-2">
+            <li>Son profil utilisateur</li>
+            <li>Ses propriétés ({{ utilisateur.proprietes.count }})</li>
+            <li>Ses messages et conversations</li>
+            <li>Ses activités et historiques</li>
+          </ul>
+        </div>
+
+        <!-- Formulaire de confirmation -->
+        <form method="POST" class="mt-4">
+          {% csrf_token %}
+          
+          <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'gestion_utilisateurs_admin' %}" class="btn btn-secondary btn-lg">
+              <i class="fas fa-times me-2"></i> Annuler
+            </a>
+            
+            <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Êtes-vous ABSOLUMENT SÛR de vouloir supprimer cet utilisateur ?')">
+              <i class="fas fa-trash me-2"></i> Supprimer définitivement
+            </button>
+          </div>
+        </form>
+
+        <!-- Message final -->
+        <div class="mt-4 pt-4 border-top">
+          <p class="text-muted">
+            <small>
+              <i class="fas fa-lightbulb me-1"></i>
+              <strong>Alternative :</strong> Au lieu de supprimer, vous pouvez désactiver le compte 
+              de l'utilisateur. Cela conservera toutes ses données tout en l'empêchant de se connecter.
+            </small>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Gestion du menu mobile
+    const btn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Confirmation supplémentaire
+    document.querySelector('form').addEventListener('submit', function(e) {
+      if (!confirm("❌ DERNIER AVERTISSEMENT : Cette action est IRREVERSIBLE. Voulez-vous vraiment supprimer définitivement l'utilisateur '{{ utilisateur.username }}' ?")) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

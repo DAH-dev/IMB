@@ -1,5 +1,7 @@
+from pyexpat.errors import messages
 from urllib import request
 from django.db.utils import IntegrityError
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets, generics
 from django.db.models import Q
@@ -13,6 +15,9 @@ from datetime import date
 from django.utils import timezone # 👈 NOUVEAU: Import pour gérer la date/heure
 from django.contrib.auth import logout
 from .forms import UtilisateurModificationForm
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 from .models import (
     Utilisateur, Propriete, Annonce, Transaction,
@@ -534,7 +539,7 @@ def propriete_update(request, pk):
             form.save() 
             
             if is_admin: 
-                return redirect('propriete_list')
+                return redirect('gestion_proprietes_admin')
             else: 
                 return redirect('mes_proprietes') 
     else:
@@ -939,9 +944,631 @@ def detail_propriete(request):
     return render(request ,'immobilier/detail_propriete.html', {})
 
 
+
 @login_required(login_url='connexion')
 def superadmin(request):
-    return render(request,'immobilier/superadmin.html' )
+    """
+    Vue pour le super admin avec statistiques globales du site.
+    Accessible uniquement aux super administrateurs.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un super admin
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    # --- STATISTIQUES GLOBALES ---
+    
+    # 1. Statistiques principales
+    total_proprietes = Propriete.objects.count()
+    total_utilisateurs = Utilisateur.objects.count()
+    total_vues = Visite.objects.count()
+    total_messages = Message.objects.count()
+    
+    # 2. Propriétés à modérer (statut 'en_attente' pour Annonce ou propriétés signalées)
+    # Pour Annonce avec statut 'attente'
+    annonces_a_moderer = Annonce.objects.filter(statut='attente').count()
+    
+    # Pour propriétés qui pourraient avoir besoin de modération
+    # (vous n'avez pas de statut 'signale' dans Propriete, donc on utilise Annonce)
+    proprietes_a_moderer = annonces_a_moderer
+    
+    # 3. Utilisateurs suspendus (statut=False)
+    utilisateurs_suspendus = Utilisateur.objects.filter(statut=False).count()
+    
+    # 4. Transactions totales
+    transactions_totales = Transaction.objects.count()
+    
+    # 5. Alertes critiques récentes (non résolues)
+    alertes_critiques = Alerte.objects.filter(
+        statut='non_resolue'
+    ).select_related('propriete', 'admin').order_by('-date_creation')[:10]
+    
+    # 6. Activité récente (dernières 24h)
+    activite_recente = Activite.objects.filter(
+        date_action__gte=timezone.now() - timezone.timedelta(days=1)
+    ).select_related('utilisateur').order_by('-date_action')[:10]
+    
+    # 7. Liste des annonces à modérer
+    annonces_a_moderer_liste = Annonce.objects.filter(
+        statut='attente'
+    ).select_related('propriete', 'utilisateur').order_by('-date_publication')[:50]
+    
+    # 8. Liste de tous les utilisateurs
+    utilisateurs_liste = Utilisateur.objects.all().order_by('-date_joined')[:50]
+    
+    # 9. Statistiques par type de propriété
+    from django.db.models import Count
+    stats_par_type = Propriete.objects.values('type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 10. Statistiques temporelles (30 derniers jours)
+    date_30_jours = timezone.now() - timezone.timedelta(days=30)
+    
+    # Propriétés créées dans les 30 derniers jours
+    nouvelles_proprietes_30j = Propriete.objects.filter(
+        date_publication__gte=date_30_jours
+    ).count()
+    
+    # Utilisateurs inscrits dans les 30 derniers jours
+    nouveaux_utilisateurs_30j = Utilisateur.objects.filter(
+        date_joined__gte=date_30_jours
+    ).count()
+    
+    # Visites dans les 30 derniers jours
+    visites_30j = Visite.objects.filter(
+        date_visite__gte=date_30_jours
+    ).count()
+    
+    # 11. Top 5 des propriétés les plus vues
+    top_proprietes_vues = Propriete.objects.annotate(
+        nb_vues=Count('visites')
+    ).order_by('-nb_vues')[:5]
+    
+    # 12. Top 5 des propriétaires les plus actifs
+    top_proprietaires = Utilisateur.objects.filter(
+        role='proprietaire'
+    ).annotate(
+        nb_proprietes=Count('proprietes')
+    ).order_by('-nb_proprietes')[:5]
+    
+    # 13. Messages non lus (statut='envoye' pour non lu, 'lu' pour lu)
+    messages_non_lus = Message.objects.filter(statut='envoye').count()
+    
+    # 14. Contacts récents (derniers 7 jours)
+    contacts_recents = Contact.objects.filter(
+        date_envoi__gte=timezone.now() - timezone.timedelta(days=7)
+    ).count()
+    
+    # 15. Répartition par rôle d'utilisateur
+    repartition_roles = Utilisateur.objects.values('role').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 16. Propriétés par commune
+    proprietes_par_commune = Propriete.objects.values('commune').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]
+    
+    # 17. Témoignages en attente de validation
+    temoignages_en_attente = Temoignage.objects.filter(statut='attente').count()
+    
+    # 18. Transactions par type
+    transactions_par_type = Transaction.objects.values('type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 19. Propriétés par statut
+    proprietes_par_statut = Propriete.objects.values('statut').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 20. Chiffre d'affaires total (somme des transactions)
+    chiffre_affaires_total = Transaction.objects.aggregate(
+        total=Sum('montant')
+    )['total'] or 0
+    
+    # 21. Propriétés avec vidéo
+    proprietes_avec_video = Propriete.objects.exclude(video='').count()
+    
+    # 22. Messages échangés aujourd'hui
+    messages_aujourdhui = Message.objects.filter(
+        date_envoi__date=timezone.now().date()
+    ).count()
+    
+    # 23. Visites aujourd'hui
+    visites_aujourdhui = Visite.objects.filter(
+        date_visite__date=timezone.now().date()
+    ).count()
+    
+    # 24. Top 5 des villes les plus populaires
+    proprietes_par_ville = Propriete.objects.values('ville').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+    
+    # 25. Contacts non lus
+    contacts_non_lus = Contact.objects.filter(statut='non_lu').count()
+    
+    # 26. Alertes non résolues
+    alertes_non_resolues = Alerte.objects.filter(statut='non_resolue').count()
+    
+    # 27. Derniers témoignages validés
+    derniers_temoignages = Temoignage.objects.filter(
+        statut='valide'
+    ).select_related('utilisateur').order_by('-date_creation')[:5]
+    
+    # 28. Informations par type
+    informations_par_type = Information.objects.values('type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # 29. Utilisateurs par statut
+    utilisateurs_par_statut = Utilisateur.objects.values('statut').annotate(
+        count=Count('id')
+    )
+    
+    # 30. Annonces par statut
+    annonces_par_statut = Annonce.objects.values('statut').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Préparation du contexte
+    context = {
+        # --- STATISTIQUES PRINCIPALES ---
+        'total_proprietes': total_proprietes,
+        'total_utilisateurs': total_utilisateurs,
+        'total_vues': total_vues,
+        'total_messages': total_messages,
+        
+        # --- MODÉRATION ---
+        'proprietes_a_moderer': proprietes_a_moderer,
+        'annonces_a_moderer': annonces_a_moderer,
+        'utilisateurs_suspendus': utilisateurs_suspendus,
+        'transactions_totales': transactions_totales,
+        
+        # --- DONNÉES POUR LES TABLEAUX ---
+        'alertes_critiques': alertes_critiques,
+        'activite_recente': activite_recente,
+        'annonces_a_moderer_liste': annonces_a_moderer_liste,
+        'utilisateurs_liste': utilisateurs_liste,
+        
+        # --- STATISTIQUES DÉTAILLÉES ---
+        'stats_par_type': stats_par_type,
+        'nouvelles_proprietes_30j': nouvelles_proprietes_30j,
+        'nouveaux_utilisateurs_30j': nouveaux_utilisateurs_30j,
+        'visites_30j': visites_30j,
+        
+        # --- TOPS ET CLASSEMENTS ---
+        'top_proprietes_vues': top_proprietes_vues,
+        'top_proprietaires': top_proprietaires,
+        'proprietes_par_ville': proprietes_par_ville,
+        'derniers_temoignages': derniers_temoignages,
+        
+        # --- STATISTIQUES DIVERSES ---
+        'messages_non_lus': messages_non_lus,
+        'contacts_recents': contacts_recents,
+        'repartition_roles': repartition_roles,
+        'proprietes_par_commune': proprietes_par_commune,
+        'temoignages_en_attente': temoignages_en_attente,
+        'transactions_par_type': transactions_par_type,
+        'proprietes_par_statut': proprietes_par_statut,
+        'chiffre_affaires_total': chiffre_affaires_total,
+        'proprietes_avec_video': proprietes_avec_video,
+        'messages_aujourdhui': messages_aujourdhui,
+        'visites_aujourdhui': visites_aujourdhui,
+        'contacts_non_lus': contacts_non_lus,
+        'alertes_non_resolues': alertes_non_resolues,
+        'informations_par_type': informations_par_type,
+        'utilisateurs_par_statut': utilisateurs_par_statut,
+        'annonces_par_statut': annonces_par_statut,
+        
+        # --- INFO UTILISATEUR ---
+        'user': user,
+        
+        # --- DATES POUR LES FILTRES ---
+        'today': timezone.now().date(),
+        'date_30_jours': date_30_jours.date(),
+    }
+    
+    return render(request, 'immobilier/superadmin.html', context)
+
+
+@login_required(login_url='connexion')
+def gestion_utilisateurs_admin(request):
+    """
+    Page admin pour gérer tous les utilisateurs avec leurs informations complètes.
+    Accessible uniquement aux super administrateurs et administrateurs.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role not in ["superadmin", "admin"]:
+        return redirect('index')
+    
+    # Importer les fonctions nécessaires
+    from django.db.models import Q, Value
+    from django.db.models.functions import Concat
+    
+    # Récupérer tous les utilisateurs avec annotation pour nom_complet
+    utilisateurs = Utilisateur.objects.annotate(
+        nom_complet=Concat('first_name', Value(' '), 'last_name')
+    ).order_by('-date_joined')
+    
+    # Récupérer le paramètre de recherche
+    search_query = request.GET.get('q', '').strip()
+    
+    # Appliquer la recherche textuelle
+    if search_query:
+        search_lower = search_query.lower()
+        
+        # Créer une requête Q complète
+        q_objects = Q()
+        
+        # Chercher dans tous les champs
+        q_objects |= Q(username__icontains=search_query)
+        q_objects |= Q(email__icontains=search_query)
+        q_objects |= Q(telephone__icontains=search_query)
+        q_objects |= Q(first_name__icontains=search_query)
+        q_objects |= Q(last_name__icontains=search_query)
+        
+        # Chercher dans le nom_complet annoté
+        q_objects |= Q(nom_complet__icontains=search_query)
+        
+        # Mapping pour la recherche par rôle (français/anglais)
+        role_search_map = {
+            'client': ['client', 'clients', 'acheteur', 'acheteurs'],
+            'proprietaire': ['proprietaire', 'propriétaire', 'propriétaires', 'vendeur', 'vendeurs'],
+            'admin': ['admin', 'administrateur', 'administrateurs', 'gestionnaire'],
+            'superadmin': ['superadmin', 'superadministrateur', 'super administrateur', 'superuser'],
+        }
+        
+        # Vérifier chaque rôle
+        for role_key, search_terms in role_search_map.items():
+            if any(term in search_lower for term in search_terms):
+                q_objects |= Q(role=role_key)
+                break
+        
+        # Recherche par statut
+        if any(term in search_lower for term in ['actif', 'actifs', 'actifes', 'actives']):
+            q_objects |= Q(statut=True)
+        elif any(term in search_lower for term in ['inactif', 'inactifs', 'inactives', 'désactivé', 'desactive']):
+            q_objects |= Q(statut=False)
+        
+        # Recherche par superuser
+        if 'superuser' in search_lower or 'super utilisateur' in search_lower:
+            q_objects |= Q(is_superuser=True)
+        
+        # Appliquer le filtre
+        utilisateurs = utilisateurs.filter(q_objects).distinct()
+    
+    # ... reste du code inchangé (statistiques, pagination, contexte)
+    
+    # Récupérer les valeurs distinctes pour les statistiques
+    roles_distincts = Utilisateur.objects.values_list('role', flat=True).distinct()
+    
+    # Statistiques (sur les utilisateurs filtrés)
+    total_users_count = utilisateurs.count()
+    utilisateurs_actifs = utilisateurs.filter(statut=True).count()
+    utilisateurs_admin = utilisateurs.filter(
+        Q(role='admin') | Q(role='superadmin') | Q(is_superuser=True)
+    ).count()
+    utilisateurs_proprietaires = utilisateurs.filter(role='proprietaire').count()
+    utilisateurs_clients = utilisateurs.filter(role='client').count()
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(utilisateurs, 50)  # 50 utilisateurs par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'utilisateurs': page_obj,
+        'user': user,
+        'utilisateurs_actifs': utilisateurs_actifs,
+        'utilisateurs_admin': utilisateurs_admin,
+        'utilisateurs_proprietaires': utilisateurs_proprietaires,
+        'utilisateurs_clients': utilisateurs_clients,
+        'search_query': search_query,
+        'roles_distincts': roles_distincts,
+        'total_users_count': total_users_count,
+    }
+    
+    return render(request, 'immobilier/gestion_utilisateurs.html', context)
+
+@login_required(login_url='connexion')
+def modifier_utilisateur_admin(request, pk):
+    """
+    Permet à un admin de modifier n'importe quel utilisateur.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    # Récupérer l'utilisateur à modifier
+    utilisateur_a_modifier = get_object_or_404(Utilisateur, pk=pk)
+    
+    if request.method == 'POST':
+        form = UtilisateurModificationForm(
+            request.POST, 
+            request.FILES, 
+            instance=utilisateur_a_modifier
+        )
+        
+        if form.is_valid():
+            form.save()
+            # Message de succès (si vous utilisez les messages Django)
+            # messages.success(request, f"Utilisateur {utilisateur_a_modifier.username} modifié avec succès.")
+            return redirect('gestion_utilisateurs_admin')
+    else:
+        form = UtilisateurModificationForm(instance=utilisateur_a_modifier)
+    
+    context = {
+        'form': form,
+        'action': 'Modifier',
+        'utilisateur': utilisateur_a_modifier,
+        'user': user,
+    }
+    
+    return render(request, 'immobilier/modifier_profil_admin.html', context)
+
+@login_required(login_url='connexion')
+def supprimer_utilisateur_admin(request, pk):
+    """
+    Permet à un admin de supprimer n'importe quel utilisateur.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    utilisateur_a_supprimer = get_object_or_404(Utilisateur, pk=pk)
+    
+    # Empêcher un admin de se supprimer lui-même
+    if utilisateur_a_supprimer == user:
+        # messages.error(request, "Vous ne pouvez pas supprimer votre propre compte.")
+        return redirect('gestion_utilisateurs_admin')
+    
+    if request.method == 'POST':
+        username = utilisateur_a_supprimer.username
+        utilisateur_a_supprimer.delete()
+        # messages.success(request, f"Utilisateur {username} supprimé avec succès.")
+        return redirect('gestion_utilisateurs_admin')
+    
+    context = {
+        'utilisateur': utilisateur_a_supprimer,
+        'user': user,
+    }
+    
+    return render(request, 'immobilier/confirm_delete_admin.html', context)
+
+@login_required(login_url='connexion')
+def creer_utilisateur_admin(request):
+    """
+    Permet à un admin de créer un nouvel utilisateur.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = UtilisateurCreationForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            nouvel_utilisateur = form.save()
+            # messages.success(request, f"Utilisateur {nouvel_utilisateur.username} créé avec succès.")
+            return redirect('gestion_utilisateurs_admin')
+    else:
+        form = UtilisateurCreationForm()
+    
+    context = {
+        'form': form,
+        'action': 'Créer',
+        'user': user,
+    }
+    
+    return render(request, 'immobilier/creer_utilisateur_admin.html', context)
+
+
+@login_required(login_url='connexion')
+def gestion_proprietes_admin(request):
+    """
+    Page admin pour gérer toutes les propriétés avec filtres.
+    Accessible uniquement aux super administrateurs et administrateurs.
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role not in ["superadmin", "admin"]:
+        return redirect('index')
+    
+    # Récupérer toutes les propriétés
+    proprietes = Propriete.objects.all().order_by('-date_publication')
+    
+    # Appliquer les filtres
+    proprietaire_filter = request.GET.get('proprietaire')
+    type_filter = request.GET.get('type')
+    statut_filter = request.GET.get('statut')
+    commune_filter = request.GET.get('commune')
+    prix_min = request.GET.get('prix_min')
+    prix_max = request.GET.get('prix_max')
+    
+    # Récupérer le nom du propriétaire filtré (pour l'affichage)
+    proprietaire_nom = None
+    
+    if proprietaire_filter:
+        # Vérifier que le propriétaire existe
+        try:
+            proprietaire_obj = Utilisateur.objects.get(id=proprietaire_filter)
+            proprietaire_nom = proprietaire_obj.get_full_name() or proprietaire_obj.username
+            # Filtrer les propriétés de ce propriétaire
+            proprietes = proprietes.filter(proprietaire=proprietaire_obj)
+        except Utilisateur.DoesNotExist:
+            # Si le propriétaire n'existe pas, on ne filtre pas
+            proprietaire_nom = "Propriétaire inconnu"
+    
+    if type_filter:
+        proprietes = proprietes.filter(type=type_filter)
+    
+    if statut_filter:
+        proprietes = proprietes.filter(statut=statut_filter)
+    
+    if commune_filter:
+        proprietes = proprietes.filter(commune__icontains=commune_filter)
+    
+    if prix_min:
+        proprietes = proprietes.filter(prix__gte=prix_min)
+    
+    if prix_max:
+        proprietes = proprietes.filter(prix__lte=prix_max)
+    
+    # Statistiques
+    total_proprietes = Propriete.objects.count()
+    proprietes_disponibles = Propriete.objects.filter(statut='disponible').count()
+    proprietes_vendues = Propriete.objects.filter(statut='vendu').count()
+    proprietes_reservees = Propriete.objects.filter(statut='reserve').count()
+    
+    from django.db.models import Avg
+    prix_moyen = Propriete.objects.aggregate(Avg('prix'))['prix__avg'] or 0
+    
+    # Propriétaires distincts pour le filtre
+    proprietaires_distincts = Utilisateur.objects.filter(
+        role='proprietaire'
+    ).distinct()
+    
+    # Types distincts
+    types_distincts = Propriete.objects.values_list('type', flat=True).distinct()
+    
+    # Communes distinctes
+    communes_distinctes = Propriete.objects.values_list('commune', flat=True).distinct()
+    
+    # Statuts distincts
+    statuts_distincts = Propriete.objects.values_list('statut', flat=True).distinct()
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(proprietes, 50)  # 50 propriétés par page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'proprietes': page_obj,
+        'user': user,
+        'total_proprietes': total_proprietes,
+        'proprietes_disponibles': proprietes_disponibles,
+        'proprietes_vendues': proprietes_vendues,
+        'proprietes_reservees': proprietes_reservees,
+        'prix_moyen': prix_moyen,
+        'proprietaires_distincts': proprietaires_distincts,
+        'types_distincts': types_distincts,
+        'communes_distinctes': communes_distinctes,
+        'statuts_distincts': statuts_distincts,
+        'filters': {
+            'proprietaire': proprietaire_filter,
+            'type': type_filter,
+            'statut': statut_filter,
+            'commune': commune_filter,
+            'prix_min': prix_min,
+            'prix_max': prix_max,
+        },
+        'proprietaire_nom': proprietaire_nom,  # Pour l'affichage dans le résumé
+    }
+    
+    return render(request, 'immobilier/gestion_proprietes.html', context)
+
+@login_required(login_url='connexion')
+def propriete_update_admin(request, pk):
+    """
+    Mise à jour d'une propriété PAR L'ADMIN
+    """
+    
+    # Récupérer la propriété
+    propriete = get_object_or_404(Propriete, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProprieteForm(request.POST, request.FILES, instance=propriete)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('gestion_proprietes_admin')
+    else:
+        form = ProprieteForm(instance=propriete)
+    
+    return render(request, 'proprietes/form.html', {
+        'form': form,
+        'objet': propriete,
+        'action': 'Modifier'
+    })
+
+@login_required(login_url='connexion')
+def export_proprietes_pdf(request):
+    """Export des propriétés en PDF"""
+    user = request.user
+    
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    proprietes = Propriete.objects.all().order_by('-date_publication')
+    
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    
+    # Titre
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, 750, "Liste des Propriétés - IMMO ABIDJAN")
+    p.setFont("Helvetica", 12)
+    p.drawString(100, 730, f"Export du {timezone.now().strftime('%d/%m/%Y %H:%M')}")
+    
+    # Contenu
+    y = 700
+    for i, propriete in enumerate(proprietes):
+        if y < 50:
+            p.showPage()
+            p.setFont("Helvetica", 12)
+            y = 750
+        
+        p.drawString(100, y, f"{propriete.id}. {propriete.titre}")
+        p.drawString(400, y, f"{propriete.prix} FCFA")
+        y -= 20
+    
+    p.save()
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="proprietes_export.pdf"'
+    return response
+
+@login_required(login_url='connexion')
+def toggle_statut_utilisateur(request, pk):
+    """
+    Active ou désactive un utilisateur (toggle du statut).
+    """
+    user = request.user
+    
+    # Vérifier que l'utilisateur est un admin
+    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
+        return redirect('index')
+    
+    utilisateur_cible = get_object_or_404(Utilisateur, pk=pk)
+    
+    # Empêcher un admin de se désactiver lui-même
+    if utilisateur_cible == user:
+        # messages.error(request, "Vous ne pouvez pas modifier votre propre statut.")
+        return redirect('gestion_utilisateurs_admin')
+    
+    # Inverser le statut
+    utilisateur_cible.statut = not utilisateur_cible.statut
+    utilisateur_cible.save()
+    
+    action = "activé" if utilisateur_cible.statut else "désactivé"
+    # messages.success(request, f"Utilisateur {utilisateur_cible.username} {action}.")
+    
+    return redirect('gestion_utilisateurs_admin')
 
 
 

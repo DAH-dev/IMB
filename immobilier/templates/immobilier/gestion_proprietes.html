@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestion des Propriétés - IMMO ABIDJAN Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Variables de couleurs du superadmin */
+    :root {
+      --primary: #2c3e50; /* Couleur principale bleu foncé */
+      --secondary: #f39c12; /* Couleur secondaire orange */
+      --danger: #e74c3c; /* Rouge */
+      --success: #2ecc71; /* Vert */
+      --warning: #f1c40f; /* Jaune */
+      --light-bg: #f5f7fa; /* Fond clair */
+      --accent: #ff6b00; /* Accent orange vif */
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+    }
+
+    .logo {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .ma_section_identity {
+      font-size: 10px;
+      background-color: #f8f9fa;
+    }
+
+    .identity {
+      font-size: 14px;
+    }
+
+    /* Sidebar avec couleurs du superadmin */
+    .sidebar {
+      background-color: white;
+      height: 100vh;
+      position: fixed;
+      width: 200px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 20px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .sidebar a:hover,
+    .sidebar .nav-item.active a {
+      background-color: #f8f9fa;
+      color: var(--primary);
+      border-left: 4px solid var(--secondary);
+    }
+
+    .main-content {
+      margin-left: 200px;
+    }
+
+    /* Barre de navigation supérieure */
+    .navbar {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cartes de dashboard avec style superadmin */
+    .dashboard-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      height: 100%;
+      font-size: 12px;
+      border-top: 4px solid var(--primary);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+
+    .dashboard-card h3 {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #333;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      padding: 5px 20px;
+      border-radius: 30px;
+    }
+
+    .btn-accent {
+      font-size: 10px;
+      background-color: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
+    .btn-accent:hover {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    /* Bouton menu mobile */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 10px;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .navbar h5 {
+      font-size: 15px;
+      color: var(--primary);
+    }
+
+    .nav {
+      width: 100%;
+    }
+
+    /* Table */
+    .table {
+      margin-bottom: 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table thead th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody td {
+      vertical-align: middle;
+    }
+
+    /* Badges de statut */
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+    }
+
+    .badge.bg-primary {
+      background-color: var(--primary) !important;
+    }
+
+    .badge.bg-success {
+      background-color: var(--success) !important;
+    }
+
+    .badge.bg-danger {
+      background-color: var(--danger) !important;
+    }
+
+    .badge.bg-warning {
+      background-color: var(--warning) !important;
+      color: #333;
+    }
+
+    .badge.bg-info {
+      background-color: #17a2b8 !important;
+    }
+
+    .badge.bg-secondary {
+      background-color: #6c757d !important;
+    }
+
+    /* Boutons d'action */
+    .btn-group .btn {
+      margin-right: 5px;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    /* Filtres */
+    .filter-section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-group {
+      margin-bottom: 15px;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--primary);
+      font-size: 14px;
+    }
+
+    /* Image miniature */
+    .property-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .property-thumb-placeholder {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+    }
+
+    /* Prix formaté */
+    .price-cell {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+      }
+
+      .sidebar a {
+        font-size: 18px;
+        font-weight: 500;
+        padding: 5px 20px;
+      }
+
+      .dashboard-card {
+        font-size: 15px;
+        padding: 15px;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+    
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .btn-accent {
+        font-size: 14px;
+        padding: 10px 15px;
+      }
+
+      .table-responsive {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .dashboard-card h3 {
+        font-size: 24px;
+      }
+    }
+
+    /* Styles spécifiques pour cette page */
+    .action-buttons {
+      white-space: nowrap;
+    }
+
+    .search-box {
+      max-width: 300px;
+    }
+
+    .clear-filters {
+      color: var(--danger);
+      text-decoration: none;
+    }
+
+    .clear-filters:hover {
+      color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <!-- Bouton menu mobile -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="p-4 menu">
+      <!-- Logo -->
+      <h4 class="text-center mb-4 logo">
+        <i class="fas fa-crown me-2" style="color: var(--secondary);"></i> IMMO<span style="color: var(--secondary);">ABIDJAN</span> <small>Admin</small>
+      </h4>
+
+      <!-- Section profil Super Admin -->
+      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin&background=2c3e50&color=fff"
+          class="rounded-circle me-3" width="40" height="40" alt="Admin">
+        <div class="identity">
+          <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
+          <small class="text-muted">Administrateur</small>
+        </div>
+      </div>
+
+      <!-- Menu navigation -->
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'superadmin' %}">
+            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
+            <i class="fas fa-users-cog me-2"></i> Utilisateurs
+          </a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fas fa-building me-2"></i> Propriétés
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fas fa-flag me-2"></i> Modération
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="fas fa-chart-line me-2"></i> Analytics
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-home me-2"></i> Accueil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <!-- Barre de navigation supérieure -->
+    <nav class="navbar navbar-expand-lg nav">
+      <div class="container-fluid justify-content-end">
+        <div class="d-none d-md-block me-auto">
+          <h5 class="mb-0">Gestion des Propriétés</h5>
+        </div>
+        <div class="search me-3 d-none d-md-block">
+          <input type="text" placeholder="Rechercher une propriété..." class="search-box" id="searchInput">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="admin-profile">
+          <span>{{ user.username }}</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container-fluid p-4">
+      <!-- En-tête -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <h1 class="h3 mb-0">Gestion des Propriétés</h1>
+          <p class="text-muted">Liste complète de toutes les propriétés du système</p>
+        </div>
+      </div>
+
+      <!-- Statistiques rapides -->
+      <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-building"></i>
+            </div>
+            <h3>{{ total_proprietes }}</h3>
+            <p class="text-muted mb-0">Propriétés totales</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>{{ proprietes_disponibles }}</h3>
+            <p class="text-muted mb-0">Disponibles</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h3>{{ proprietes_vendues }}</h3>
+            <p class="text-muted mb-0">Vendues</p>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="dashboard-card">
+            <div class="card-icon">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <h3>{{ prix_moyen|floatformat:0 }} FCFA</h3>
+            <p class="text-muted mb-0">Prix moyen</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Filtres -->
+      <div class="filter-section">
+        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtres</h5>
+        <form method="GET" action="{% url 'gestion_proprietes_admin' %}">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="filter-group">
+                <label for="proprietaire">Propriétaire</label>
+                <select class="form-select" id="proprietaire" name="proprietaire">
+                  <option value="">Tous les propriétaires</option>
+                  {% for proprietaire in proprietaires_distincts %}
+                  <option value="{{ proprietaire.id }}" {% if filters.proprietaire == proprietaire.id|stringformat:"s" %}selected{% endif %}>
+                    {{ proprietaire.get_full_name|default:proprietaire.username }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="filter-group">
+                <label for="type">Type</label>
+                <select class="form-select" id="type" name="type">
+                  <option value="">Tous les types</option>
+                  {% for type in types_distincts %}
+                  <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>
+                    {{ type|title }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="filter-group">
+                <label for="statut">Statut</label>
+                <select class="form-select" id="statut" name="statut">
+                  <option value="">Tous les statuts</option>
+                  {% for statut in statuts_distincts %}
+                  <option value="{{ statut }}" {% if filters.statut == statut %}selected{% endif %}>
+                    {{ statut|title }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="filter-group">
+                <label for="commune">Commune</label>
+                <select class="form-select" id="commune" name="commune">
+                  <option value="">Toutes les communes</option>
+                  {% for commune in communes_distinctes %}
+                  <option value="{{ commune }}" {% if filters.commune == commune %}selected{% endif %}>
+                    {{ commune }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="filter-group">
+                    <label for="prix_min">Prix min (FCFA)</label>
+                    <input type="number" class="form-control" id="prix_min" name="prix_min" 
+                           placeholder="Min" value="{{ filters.prix_min }}">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="filter-group">
+                    <label for="prix_max">Prix max (FCFA)</label>
+                    <input type="number" class="form-control" id="prix_max" name="prix_max" 
+                           placeholder="Max" value="{{ filters.prix_max }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i> Appliquer les filtres
+              </button>
+              {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
+              <a href="{% url 'gestion_proprietes_admin' %}" class="btn btn-outline-danger">
+                <i class="fas fa-times me-2"></i> Effacer les filtres
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Actions -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{% url 'propriete_create' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i> Ajouter une propriété
+              </a>
+              <a href="{% url 'superadmin' %}" class="btn btn-secondary ms-2">
+                <i class="fas fa-arrow-left me-2"></i> Retour au Dashboard
+              </a>
+            </div>
+            <div>
+              <button class="btn btn-outline-primary" id="exportBtn">
+                <i class="fas fa-file-export me-2"></i> Exporter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau des propriétés -->
+      <div class="dashboard-card">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped" id="propertiesTable">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Titre</th>
+                <th>Propriétaire</th>
+                <th>Type</th>
+                <th>Prix</th>
+                <th>Ville/Commune</th>
+                <th>Statut</th>
+                <th>Date publication</th>
+                <th>Vues</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for propriete in proprietes %}
+              <tr>
+                <td>{{ propriete.id }}</td>
+                <td>
+                  {% if propriete.image %}
+                    <img src="{{ propriete.image.url }}" alt="{{ propriete.titre }}" 
+                         class="property-thumb">
+                  {% else %}
+                    <div class="property-thumb-placeholder">
+                      <i class="fas fa-home fa-lg"></i>
+                    </div>
+                  {% endif %}
+                </td>
+                <td>
+                  <strong>{{ propriete.titre|truncatechars:30 }}</strong>
+                  <br>
+                  <small class="text-muted">{{ propriete.type|title }}</small>
+                </td>
+                <td>
+                  {% if propriete.proprietaire.photo %}
+                    <img src="{{ propriete.proprietaire.photo.url }}" 
+                         class="rounded-circle me-2" width="20" height="20" 
+                         alt="{{ propriete.proprietaire.username }}">
+                  {% endif %}
+                  {{ propriete.proprietaire.get_full_name|default:propriete.proprietaire.username }}
+                </td>
+                <td>
+                  <span class="badge bg-info">
+                    {{ propriete.get_type_display }}
+                  </span>
+                </td>
+                <td class="price-cell">
+                  {{ propriete.prix|floatformat:0 }} FCFA
+                </td>
+                <td>
+                  {{ propriete.ville }} / {{ propriete.commune }}
+                </td>
+                <td>
+                  {% if propriete.statut == 'disponible' %}
+                    <span class="badge bg-success">Disponible</span>
+                  {% elif propriete.statut == 'vendu' %}
+                    <span class="badge bg-danger">Vendu</span>
+                  {% elif propriete.statut == 'reserve' %}
+                    <span class="badge bg-warning">Réservé</span>
+                  {% elif propriete.statut == 'en_netoyage' %}
+                    <span class="badge bg-info">En nettoyage</span>
+                  {% elif propriete.statut == 'en_construction' %}
+                    <span class="badge bg-secondary">En construction</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{{ propriete.statut }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ propriete.date_publication|date:"d/m/Y" }}</td>
+                <td>
+                  {% with nb_vues=propriete.visites.count %}
+                    {% if nb_vues > 0 %}
+                      <span class="badge bg-primary">{{ nb_vues }}</span>
+                    {% else %}
+                      <span class="text-muted">0</span>
+                    {% endif %}
+                  {% endwith %}
+                </td>
+                <td class="action-buttons">
+                  <div class="btn-group" role="group">
+                    <!-- Bouton Voir -->
+                    <a href="{% url 'detail_propriete_web' propriete.pk %}" 
+                       class="btn btn-sm btn-info" title="Voir" target="_blank">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    
+                    <!-- Bouton Modifier -->
+                    <a href="{% url 'propriete_update_admin' pk=propriete.pk %}" 
+                       class="btn btn-sm btn-primary" title="Modifier">
+                       
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    
+                    <!-- Bouton Supprimer -->
+                    <a href="{% url 'propriete_delete' pk=propriete.pk %}" 
+                       class="btn btn-sm btn-danger" title="Supprimer"
+                       onclick="return confirm('Êtes-vous sûr de vouloir supprimer la propriété « {{ propriete.titre }} » ? Cette action est irréversible.')">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                   
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="11" class="text-center py-4">
+                  <i class="fas fa-building fa-2x text-muted mb-3"></i>
+                  <p class="text-muted">Aucune propriété trouvée.</p>
+                  {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
+                  <a href="{% url 'gestion_proprietes_admin' %}" class="btn btn-sm btn-outline-primary">
+                    Afficher toutes les propriétés
+                  </a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if proprietes.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if proprietes.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ proprietes.previous_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            {% for num in proprietes.paginator.page_range %}
+              {% if proprietes.number == num %}
+              <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+              </li>
+              {% elif num > proprietes.number|add:'-3' and num < proprietes.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+              </li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if proprietes.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ proprietes.next_page_number }}{% for key, value in filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Suivant</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+        
+<!-- Résumé des filtres -->
+{% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
+<div class="alert alert-info mt-3">
+  <i class="fas fa-info-circle me-2"></i>
+  <strong>Filtres appliqués:</strong>
+  
+  {% if filters.proprietaire %} | Propriétaire: {{ proprietaire_nom }}{% endif %}
+  {% if filters.type %} | Type: {{ filters.type|title }}{% endif %}
+  {% if filters.statut %} | Statut: {{ filters.statut|title }}{% endif %}
+  {% if filters.commune %} | Commune: {{ filters.commune }}{% endif %}
+  {% if filters.prix_min %} | Prix min: {{ filters.prix_min }} FCFA{% endif %}
+  {% if filters.prix_max %} | Prix max: {{ filters.prix_max }} FCFA{% endif %}
+  
+  - <strong>{{ proprietes.paginator.count }}</strong> propriété(s) trouvée(s)
+</div>
+{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Gestion du menu mobile
+    const btn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.getElementById('sidebar');
+
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Recherche en temps réel
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#propertiesTable tbody tr');
+        
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(filter) ? '' : 'none';
+        });
+      });
+    }
+
+    // Export des données
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
+      // Créer un CSV
+      let csv = 'ID,Titre,Propriétaire,Type,Prix (FCFA),Ville,Commune,Statut,Date publication,Vues\n';
+      
+      document.querySelectorAll('#propertiesTable tbody tr').forEach(row => {
+        if (row.style.display !== 'none') {
+          const cells = row.querySelectorAll('td');
+          const rowData = [
+            cells[0].textContent.trim(),
+            cells[2].querySelector('strong')?.textContent.trim() || '',
+            cells[3].textContent.trim(),
+            cells[4].textContent.trim(),
+            cells[5].textContent.trim().replace(' FCFA', ''),
+            cells[6].textContent.trim().split('/')[0].trim(),
+            cells[6].textContent.trim().split('/')[1].trim(),
+            cells[7].textContent.trim(),
+            cells[8].textContent.trim(),
+            cells[9].textContent.trim()
+          ];
+          
+          // Nettoyer les données (enlever les virgules dans les textes)
+          const cleanData = rowData.map(data => 
+            data.includes(',') ? `"${data}"` : data
+          );
+          
+          csv += cleanData.join(',') + '\n';
+        }
+      });
+      
+      // Télécharger le fichier
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'proprietes_export_' + new Date().toISOString().split('T')[0] + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert('Export terminé !');
+    });
+
+    // Gestion des liens actifs dans la sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.sidebar .nav-link');
+      
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.parentElement.classList.add('active');
+        }
+      });
+      
+      // Formatage automatique des prix
+      const prixInputs = document.querySelectorAll('input[name="prix_min"], input[name="prix_max"]');
+      prixInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+          if (this.value) {
+            this.value = this.value.replace(/\D/g, '');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
