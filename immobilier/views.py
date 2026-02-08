@@ -18,6 +18,11 @@ from .forms import UtilisateurModificationForm
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from datetime import timedelta
+import json
 
 from .models import (
     Utilisateur, Propriete, Annonce, Transaction,
@@ -825,6 +830,80 @@ def send_message(request, contact_pk):
                 contenu=contenu
             )
     return redirect('mes_messages_detail', contact_pk=contact_pk)
+
+@login_required
+@csrf_exempt  # Permet les requêtes AJAX sans CSRF token (à sécuriser en production)
+def check_new_messages(request):
+    """
+    API pour vérifier les nouveaux messages en temps réel
+    Retourne un JSON indiquant s'il y a de nouveaux messages
+    """
+    try:
+        # Récupérer les paramètres
+        conversation_id = request.GET.get('conversation_id')
+        last_count = int(request.GET.get('last_count', 0))
+        user_id = request.user.id
+        
+        # Si pas de conversation spécifiée
+        if not conversation_id or conversation_id == '0':
+            return JsonResponse({
+                'success': False,
+                'has_new_messages': False,
+                'new_count': 0,
+                'message': 'Aucune conversation spécifiée'
+            })
+        
+        # Vérifier que la conversation existe et que l'utilisateur y a accès
+        conversation = get_object_or_404(Contact, pk=conversation_id)
+        
+        # Vérifier les permissions
+        if conversation.utilisateur_id != user_id and conversation.proprietaire_id != user_id:
+            return JsonResponse({
+                'success': False,
+                'has_new_messages': False,
+                'new_count': 0,
+                'message': 'Accès non autorisé'
+            })
+        
+        # Compter les messages de la conversation
+        total_messages = Message.objects.filter(contact=conversation).count()
+        
+        # Vérifier s'il y a de nouveaux messages
+        has_new = total_messages > last_count
+        
+        # Optionnel : récupérer les derniers messages
+        new_messages_data = []
+        if has_new:
+            new_messages = Message.objects.filter(
+                contact=conversation
+            ).order_by('-date_envoi')[:5]  # 5 derniers messages
+            
+            for msg in new_messages:
+                new_messages_data.append({
+                    'id': msg.id,
+                    'contenu': msg.contenu,
+                    'expediteur_id': msg.expediteur_id,
+                    'date_envoi': msg.date_envoi.strftime('%H:%M'),
+                    'est_expediteur': msg.expediteur_id == user_id
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'has_new_messages': has_new,
+            'new_count': total_messages,
+            'message_diff': total_messages - last_count if has_new else 0,
+            'new_messages': new_messages_data,
+            'timestamp': timezone.now().isoformat()
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'has_new_messages': False,
+            'new_count': 0,
+            'error': str(e),
+            'message': 'Erreur lors de la vérification'
+        })
 
 @login_required
 def supprimer_message(request, message_pk, mode):
