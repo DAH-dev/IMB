@@ -94,6 +94,9 @@ path('deconnexion/', views.deconnexion, name='logout'),
      path('messages/supprimer/<int:message_pk>/<str:mode>/', views.supprimer_message, name='supprimer_message'),
     path("messages/<int:contact_pk>/supprimer/", views.supprimer_conversation, name="supprimer_conversation"),
     path('success/', views.success_page, name='success_page'),
+    # API pour l'actualisation des messages
+    path('api/check-new-messages/', views.check_new_messages, name='check_new_messages'),
+    
      
     
     # Vues CRUD pour les informations
