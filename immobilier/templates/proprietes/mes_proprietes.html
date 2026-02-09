@@ -4,323 +4,744 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IMMO ABIDJAN - Propriétaire</title>
+  <title>Tableau de bord | IMMO ABIDJAN</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-   {% load static %}
-   {% load humanize %}
+  {% load static %}
+  {% load humanize %}
   <style>
+    /* --- Variables CSS modernes --- */
     :root {
-      --primary: #1e4a8d;
-      --accent: #ff6b00;
-      --light: #f8f9fa;
+      --primary-color: #2C3E50;
+      --secondary-color: #3498DB;
+      --accent-color: #E74C3C;
+      --success-color: #27AE60;
+      --warning-color: #F39C12;
+      --light-color: #F8F9FA;
+      --dark-color: #2C3E50;
+      --gray-light: #ECF0F1;
+      --gray-medium: #BDC3C7;
+      --border-color: #E0E0E0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --sidebar-width: 260px;
+      --navbar-height: 70px;
+    }
+
+    /* --- Reset et configuration globale --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f7fa;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: #F8FAFC;
+      color: #334155;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    .logo {
-      font-size: 15px;
+    /* --- Typographie améliorée --- */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--primary-color);
     }
 
-    .ma_section_identity {
-      font-size: 10px;
+    .text-muted {
+      color: #64748B !important;
     }
 
-    .identity {
-      font-size: 14px;
-    }
-
+    /* --- Sidebar moderne --- */
     .sidebar {
-      background-color: white;
+      background: linear-gradient(180deg, var(--primary-color) 0%, #1A2530 100%);
+      color: white;
       height: 100vh;
       position: fixed;
-      width: 200px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
       z-index: 1000;
+      overflow-y: auto;
+      transition: all var(--transition-normal);
     }
 
-    .sidebar a {
-      font-size: 12px;
+    .sidebar-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h4 {
+      color: white;
+      margin: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      color: var(--secondary-color);
+    }
+
+    .user-profile-card {
+      padding: 1.25rem;
+      margin: 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid var(--secondary-color);
+      object-fit: cover;
+    }
+
+    .user-info h6 {
+      color: white;
+      margin-bottom: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    .user-info small {
+      color: var(--gray-medium);
+      font-size: 0.8rem;
+    }
+
+    .sidebar .nav {
+      padding: 1rem 0;
+    }
+
+    .sidebar .nav-link {
+      color: rgba(255, 255, 255, 0.85);
+      padding: 0.75rem 1.5rem;
+      margin: 0.25rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       font-weight: 500;
-      padding: 5px 20px;
     }
 
+    .sidebar .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    .sidebar .nav-link.active {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
+      color: white;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    /* --- Bouton menu mobile --- */
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
+    }
+
+    .mobile-menu-btn:hover {
+      background: var(--secondary-color);
+      transform: scale(1.05);
+    }
+
+    /* --- Navbar principale --- */
+    .main-navbar {
+      background: white;
+      box-shadow: var(--shadow-sm);
+      height: var(--navbar-height);
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: var(--sidebar-width);
+      z-index: 999;
+      padding: 0 2rem;
+      transition: all var(--transition-normal);
+    }
+
+    .main-navbar.shifted {
+      left: 0;
+    }
+
+    .navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+    }
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* --- Contenu principal --- */
     .main-content {
-      margin-left: 250px;
+      margin-left: var(--sidebar-width);
+      padding-top: calc(var(--navbar-height) + 1.5rem);
+      padding-bottom: 2rem;
+      transition: all var(--transition-normal);
+      min-height: 100vh;
     }
 
-    .navbar {
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    .main-content.shifted {
+      margin-left: 0;
     }
 
+    .content-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* --- Cartes de dashboard --- */
     .dashboard-card {
       background: white;
-      border-radius: 10px;
-      padding: 5px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-normal);
       height: 100%;
-      font-size: 12px;
     }
 
     .dashboard-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--secondary-color);
+    }
+
+    .card-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header h5 {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .card-header i {
+      color: var(--secondary-color);
+    }
+
+    /* --- Liste des propriétés --- */
+    .properties-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .property-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .property-card:hover {
+      border-color: var(--secondary-color);
+      box-shadow: var(--shadow-md);
+      transform: translateX(5px);
     }
 
     .property-thumbnail {
-      width: 80px;
-      height: 60px;
+      width: 100px;
+      height: 80px;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 8px;
+      flex-shrink: 0;
     }
 
-    .btn-primary {
-      background-color: var(--primary);
-      border-color: var(--primary);
-      padding: 5px 20px;
-      border-radius: 30px;
+    .property-info {
+      flex: 1;
     }
 
-    .btn-accent {
-      background-color: var(--accent);
+    .property-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .property-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--gray-medium);
+    }
+
+    .property-meta i {
+      margin-right: 0.5rem;
+      color: var(--secondary-color);
+    }
+
+    .property-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--success-color);
+      text-align: right;
+    }
+
+    .property-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-edit {
+      background: rgba(52, 152, 219, 0.1);
+      color: var(--secondary-color);
+    }
+
+    .btn-edit:hover {
+      background: var(--secondary-color);
       color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
+      transform: scale(1.05);
     }
 
-    .mobile-menu-btn {
-      display: none;
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: var(--primary);
+    .btn-delete {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--accent-color);
+    }
+
+    .btn-delete:hover {
+      background: var(--accent-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* --- Bouton d'action principal --- */
+    .btn-primary-action {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 8px 10px;
-      z-index: 1001;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     }
 
-    .navbar h5 {
-      font-size: 15px;
+    .btn-primary-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
     }
 
-    .navbar .btn-accent {
-      font-size: 10px;
-      background-color: #198754;
-      color: white;
-    
+    /* --- État vide --- */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray-medium);
     }
 
-    .nav {
-      width: 100%;
+    .empty-state-icon {
+      font-size: 3.5rem;
+      color: var(--gray-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h4 {
+      margin-bottom: 0.75rem;
+      color: var(--primary-color);
+    }
+
+    .empty-state p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* --- Badges --- */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-active {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-color);
+    }
+
+    .badge-inactive {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--accent-color);
+    }
+
+    /* --- Responsive Design --- */
+    @media (max-width: 1200px) {
+      :root {
+        --sidebar-width: 240px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .main-navbar {
+        left: 0;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .content-container {
+        padding: 0 1.5rem;
+      }
+      
+      .property-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .property-thumbnail {
+        width: 100%;
+        height: 180px;
+      }
+      
+      .property-price {
+        text-align: left;
+      }
+      
+      .property-actions {
+        justify-content: flex-start;
+      }
     }
 
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
-        transition: transform 0.3s ease-in-out;
-        width: 250px;
+        width: 280px;
       }
-
-      .sidebar a {
-         font-size: 18px;
-        font-weight: 500;
-        padding: 5px 20px;
-      }
-
+      
       .sidebar.active {
         transform: translateX(0);
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
       }
-
-      .dashboard-card {
-        font-size: 15px;
-      }
-
-      .main-content {
-        margin-left: 0;
-      }
-      /* AJOUTEZ CE BLOC POUR LE CONTENU DE LA PROPRIÉTÉ */
-.main-content .container-fluid {
- /* Supprime le padding par défaut de Bootstrap */
- padding: 0 !important; 
- /* Contient le contenu principal */
- width: 98%; 
- /* Centre le contenu avec une petite marge latérale pour le 98% */
- margin-left: auto;
- margin-right: auto;
- }
-
+      
       .mobile-menu-btn {
-        display: block;
-      }
-      .text-end {
         display: flex;
-      flex-direction: column;   
+        align-items: center;
+        justify-content: center;
       }
+      
+      .main-navbar {
+        padding: 0 1rem;
+        height: 60px;
+      }
+      
+      .main-content {
+        padding-top: calc(60px + 1rem);
+      }
+      
+      .content-container {
+        padding: 0 1rem;
+      }
+      
+      .dashboard-card {
+        padding: 1.25rem;
+      }
+      
+      .navbar-actions {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+    }
+
+    @media (max-width: 576px) {
+      :root {
+        --navbar-height: 60px;
+      }
+      
+      .sidebar {
+        width: 260px;
+      }
+      
+      .main-navbar {
+        padding: 0 0.75rem;
+      }
+      
+      .page-title {
+        font-size: 1.1rem;
+      }
+      
+      .property-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .btn-primary-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* --- Animations --- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* --- Scrollbar personnalisée --- */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gray-medium);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #95A5A6;
     }
   </style>
 </head>
 
 <body>
+  <!-- Bouton menu mobile -->
   <button class="mobile-menu-btn" id="mobileMenuBtn">
     <i class="fas fa-bars"></i>
   </button>
 
+  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <div class="p-4">
-      <h4 class="text-center mb-4 logo">
-        <i class="fas fa-home me-2 text-primary"></i> IMMO ABIDJAN
+    <div class="sidebar-header">
+      <h4>
+        <i class="fas fa-home"></i>
+        <span>IMMO ABIDJAN</span>
       </h4>
-
-   <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
-    <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=1e4a8d&color=fff{% endif %}"
-         class="rounded-circle me-3" width="40" height="40">
-    <div>
-      <h6 class="mb-0">{{ user.get_full_name }}</h6>
-      <small class="text-muted">{{ user.role|capfirst }}</small>
     </div>
-  </div>
 
-      <ul class="nav flex-column">
-       
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'profil' %}">
-          <i class="fas fa-user me-2"></i> Mon profil</a>
-        </li>
-         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'proprietaire' %}">
-            <i class="fas fa-cog me-2"></i> Paramètres
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'mes_proprietes'%}">
-            <i class="fas fa-building"></i> Mes propriétés
-          </a>
-        </li>
-     
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'mes_messages'%}">
-            <i class="fas fa-envelope me-2"></i> Messages
-          </a>
-        </li>
-
-        <!-- <li class="nav-item ">
-          <a class="nav-link" href="#">
-           <i class="fas fa-calendar-check"></i> Reservations
-          </a>
-        </li> -->
-   <li class="nav-item ">
-          <a class="nav-link" href="{% url 'index' %}">
-           <i class="fas fa-home me-2"></i> Accueil
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'logout' %}">
-      <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
-    </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="main-content">
-    <nav class="navbar navbar-expand-lg nav">
-      <div class="container-fluid justify-content-end">
-        <div class="d-none d-md-block me-auto">
-          <h5 class="mb-0">Mes propriétés</h5>
-        </div>
-
-        <div>
-           <a class="nav-link" href="{% url 'index'%}">
-            <i class="fas fa-home me-2"></i>
-          </a>
-        </div>
-        <button class="btn btn-accent">
-         <a href="{% url 'propriete_create' %}" class="btn btn-accent"><i class="fas fa-plus-circle me-1"></i> Ajouter une propriété</a>
-        </button>
+    <div class="user-profile-card d-flex align-items-center">
+      <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=3498db&color=fff&bold=true{% endif %}"
+           class="user-avatar me-3"
+           alt="Photo de profil">
+      <div class="user-info">
+        <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+        <small class="text-muted">{{ user.role|capfirst }}</small>
       </div>
-    </nav>
+    </div>
 
-    <div class="container-fluid p-4">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'profil' %}">
+          <i class="fas fa-user"></i>
+          <span>Mon profil</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'proprietaire' %}">
+          <i class="fas fa-cog"></i>
+          <span>Paramètres</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'mes_proprietes' %}">
+          <i class="fas fa-building"></i>
+          <span>Mes propriétés</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'mes_messages' %}">
+          <i class="fas fa-comments"></i>
+          <span>Messages</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'index' %}">
+          <i class="fas fa-home"></i>
+          <span>Accueil</span>
+        </a>
+      </li>
+      <li class="nav-item mt-4">
+        <a class="nav-link" href="{% url 'logout' %}">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Déconnexion</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Navbar principale -->
+  <nav class="main-navbar" id="mainNavbar">
+    <div class="navbar-content">
+      <div class="d-none d-md-block">
+        <h5 class="page-title">Mes propriétés</h5>
+      </div>
+      <div class="navbar-actions">
+        <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex">
+          <i class="fas fa-home me-1"></i>
+          Accueil
+        </a>
+        <a href="{% url 'propriete_create' %}" class="btn-primary-action">
+          <i class="fas fa-plus-circle"></i>
+          Ajouter une propriété
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenu principal -->
+  <div class="main-content" id="mainContent">
+    <div class="content-container">
+      <!-- Section principale -->
       <div class="row">
-        <div class="col-lg-12 mb-4">
-          <div class="dashboard-card">
-            <h5 class="mb-4">Toutes mes propriétés récentes</h5>
-          <div class="list-group">
-    {% if proprietes %}
-        {% for propriete in proprietes %}
-            <div class="list-group-item mb-2 border rounded p-3">
-                <div class="d-flex align-items-center">
-                    
-                    <a href="{% url 'detail_propriete_web' pk=propriete.pk %}" class="me-3" title="Voir les détails">
-                        {% if propriete.image %}
-                            <img src="{{ propriete.image.url }}"
-                                 class="property-thumbnail"
-                                 alt="{{ propriete.titre }}">
-                        {% else %}
-                            <img src="{% static 'images/default_property.jpg' %}"
-                                 class="property-thumbnail"
-                                 alt="Image par défaut">
-                        {% endif %}
-                    </a>
-                    
-                    <div class="flex-grow-1 me-3 small">
-                        <h6 class="mb-0 text-primary">{{ propriete.titre|default:"[Sans Titre]" }}</h6>
-                        
-                        <small class="text-muted d-block">
-                            <i class="fas fa-map-marker-alt me-1"></i> {{ propriete.ville|default:"Non spécifié" }} 
-                        </small>
-                        <small class="text-muted"> {{ propriete.date_publication|date:"d/m/Y" }}</small>
-                    </div>
-
-                    <div class="text-end d-flex flex align-items-end small">
-                        
-                        <span class="text-primary fw-bold mb-1">
-                            {% if propriete.prix %}
-                                {{ propriete.prix|floatformat:"0"|intcomma }} FCFA
-                            {% else %}
-                                Prix non défini
-                            {% endif %}
-                        </span>
-                        
-                        <!-- {% if propriete.est_active %}
-                            <span class="badge bg-success mb-2">Active</span>
-                        {% else %}
-                            <span class="badge bg-danger mb-2">Inactive</span>
-                        {% endif %} -->
-
-                        <div class="me-3 small flex-md-grow-1 mb-2 mb-md-0">
-                            <a href="{% url 'propriete_update' pk=propriete.pk %}" class="btn btn-sm btn-info text-white me-1 p-1" title="Modifier">
-                                <i class="fas fa-edit small"></i>
-                                modifier
-                            </a>
-                            <a href="{% url 'propriete_delete' pk=propriete.pk %}" class="btn btn-sm btn-danger p-1 " title="Supprimer">
-                                <i class="fas fa-trash-alt small"></i>
-                                supprimer
-  
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-12">
+          <div class="dashboard-card fade-in">
+            <div class="card-header">
+              <h5>
+                <i class="fas fa-list"></i>
+                Toutes mes propriétés
+              </h5>
             </div>
-        {% endfor %}
-    {% else %}
-       <div class="text-start text-md-end d-flex flex-row flex-md-column align-items-center align-items-md-end small mt-2 mt-md-0">
-            <i class="fas fa-info-circle me-2"></i> Vous n'avez encore publié aucune propriété.
-            <a href="{% url 'propriete_create' %}" class="alert-link">Ajouter une propriété maintenant !</a>
-        </div>
-    {% endif %}
-</div>
+            
+            <div class="properties-list">
+              {% if proprietes %}
+                {% for propriete in proprietes %}
+                <div class="property-card fade-in">
+                  <img src="{% if propriete.image %}{{ propriete.image.url }}{% else %}{% static 'images/default_property.jpg' %}{% endif %}"
+                       class="property-thumbnail"
+                       alt="{{ propriete.titre|default:'Propriété' }}">
+                  
+                  <div class="property-info">
+                    <h6 class="property-title">
+                      {{ propriete.titre|default:"[Sans titre]" }}
+                    </h6>
+                    <div class="property-meta">
+                      <span>
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ propriete.ville|default:"Localisation non spécifiée" }}
+                      </span>
+                      <span>
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ propriete.date_publication|date:"d/m/Y" }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="property-price">
+                    {% if propriete.prix %}
+                      {{ propriete.prix|floatformat:"0"|intcomma }} FCFA
+                    {% else %}
+                      <span class="text-muted">Non spécifié</span>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="property-actions">
+                    <a href="{% url 'propriete_update' pk=propriete.pk %}" 
+                       class="btn-icon btn-edit"
+                       title="Modifier">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'propriete_delete' pk=propriete.pk %}" 
+                       class="btn-icon btn-delete"
+                       title="Supprimer">
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                    <a href="{% url 'detail_propriete_web' pk=propriete.pk %}" 
+                       class="btn-icon btn-info"
+                       style="background: rgba(52, 152, 219, 0.1); color: var(--secondary-color);"
+                       title="Voir détails">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fas fa-home"></i>
+                  </div>
+                  <h4>Aucune propriété trouvée</h4>
+                  <p class="text-muted mb-4">
+                    Vous n'avez pas encore publié de propriétés. Commencez par ajouter votre première propriété.
+                  </p>
+                  <a href="{% url 'propriete_create' %}" class="btn-primary-action">
+                    <i class="fas fa-plus-circle"></i>
+                    Ajouter une propriété
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+            
+            {% if proprietes %}
+            <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                {{ proprietes|length }} propriété{{ proprietes|length|pluralize }}
+              </small>
+              <a href="{% url 'propriete_create' %}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>
+                Ajouter une autre
+              </a>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -328,17 +749,44 @@
   </div>
 
   <script>
-    const btn = document.getElementById('mobileMenuBtn');
-    const sidebar = document.getElementById('sidebar');
-
-    btn.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      const mainNavbar = document.getElementById('mainNavbar');
+      const mainContent = document.getElementById('mainContent');
+      
+      // Gestion du menu mobile
+      mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        mainNavbar.classList.toggle('shifted');
+        mainContent.classList.toggle('shifted');
+      });
+      
+      // Fermer le sidebar en cliquant à l'extérieur (mobile)
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            mainNavbar.classList.remove('shifted');
+            mainContent.classList.remove('shifted');
+          }
+        }
+      });
+      
+      // Animation au chargement
+      const cards = document.querySelectorAll('.fade-in');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+      });
+      
+      // Gestion du resize
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          mainNavbar.classList.remove('shifted');
+          mainContent.classList.remove('shifted');
+        }
+      });
     });
   </script>
 </body>

@@ -3,143 +3,305 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IMMO ABIDJAN - Profil client</title>
+  <title>Mon Profil | IMMO ABIDJAN</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-{% load static %} 
-<link rel="stylesheet" href="{% static 'css/profil.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  {% load static %} 
+  <link rel="stylesheet" href="{% static 'css/profil.css' %}">
 </head>
 
 <body>
-
   <!-- Bouton menu mobile -->
   <button class="mobile-menu-btn" id="mobileMenuBtn">
     <i class="fas fa-bars"></i>
   </button>
 
   <!-- Sidebar -->
-  <div class="sidebar p-4" id="sidebar">
-    <h4 class="text-center mb-4 logo">
-      <i class="fas fa-home me-2 text-primary"></i> IMMO ABIDJAN
-    </h4>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h4>
+        <i class="fas fa-home"></i>
+        <span>IMMO ABIDJAN</span>
+      </h4>
+    </div>
 
-    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
-         <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=1e4a8d&color=fff{% endif %}"
-           class="rounded-circle me-3" width="40" height="40">
-       <div class="identity">
-        <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
-        <small class="text-muted">{{ user.role|capfirst }}</small>
+    <div class="user-profile-card">
+      <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=3498db&color=fff&bold=true{% endif %}"
+           class="user-avatar"
+           alt="Photo de profil">
+      <div class="user-info">
+        <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
+        <small class="user-role">{{ user.role|capfirst }}</small>
       </div>
     </div>
 
-  <ul class="nav flex-column">
-
-  <!-- Mon profil : visible pour tout utilisateur -->
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'profil' %}">
-      <i class="fas fa-user me-2"></i> Mon profil
-    </a>
-  </li>
-
-  <!-- Ces deux liens s’affichent uniquement si l’utilisateur est propriétaire -->
-  {% if user.role == "proprietaire" %}
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'proprietaire' %}">
-        <i class="fas fa-cog me-2"></i> Paramètres
-      </a>
-    </li>
-
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'mes_proprietes' %}">
-        <i class="fas fa-building"></i> Mes propriétés
-      </a>
-    </li>
-  {% endif %}
-
-  <!-- Les liens suivants sont visibles pour tout le monde (client ou propriétaire) -->
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'mes_messages' %}">
-      <i class="fas fa-envelope me-2"></i> Messages
-    </a>
-  </li>
-
-  <!-- <li class="nav-item">
-    <a class="nav-link" href="#">
-      <i class="fas fa-calendar-check me-2"></i> Réservations
-    </a>
-  </li> -->
-   <li class="nav-item ">
-          <a class="nav-link" href="{% url 'index' %}">
-           <i class="fas fa-home me-2"></i> Accueil
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'profil' %}">
+            <i class="fas fa-user"></i>
+            <span>Mon profil</span>
           </a>
         </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'logout' %}">
-      <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
-    </a>
-  </li>
 
-</ul>
-
-  </div>
-
-  <!-- Main content -->
-  <div class="main-content">
-    <nav class="navbar navbar-expand-lg">
-      <div class="container-fluid justify-content-end">
-        <div class="d-none d-md-block me-auto">
-          <h5 class="mb-0">Profil utilisateur</h5>
-        </div>
-
-        <div>
-          <a class="nav-link d-inline-block me-3" href="{% url 'index' %}">
-            <i class="fas fa-home me-2"></i>
+        {% if user.role == "proprietaire" %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'proprietaire' %}">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
           </a>
-          <a href="{% url 'modifier_profil' %}" class="btn btn-accent">
-            <i class="fas fa-user-edit me-1"></i> Modifier mon profil
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'mes_proprietes' %}">
+            <i class="fas fa-building"></i>
+            <span>Mes propriétés</span>
           </a>
-        </div>
-      </div>
+        </li>
+        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'mes_messages' %}">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'index' %}">
+            <i class="fas fa-home"></i>
+            <span>Accueil</span>
+          </a>
+        </li>
+
+        <li class="nav-item logout-item">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Déconnexion</span>
+          </a>
+        </li>
+      </ul>
     </nav>
+  </div>
 
-    <div class="container-fluid p-4">
-      <div class="dashboard-card">
-        <h5 class="mb-4"><i class="fas fa-user-circle me-2 text-primary"></i> Informations du compte</h5>
-        <div class="row">
-          <div class="col-md-4 text-center">
-            <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=1e4a8d&color=fff{% endif %}"
-                 alt="Avatar"
-                 style="width: 120px; height: 120px;">
+  <!-- Contenu principal -->
+  <div class="main-content" id="mainContent">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="container-fluid">
+        <div class="header-content">
+          <div class="page-title-container">
+            <h1 class="page-title">Mon profil</h1>
+            <p class="page-subtitle">Gérez vos informations personnelles</p>
           </div>
-
-          <div class="col-md-8">
-            <p><span class="info-label">Nom d’utilisateur :</span> <span class="info-value">{{ user.username }}</span></p>
-            <p><span class="info-label">Nom complet :</span> <span class="info-value">{{ user.get_full_name }}</span></p>
-            <p><span class="info-label">Email :</span> <span class="info-value">{{ user.email }}</span></p>
-            <p><span class="info-label">Téléphone :</span> <span class="info-value">{{ user.telephone }}</span></p>
-            <p><span class="info-label">Rôle :</span> <span class="info-value">{{ user.role|capfirst }}</span></p>
+          
+          <div class="header-actions">
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-home">
+              <i class="fas fa-home"></i>
+              <span class="d-none d-md-inline">Accueil</span>
+            </a>
+            <a href="{% url 'modifier_profil' %}" class="btn btn-primary btn-edit-profile">
+              <i class="fas fa-user-edit"></i>
+              Modifier mon profil
+            </a>
           </div>
         </div>
       </div>
-    </div>
+    </header>
+
+    <!-- Section profil -->
+    <main class="profile-section">
+      <div class="container-fluid">
+        <div class="profile-card">
+          <div class="profile-header">
+            <h2 class="profile-title">
+              <i class="fas fa-user-circle"></i>
+              Informations du compte
+            </h2>
+            <p class="profile-description">
+              Visualisez et gérez vos informations personnelles
+            </p>
+          </div>
+          
+          <div class="profile-content">
+            <div class="row">
+              <!-- Photo de profil -->
+              <div class="col-md-4 col-lg-3">
+                <div class="profile-avatar-container">
+                  <div class="profile-avatar-wrapper">
+                    <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=3498db&color=fff&bold=true&size=400{% endif %}"
+                         class="profile-avatar"
+                         alt="Photo de profil">
+                    <div class="avatar-overlay">
+                      <i class="fas fa-camera"></i>
+                    </div>
+                  </div>
+                  <div class="avatar-info">
+                    <h5 class="avatar-name">{{ user.get_full_name|default:user.username }}</h5>
+                    <p class="avatar-role">{{ user.role|capfirst }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Informations -->
+              <div class="col-md-8 col-lg-9">
+                <div class="profile-info-grid">
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-user-tag"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Nom d'utilisateur</label>
+                      <p class="info-value">{{ user.username }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Nom complet</label>
+                      <p class="info-value">{{ user.get_full_name|default:"Non spécifié" }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Adresse email</label>
+                      <p class="info-value">{{ user.email|default:"Non spécifié" }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Téléphone</label>
+                      <p class="info-value">{{ user.telephone|default:"Non spécifié" }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Rôle</label>
+                      <p class="info-value role-badge">{{ user.role|capfirst }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-item">
+                    <div class="info-icon">
+                      <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="info-content">
+                      <label class="info-label">Membre depuis</label>
+                      <p class="info-value">
+                        {% if user.date_joined %}
+                          {{ user.date_joined|date:"d F Y" }}
+                        {% else %}
+                          Date non disponible
+                        {% endif %}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="profile-stats">
+                  <div class="stat-item">
+                    <div class="stat-icon">
+                      <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h6 class="stat-title">Propriétés</h6>
+                      <p class="stat-value">
+                        {% if user.role == "proprietaire" %}
+                          {{ user.proprietes.count }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="stat-item">
+                    <div class="stat-icon">
+                      <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h6 class="stat-title">Messages</h6>
+                      <p class="stat-value">-</p>
+                    </div>
+                  </div>
+                  
+                  <div class="stat-item">
+                    <div class="stat-icon">
+                      <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h6 class="stat-title">Visites</h6>
+                      <p class="stat-value">-</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="profile-footer">
+            <div class="security-info">
+              <i class="fas fa-shield-alt text-primary"></i>
+              <span>Vos informations sont sécurisées et protégées.</span>
+            </div>
+            <a href="{% url 'modifier_profil' %}" class="btn btn-primary btn-lg">
+              <i class="fas fa-edit me-2"></i>
+              Modifier mes informations
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <!-- JS menu mobile -->
   <script>
-    const btn = document.getElementById('mobileMenuBtn');
-    const sidebar = document.getElementById('sidebar');
-
-    btn.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      
+      // Gestion du menu mobile
+      mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('shifted');
+      });
+      
+      // Fermer le sidebar en cliquant à l'extérieur (mobile)
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('shifted');
+          }
+        }
+      });
+      
+      // Fermer le sidebar lors du redimensionnement
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('shifted');
+        }
+      });
     });
   </script>
-
 </body>
 </html>

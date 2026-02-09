@@ -97,7 +97,6 @@ path('deconnexion/', views.deconnexion, name='logout'),
     # API pour l'actualisation des messages
     path('api/check-new-messages/', views.check_new_messages, name='check_new_messages'),
     
-     
     
     # Vues CRUD pour les informations
     path('gestion/informations/', views.information_list, name='information_list'),
