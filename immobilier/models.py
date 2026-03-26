@@ -5,14 +5,26 @@ from django.db.models import UniqueConstraint
 # from moviepy.editor import VideoFileClip
 
 # --- Utilisateur ---
+# --- Utilisateur ---
 class Utilisateur(AbstractUser):
     # Ajout du champ 'photo'
     photo = models.ImageField(upload_to="utilisateurs/", blank=True, null=True)
     
-    # tes champs personnalisés ici
-    telephone = models.CharField(max_length=20, blank=True)
+    # CNI obligatoire
+    cni = models.ImageField(upload_to="utilisateurs/cni/", default='', verbose_name="Carte Nationale d'Identité")
+    
+    # telephone obligatoire
+    telephone = models.CharField(max_length=20, blank=False)
+    
+    # ✅ Rendre first_name et last_name obligatoires
+    first_name = models.CharField(max_length=150, blank=False)  # ← plus de blank=True
+    last_name = models.CharField(max_length=150, blank=False)   # ← plus de blank=True
+    
     role = models.CharField(max_length=20, choices=[('client','Client'),('proprietaire','Propriétaire'),('admin','Admin'),('superadmin','SuperAdmin')])
     statut = models.BooleanField(default=True)
+    
+    # Champ pour indiquer si la CNI est vérifiée
+    cni_verifie = models.BooleanField(default=False, verbose_name="CNI vérifiée")
 
     # ⚠️ évite le conflit avec auth.User
     groups = models.ManyToManyField(
@@ -106,6 +118,8 @@ class Propriete(models.Model):
     prix = models.DecimalField(max_digits=12, decimal_places=2)
     ville=models.CharField(max_length=50)
     commune=models.CharField(max_length=50)
+    statut_propriete_admin = models.BooleanField(default=True)   # Contrôle admin (True = autorisé)
+    statut_propriete_owner = models.BooleanField(default=False)   # Choix du propriétaire
    
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='disponible')
     date_publication = models.DateTimeField(auto_now_add=True)
@@ -152,7 +166,7 @@ class Transaction(models.Model):
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
 
 
-# --- Visite ---
+
 # --- Visite ---
 class Visite(models.Model):
     propriete = models.ForeignKey('Propriete', on_delete=models.CASCADE, related_name="visites")
@@ -204,30 +218,29 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name="messages_recus"
     )
+    
     contact = models.ForeignKey(
         'Contact',
         on_delete=models.CASCADE,
         related_name="messages",
-        null=True,  # Permet aux messages existants de ne pas avoir de contact
+        null=True,
         blank=True
     )
-    expediteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_envoyes")
-    destinataire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="messages_recus")
+    
     contenu = models.TextField()
     date_envoi = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='envoye')
-     # 🚨 Nouveaux champs pour la suppression
+    
+    # ✅ NOUVEAU : Ajoutez ce champ si vous voulez la date de lecture
+    date_lu = models.DateTimeField(null=True, blank=True)  # ← À AJOUTER SI VOUS VOULEZ
+    
+    # Champs pour la suppression
     supprime_par_expediteur = models.BooleanField(default=False)
     supprime_par_destinataire = models.BooleanField(default=False)
-    
-    # Champ pour la suppression pour tout le monde (visible par les deux)
-    # L'expéditeur peut choisir de le rendre invisible pour les deux
     supprime_pour_tous = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Message de {self.expediteur} à {self.destinataire} - {self.statut}"
-
-
 
 
 # --- Information ---

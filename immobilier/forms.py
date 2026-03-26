@@ -39,8 +39,7 @@ class UserLoginForm(AuthenticationForm):
 class UtilisateurCreationForm(UserCreationForm):
     class Meta:
         model = Utilisateur
-        fields = ('username', 'email', 'first_name', 'last_name', 'telephone', 'role', 'photo', 'password1', 'password2')  
-        # ⚠️ Django attend 'password1' et 'password2', pas 'password' et 'password2'
+        fields = ('username', 'email', 'first_name', 'last_name', 'telephone', 'role', 'photo', 'cni', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,24 +50,69 @@ class UtilisateurCreationForm(UserCreationForm):
             ('proprietaire', 'Propriétaire')
         ]
 
-        # Optionnel : personnalisation du style ou des labels
+        # Personnalisation des labels
         self.fields['username'].label = "Nom d'utilisateur"
         self.fields['email'].label = "Adresse e-mail"
+        self.fields['first_name'].label = "Prénom"
+        self.fields['last_name'].label = "Nom"
         self.fields['telephone'].label = "Téléphone"
-        self.fields['photo'].label = "Photo de profil"
+        self.fields['photo'].label = "Photo de profil (optionnel)"
+        self.fields['cni'].label = "Carte Nationale d'Identité"
+        
+        # ✅ Rendre tous les champs obligatoires
+        self.fields['username'].required = True
+        self.fields['email'].required = True
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['telephone'].required = True
+        self.fields['cni'].required = True
+        self.fields['photo'].required = False  # Photo reste optionnelle
 
-        # Tu peux aussi ajouter des classes CSS si besoin
+        # Ajouter des classes CSS
         for field in self.fields.values():
-            field.widget.attrs['class'] = 'form-control'  
+            if hasattr(field.widget, 'attrs'):
+                field.widget.attrs['class'] = 'form-control'
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            raise ValidationError("L'adresse email est obligatoire.")
+        return email
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name:
+            raise ValidationError("Le prénom est obligatoire.")
+        return first_name
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name:
+            raise ValidationError("Le nom est obligatoire.")
+        return last_name
+    
+    def clean_telephone(self):
+        telephone = self.cleaned_data.get('telephone')
+        if not telephone:
+            raise ValidationError("Le numéro de téléphone est obligatoire.")
+        if not telephone.isdigit():
+            raise ValidationError("Le numéro de téléphone ne doit contenir que des chiffres.")
+        if len(telephone) < 8:
+            raise ValidationError("Le numéro de téléphone doit contenir au moins 8 chiffres.")
+        return telephone
+    
+    def clean_cni(self):
+        cni = self.cleaned_data.get('cni')
+        if not cni:
+            raise ValidationError("La Carte Nationale d'Identité est obligatoire.")
+        return cni
+
 
 class UtilisateurModificationForm(forms.ModelForm):
-    # 💡 C'est la bonne classe pour l'édition d'un modèle existant
     class Meta:
         model = Utilisateur
-        # Liste des champs que l'utilisateur peut modifier (sans le mot de passe)
-        fields = ['username', 'email', 'first_name', 'last_name', 'telephone', 'role', 'photo']
+        fields = ['username', 'email', 'first_name', 'last_name', 'telephone', 'role', 'photo', 'cni']
         
-        # NOTE : Si vous ne voulez pas que le champ 'role' soit modifiable par l'utilisateur
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.role not in ('admin', 'superadmin') and 'role' in self.fields:
@@ -76,7 +120,60 @@ class UtilisateurModificationForm(forms.ModelForm):
                 ('client', 'Client'),
                 ('proprietaire', 'Propriétaire')
             ]
+        
+        # Personnalisation des labels
+        self.fields['first_name'].label = "Prénom"
+        self.fields['last_name'].label = "Nom"
+        self.fields['cni'].label = "Carte Nationale d'Identité"
+        
+        # ✅ Rendre les champs obligatoires pour la modification
+        self.fields['username'].required = True
+        self.fields['email'].required = True
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['telephone'].required = True
+        
+        # CNI obligatoire seulement si elle n'existe pas encore
+        if not self.instance.cni:
+            self.fields['cni'].required = True
+        else:
+            self.fields['cni'].required = False
+        
+        # Photo reste optionnelle
+        self.fields['photo'].required = False
+        
+        # Ajouter des classes CSS
+        for field in self.fields.values():
+            if hasattr(field.widget, 'attrs'):
+                field.widget.attrs['class'] = 'form-control'
     
+    def clean_telephone(self):
+        telephone = self.cleaned_data.get('telephone')
+        if not telephone:
+            raise ValidationError("Le numéro de téléphone est obligatoire.")
+        if not telephone.isdigit():
+            raise ValidationError("Le numéro de téléphone ne doit contenir que des chiffres.")
+        if len(telephone) < 8:
+            raise ValidationError("Le numéro de téléphone doit contenir au moins 8 chiffres.")
+        return telephone
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+            raise ValidationError("L'adresse email est obligatoire.")
+        return email
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name:
+            raise ValidationError("Le prénom est obligatoire.")
+        return first_name
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name:
+            raise ValidationError("Le nom est obligatoire.")
+        return last_name
     
 class ContactForm(forms.ModelForm):
     class Meta:

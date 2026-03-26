@@ -380,67 +380,89 @@
       border-top-right-radius: 10px;
     }
 
-    .descrip_appartement {
-      padding: 4px;
-      flex-grow: 1;
-    }
+    /* Grid for properties */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;  /* ← MODIFIER de 10px à 15px */
+  margin-bottom: 50px;
+  padding-top: 10px;
+}
+
+/* Ajustements pour les cartes de propriété */
+.cart_appartement {
+  width: 350px;  /* ← MODIFIÉ (était 230px) */
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.img_appartement {
+  padding: 5px;
+  width: 100%;
+  height: 190px;  /* ← MODIFIÉ (était 170px) */
+  overflow: hidden;
+}
+
+.img_appartement img,
+.img_appartement video {
+  width: 100%;
+  height: 190px;  /* ← MODIFIÉ (était 170px) */
+  margin: auto;
+  border-radius: 3px;
+  border-style: none;
+  object-fit: cover;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.descrip_appartement {
+  padding: 8px;  /* ← MODIFIÉ de 4px à 8px */
+  flex-grow: 1;
+}
+
+.descrip_appartement h5 {
+  font-size: 1rem;  /* ← MODIFIÉ (était 0.8rem) */
+  margin-bottom: 5px;
+  color: var(--primary);
+}
+
+.descrip_appartement p {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+  font-size: 0.85rem;  /* ← MODIFIÉ (était 0.70rem) */
+  color: #555;
+}
+
+/* Pour la date et les vues */
+.descrip_appartement p strong {
+  font-size: 0.8rem;  /* ← AJOUTÉ */
+}
+
+.descrip_appartement ul span {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 0.8rem;  /* ← MODIFIÉ de 0.7rem à 0.8rem */
+  color: #666;
+}
 
 
-    .descrip_appartement h5 {
-      font-size: 0, 8rem;
-      margin-bottom: 2px;
-      color: var(--primary);
-    }
 
-    .descrip_appartement p {
-      display: flex;
-      align-items: center;
-      flex-wrap: nowrap;
-      gap: 5px;
-      font-size: 0.70rem;
-      color: #555;
-    }
+.owner-name {
+  font-size: 0.85rem;  /* ← MODIFIÉ de 0.75rem à 0.85rem */
+  color: var(--dark);
+  font-weight: 600;
+}
 
-    .descrip_appartement ul span {
-      display: flex;
-      align-items: center;
-      gap: 1px;
-      font-size: 0.7rem;
-      color: #666;
-    }
-
-    .descrip_appartement p a {
-      padding: 6px;
-      text-align: center;
-    }
-
-
-    .descrip_appartement p button {
-      max-width: 230px;
-      padding: 2px;
-      border: 2px solid var(--primary);
-      background-color: var(--primary);
-      color: white;
-      border-radius: 6px;
-      font-size: 0, 7rem;
-      cursor: pointer;
-      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    }
-
-    .descrip_appartement i {
-      color: var(--success);
-    }
-
-
-    .voitout {
-      color: black;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      margin: 40px;
-    }
-
-    /* --- NOUVEAUX STYLES POUR LA CARTE DU PROPRIÉTAIRE --- */
+/* --- NOUVEAUX STYLES POUR LA CARTE DU PROPRIÉTAIRE --- */
 
     .owner-info {
       /* Utilise Flexbox pour aligner l'image et le nom sur une seule ligne */
@@ -499,14 +521,13 @@
       /* Couleur blanche pour l'icône par défaut */
     }
 
-    /* Mise à jour des règles existantes (facultatif mais recommandé pour la propreté) */
-    .descrip_appartement .h5 {
-      font-size: 0.9rem;
-      /* Légèrement plus grand que votre 0.8rem précédent */
-      margin-bottom: 5px;
-      /* Ajuste l'espace */
-      color: var(--primary);
-    }
+
+
+.descrip_appartement .h5 {
+  font-size: 1rem;  /* ← MODIFIÉ de 0.9rem à 1rem */
+  margin-bottom: 5px;
+  color: var(--primary);
+}
 
     /* Footer (conservé) */
     footer {

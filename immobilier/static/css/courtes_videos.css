@@ -1,4 +1,4 @@
- 
+
         /* ====== Base ====== */
         html,
         body {
@@ -114,7 +114,6 @@
             height: 100%;
             object-fit: contain;
             display: block;
-            background: #fcf9f9;
             background: #555;
         }
 
@@ -146,20 +145,19 @@
         .shorts-characteristics {
             display: flex;
             gap: 12px;
-            /* Espacement entre les caractéristiques */
             margin-top: 10px;
+            flex-wrap: wrap;
         }
 
         .shorts-characteristics .char-item {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             opacity: 0.95;
-            background: rgba(255, 255, 255, 0.1);
-            /* Fond légèrement transparent */
+            background: rgba(255, 255, 255, 0.2);
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 20px;
         }
 
         /* actions à droite (like, comment, share, etc.) */
@@ -175,9 +173,9 @@
         }
 
         .action-btn {
-            background: rgba(0, 0, 0, 0.2);
-            width: 54px;
-            height: 54px;
+            background: rgba(0, 0, 0, 0.5);
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
@@ -187,19 +185,212 @@
             border: none;
             cursor: pointer;
             font-size: 20px;
-            padding: 6px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: rgba(0, 0, 0, 0.7);
         }
 
         .action-btn .count {
-            font-size: 12px;
-            margin-top: 6px;
-            opacity: 0.95;
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.9;
         }
 
         .action-btn.like.liked {
             background: linear-gradient(180deg, #ff4d6d, #ff7aa2);
-            transform: scale(1.05);
+        }
+
+        /* Style du bouton partager */
+        .action-btn.share {
+            background: rgba(52, 152, 219, 0.6);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .action-btn.share:hover {
+            background: #3498db;
+        }
+
+        /* Menu de partage */
+        .share-menu {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            overflow: hidden;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .share-menu-content {
+            width: 280px;
+            background: white;
+        }
+
+        .share-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .share-menu-header h4 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .share-menu-header button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .share-menu-header button:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .share-options {
+            padding: 8px 0;
+        }
+
+        .share-options button {
+            width: 100%;
+            padding: 12px 16px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+
+        .share-options button:hover {
+            background: #f5f5f5;
+        }
+
+        .share-options button i {
+            width: 20px;
+            font-size: 18px;
+        }
+
+        .share-options button i.fa-facebook-f {
+            color: #1877f2;
+        }
+
+        .share-options button i.fa-twitter {
+            color: #1da1f2;
+        }
+
+        .share-options button i.fa-whatsapp {
+            color: #25d366;
+        }
+
+        .share-options button i.fa-link {
+            color: #3498db;
+        }
+
+        .share-link-container {
+            padding: 12px 16px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-link-container input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 12px;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .share-link-container button {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .share-link-container button:hover {
+            background: #2980b9;
+        }
+
+        /* Notification */
+        .share-notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            animation: slideUp 0.3s ease;
+        }
+
+        .notification-content {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .notification-content.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .notification-content.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
         /* spinner de chargement */
@@ -224,13 +415,8 @@
         }
 
         @keyframes spin {
-            from {
-                transform: rotate(0);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
+            from { transform: rotate(0); }
+            to { transform: rotate(360deg); }
         }
 
         /* animation coeur au double-tap */
@@ -270,12 +456,19 @@
             }
 
             .action-btn {
-                width: 48px;
-                height: 48px;
+                width: 42px;
+                height: 42px;
+                font-size: 18px;
             }
 
             .shorts-overlay {
                 padding: 10px;
             }
+            
+            .share-menu-content {
+                width: 260px;
+            }
         }
-  
+    
+
+        

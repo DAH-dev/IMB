@@ -29,6 +29,64 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+
+
+# ===== AJOUTEZ CES CONFIGURATIONS DE SESSION =====
+
+# Session configuration (AJOUTER CES LIGNES)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Utilise la base de données pour les sessions
+SESSION_COOKIE_AGE = 2592000        # 30 jours (1 mois)
+SESSION_SAVE_EVERY_REQUEST = True  # Sauvegarde la session à chaque requête
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Ne pas expirer à la fermeture du navigateur
+
+# Cookie configuration (AJOUTER CES LIGNES)
+SESSION_COOKIE_SECURE = False  # Mettre à True seulement en HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Empêche l'accès JavaScript aux cookies
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protège contre les attaques CSRF
+
+# CSRF configuration (AJOUTER CES LIGNES)
+CSRF_COOKIE_SECURE = False  # Mettre à True seulement en HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Doit être False pour que JavaScript puisse lire le token
+CSRF_USE_SESSIONS = False  # Stocke le token CSRF dans la session au lieu d'un cookie
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Ajoutez ces lignes dans settings.py après les configurations de session
+# Pour s'assurer que les sessions sont bien sauvegardées
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_PATH = '/'
+SESSION_COOKIE_DOMAIN = None
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+
+# Pour le débogage (AJOUTER TEMPORAIREMENT)
+import logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Logger pour les sessions (AJOUTER)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.contrib.sessions': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'django.contrib.auth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -67,8 +125,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'immobilier',
+    
     'django_extensions',
     'django.contrib.humanize',
+     'channels',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +139,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'immobilier.middleware.SessionDebugMiddleware',  # Ajoutez ceci
 ]
 
 ROOT_URLCONF = 'imb.urls'
@@ -94,6 +155,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'immobilier.context_processors.notifications',  # Ajout du context processor pour les notifications
             ],
         },
     },
@@ -133,13 +195,11 @@ REST_FRAMEWORK = {
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# Remplacez ces lignes
+LANGUAGE_CODE = 'fr-fr'  # Changé de 'en-us' à 'fr-fr'
+TIME_ZONE = 'Africa/Abidjan'  # Changé de 'UTC' à votre fuseau horaire
 USE_I18N = True
-
-USE_TZ = True
+USE_TZ = True  # Gardez True
 
 
 # Static files (CSS, JavaScript, Images)

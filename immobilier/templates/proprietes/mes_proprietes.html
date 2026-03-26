@@ -327,6 +327,7 @@
     .property-actions {
       display: flex;
       gap: 0.5rem;
+      align-items: center;
     }
 
     .btn-icon {
@@ -361,6 +362,57 @@
       background: var(--accent-color);
       color: white;
       transform: scale(1.05);
+    }
+
+    /* ✅ Boutons pour activer/désactiver */
+    .btn-toggle {
+      background: rgba(243, 156, 18, 0.1);
+      color: var(--warning-color);
+    }
+
+    .btn-toggle:hover {
+      background: var(--warning-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .btn-toggle-active {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-color);
+    }
+
+    .btn-toggle-active:hover {
+      background: var(--success-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* Badge de statut */
+    .status-badge-sm {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .badge-pending {
+      background: rgba(243, 156, 18, 0.1);
+      color: var(--warning-color);
+    }
+
+    .badge-blocked {
+      background: rgba(231, 76, 60, 0.1);
+      color: var(--accent-color);
+    }
+
+    .badge-active {
+      background: rgba(39, 174, 96, 0.1);
+      color: var(--success-color);
+    }
+
+    .badge-inactive {
+      background: rgba(149, 165, 166, 0.1);
+      color: #95A5A6;
     }
 
     /* --- Bouton d'action principal --- */
@@ -414,16 +466,6 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-    }
-
-    .badge-active {
-      background: rgba(39, 174, 96, 0.1);
-      color: var(--success-color);
-    }
-
-    .badge-inactive {
-      background: rgba(231, 76, 60, 0.1);
-      color: var(--accent-color);
     }
 
     /* --- Responsive Design --- */
@@ -672,6 +714,20 @@
                   <div class="property-info">
                     <h6 class="property-title">
                       {{ propriete.titre|default:"[Sans titre]" }}
+                      <!-- ✅ Badge de statut admin -->
+                      {% if not propriete.statut_propriete_admin %}
+                        <span class="status-badge-sm badge-blocked ms-2">
+                          <i class="fas fa-ban me-1"></i>Bloquée par l'admin
+                        </span>
+                      {% elif not propriete.statut_propriete_owner %}
+                        <span class="status-badge-sm badge-inactive ms-2">
+                          <i class="fas fa-eye-slash me-1"></i>Désactivée
+                        </span>
+                      {% else %}
+                        <span class="status-badge-sm badge-active ms-2">
+                          <i class="fas fa-eye me-1"></i>Active
+                        </span>
+                      {% endif %}
                     </h6>
                     <div class="property-meta">
                       <span>
@@ -694,16 +750,39 @@
                   </div>
                   
                   <div class="property-actions">
+                    <!-- ✅ Bouton Activer/Désactiver pour le propriétaire (si admin a validé) -->
+                    {% if propriete.statut_propriete_admin %}
+                      <a href="{% url 'toggle_owner_statut_propriete' propriete.pk %}" 
+                         class="btn-icon {% if propriete.statut_propriete_owner %}btn-toggle{% else %}btn-toggle-active{% endif %}"
+                         title="{% if propriete.statut_propriete_owner %}Désactiver la publication{% else %}Activer la publication{% endif %}">
+                        {% if propriete.statut_propriete_owner %}
+                          <i class="fas fa-eye-slash"></i>
+                        {% else %}
+                          <i class="fas fa-eye"></i>
+                        {% endif %}
+                      </a>
+                    {% else %}
+                      <!-- Admin a bloqué, le propriétaire ne peut pas réactiver -->
+                      <span class="btn-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--accent-color); cursor: not-allowed;" title="Propriété bloquée par l'administrateur">
+                        <i class="fas fa-lock"></i>
+                      </span>
+                    {% endif %}
+                    
+                    <!-- Bouton Modifier -->
                     <a href="{% url 'propriete_update' pk=propriete.pk %}" 
                        class="btn-icon btn-edit"
                        title="Modifier">
                       <i class="fas fa-edit"></i>
                     </a>
+                    
+                    <!-- Bouton Supprimer -->
                     <a href="{% url 'propriete_delete' pk=propriete.pk %}" 
                        class="btn-icon btn-delete"
                        title="Supprimer">
                       <i class="fas fa-trash-alt"></i>
                     </a>
+                    
+                    <!-- Bouton Voir -->
                     <a href="{% url 'detail_propriete_web' pk=propriete.pk %}" 
                        class="btn-icon btn-info"
                        style="background: rgba(52, 152, 219, 0.1); color: var(--secondary-color);"

@@ -44,10 +44,10 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('gestion/proprietes/<int:pk>/supprimer/', views.propriete_delete, name='propriete_delete'),
 
     # Vues CRUD pour les annonces
-    path('gestion/annonces/', views.annonce_list, name='annonce_list'),
-    path('gestion/annonces/ajouter/', views.annonce_create, name='annonce_create'),
-    path('gestion/annonces/<int:pk>/modifier/', views.annonce_update, name='annonce_update'),
-    path('gestion/annonces/<int:pk>/supprimer/', views.annonce_delete, name='annonce_delete'),
+    # path('gestion/annonces/', views.annonce_list, name='annonce_list'),
+    # path('gestion/annonces/ajouter/', views.annonce_create, name='annonce_create'),
+    # path('gestion/annonces/<int:pk>/modifier/', views.annonce_update, name='annonce_update'),
+    # path('gestion/annonces/<int:pk>/supprimer/', views.annonce_delete, name='annonce_delete'),
 
     # Vues CRUD pour les utilisateurs
     path('gestion/utilisateurs/', views.utilisateur_list, name='utilisateur_list'),
@@ -58,10 +58,10 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('gestion/utilisateurs/<int:pk>/supprimer/', views.utilisateur_delete, name='utilisateur_delete'),
     
     # Vues CRUD pour les transactions
-    path('gestion/transactions/', views.transaction_list, name='transaction_list'),
-    path('gestion/transactions/ajouter/', views.transaction_create, name='transaction_create'),
-    path('gestion/transactions/<int:pk>/modifier/', views.transaction_update, name='transaction_update'),
-    path('gestion/transactions/<int:pk>/supprimer/', views.transaction_delete, name='transaction_delete'),
+    # path('gestion/transactions/', views.transaction_list, name='transaction_list'),
+    # path('gestion/transactions/ajouter/', views.transaction_create, name='transaction_create'),
+    # path('gestion/transactions/<int:pk>/modifier/', views.transaction_update, name='transaction_update'),
+    # path('gestion/transactions/<int:pk>/supprimer/', views.transaction_delete, name='transaction_delete'),
     
     # Vues CRUD pour les visites
     path('gestion/visites/', views.visite_list, name='visite_list'),
@@ -70,16 +70,16 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('gestion/visites/<int:pk>/supprimer/', views.visite_delete, name='visite_delete'),
     
     # Vues CRUD pour les alertes
-    path('gestion/alertes/', views.alerte_list, name='alerte_list'),
-    path('gestion/alertes/ajouter/', views.alerte_create, name='alerte_create'),
-    path('gestion/alertes/<int:pk>/modifier/', views.alerte_update, name='alerte_update'),
-    path('gestion/alertes/<int:pk>/supprimer/', views.alerte_delete, name='alerte_delete'),
+    # path('gestion/alertes/', views.alerte_list, name='alerte_list'),
+    # path('gestion/alertes/ajouter/', views.alerte_create, name='alerte_create'),
+    # path('gestion/alertes/<int:pk>/modifier/', views.alerte_update, name='alerte_update'),
+    # path('gestion/alertes/<int:pk>/supprimer/', views.alerte_delete, name='alerte_delete'),
     
     # Vues CRUD pour les activites
-    path('gestion/activites/', views.activite_list, name='activite_list'),
-    path('gestion/activites/ajouter/', views.activite_create, name='activite_create'),
-    path('gestion/activites/<int:pk>/modifier/', views.activite_update, name='activite_update'),
-    path('gestion/activites/<int:pk>/supprimer/', views.activite_delete, name='activite_delete'),
+    # path('gestion/activites/', views.activite_list, name='activite_list'),
+    # path('gestion/activites/ajouter/', views.activite_create, name='activite_create'),
+    # path('gestion/activites/<int:pk>/modifier/', views.activite_update, name='activite_update'),
+    # path('gestion/activites/<int:pk>/supprimer/', views.activite_delete, name='activite_delete'),
     
     # Vues CRUD pour les messages (pour les administrateurs)
     path('gestion/messages/', views.message_list, name='message_list'),
@@ -93,23 +93,25 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('send_message/<int:contact_pk>/', views.send_message, name='send_message'),
      path('messages/supprimer/<int:message_pk>/<str:mode>/', views.supprimer_message, name='supprimer_message'),
     path("messages/<int:contact_pk>/supprimer/", views.supprimer_conversation, name="supprimer_conversation"),
-    path('success/', views.success_page, name='success_page'),
+    path('demarrer-conversation/<int:propriete_pk>/', views.demarrer_conversation, name='demarrer_conversation'),
+    # path('success/', views.success_page, name='success_page'),
     # API pour l'actualisation des messages
-    path('api/check-new-messages/', views.check_new_messages, name='check_new_messages'),
+    path('api/check-new-messages/', views.api_check_new_messages, name='check_new_messages'),
     
     
     # Vues CRUD pour les informations
-    path('gestion/informations/', views.information_list, name='information_list'),
-    path('gestion/informations/ajouter/', views.information_create, name='information_create'),
-    path('gestion/informations/<int:pk>/modifier/', views.information_update, name='information_update'),
-    path('gestion/informations/<int:pk>/supprimer/', views.information_delete, name='information_delete'),
-    path('about', views.abaut, name='about'),
+    # path('gestion/informations/', views.information_list, name='information_list'),
+    # path('gestion/informations/ajouter/', views.information_create, name='information_create'),
+    # path('gestion/informations/<int:pk>/modifier/', views.information_update, name='information_update'),
+    # path('gestion/informations/<int:pk>/supprimer/', views.information_delete, name='information_delete'),
+    path('about/', views.abaut, name='about'),
+    path('contact/', views.contact, name='contact'),
     
     # Vues CRUD pour les temoignages
-    path('gestion/temoignages/', views.temoignage_list, name='temoignage_list'),
-    path('gestion/temoignages/ajouter/', views.temoignage_create, name='temoignage_create'),
-    path('gestion/temoignages/<int:pk>/modifier/', views.temoignage_update, name='temoignage_update'),
-    path('gestion/temoignages/<int:pk>/supprimer/', views.temoignage_delete, name='temoignage_delete'),
+    # path('gestion/temoignages/', views.temoignage_list, name='temoignage_list'),
+    # path('gestion/temoignages/ajouter/', views.temoignage_create, name='temoignage_create'),
+    # path('gestion/temoignages/<int:pk>/modifier/', views.temoignage_update, name='temoignage_update'),
+    # path('gestion/temoignages/<int:pk>/supprimer/', views.temoignage_delete, name='temoignage_delete'),
 
     # --- URLS POUR L'API REST (VUES JSON) ---
     path('api/', include(router.urls)),
@@ -123,11 +125,11 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('espace-client/', views.espace_client, name='espace_client'),
     path('mes_proprietes',views.mes_proprietes, name='mes_proprietes'),
     path('proprietaire/<int:proprietaire_pk>/', views.propriete_par_proprietaire, name='propriete_par_proprietaire'),
-    path('proprietaire_parametres',views.proprietaire_parametres, name='proprietaire_parametres'),
+  
     path('profil',views.profil, name='profil'),
     path('profil/modifier/', views.modifier_profil, name='modifier_profil'),
 
-    path('nav_bar',views.nav_bar, name='nav_bar'),
+    # path('nav_bar',views.nav_bar, name='nav_bar'),
    
     
     path('temoingnages', views.temoingnages, name='temoingnages'),
@@ -135,13 +137,23 @@ path('deconnexion/', views.deconnexion, name='logout'),
   
 
     # Gestion des utilisateurs (admin)
-    path('superadmin',views.superadmin, name='superadmin'),
+    # path('superadmin',views.superadmin, name='superadmin'),
     path('superadmin/utilisateurs/', views.gestion_utilisateurs_admin, name='gestion_utilisateurs_admin'),
     path('superadmin/utilisateurs/creer/', views.creer_utilisateur_admin, name='creer_utilisateur_admin'),
     path('superadmin/utilisateurs/<int:pk>/modifier/', views.modifier_utilisateur_admin, name='modifier_utilisateur_admin'),
     path('superadmin/utilisateurs/<int:pk>/supprimer/', views.supprimer_utilisateur_admin, name='supprimer_utilisateur_admin'),
     path('superadmin/utilisateurs/<int:pk>/toggle-statut/', views.toggle_statut_utilisateur, name='toggle_statut_utilisateur'),
+
+    path('utilisateur/verifier-cni/<int:pk>/', views.verifier_cni, name='verifier_cni'),
     # Gestion des proprietes (admin)
     path('superadmin/proprietes/', views.gestion_proprietes_admin, name='gestion_proprietes_admin'),
-     path('superadmin/proprietes/<int:pk>/modifier/', views.propriete_update_admin, name='propriete_update_admin'),
+    path('superadmin/proprietes/<int:pk>/modifier/', views.propriete_update_admin, name='propriete_update_admin'),
+    path('propriete/toggle-statut/<int:pk>/', views.toggle_statut_propriete, name='toggle_statut_propriete'),
+
+   # urls.py
+  path('propriete/toggle-admin-statut/<int:pk>/', views.toggle_admin_statut_propriete, name='toggle_admin_statut_propriete'),
+  path('propriete/toggle-owner-statut/<int:pk>/', views.toggle_owner_statut_propriete, name='toggle_owner_statut_propriete'),
+
+     path('contact/', views.contact, name='contact'),
+     path('contacts-admin/', views.contacts_admin, name='contacts_admin'),
 ]

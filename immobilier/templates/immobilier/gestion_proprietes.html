@@ -6,96 +6,272 @@
   <title>Gestion des Propriétés - IMMO ABIDJAN Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Variables de couleurs du superadmin */
+    /* Variables fusionnées */
     :root {
-      --primary: #2c3e50; /* Couleur principale bleu foncé */
-      --secondary: #f39c12; /* Couleur secondaire orange */
-      --danger: #e74c3c; /* Rouge */
-      --success: #2ecc71; /* Vert */
-      --warning: #f1c40f; /* Jaune */
-      --light-bg: #f5f7fa; /* Fond clair */
-      --accent: #ff6b00; /* Accent orange vif */
+      --primary: #2c3e50;
+      --secondary: #f39c12;
+      --accent: #ff6b00;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --warning: #f1c40f;
+      --light-bg: #f5f7fa;
+      
+      --primary-color: #2C3E50;
+      --secondary-color: #3498DB;
+      --accent-color: #E74C3C;
+      --success-color: #27AE60;
+      --warning-color: #F39C12;
+      --light-color: #F8F9FA;
+      --dark-color: #1A2530;
+      --gray-light: #ECF0F1;
+      --gray-medium: #BDC3C7;
+      --gray-dark: #7F8C8D;
+      --border-color: #E0E0E0;
+      --shadow-color: rgba(0, 0, 0, 0.08);
+      
+      --shadow-sm: 0 2px 8px var(--shadow-color);
+      --shadow-md: 0 4px 16px var(--shadow-color);
+      --shadow-lg: 0 8px 32px var(--shadow-color);
+      --shadow-sidebar: 5px 0 25px rgba(0, 0, 0, 0.15);
+      
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      
+      --sidebar-width: 280px;
+      --header-height: 70px;
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--light-bg);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: #F8FAFC;
+      color: #334155;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    .logo {
-      font-size: 15px;
-      font-weight: bold;
-      color: var(--primary);
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--primary-color);
+      line-height: 1.3;
     }
 
-    .ma_section_identity {
-      font-size: 10px;
-      background-color: #f8f9fa;
+    .mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+      color: white;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--border-radius-sm);
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
     }
 
-    .identity {
-      font-size: 14px;
+    .mobile-menu-btn:hover {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
+      transform: scale(1.05);
+      box-shadow: var(--shadow-lg);
     }
 
-    /* Sidebar avec couleurs du superadmin */
     .sidebar {
-      background-color: white;
+      background: linear-gradient(180deg, var(--primary-color) 0%, var(--dark-color) 100%);
+      color: white;
       height: 100vh;
       position: fixed;
-      width: 200px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      box-shadow: var(--shadow-sidebar);
       z-index: 1000;
-      transition: transform 0.3s ease-in-out;
+      overflow-y: auto;
+      transition: transform var(--transition-normal);
     }
 
-    .sidebar a {
-      font-size: 12px;
-      font-weight: 500;
-      padding: 5px 20px;
-      color: #333;
+    .sidebar-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h4 {
+      color: white;
+      margin: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header i {
+      color: var(--secondary-color);
+    }
+
+    .user-profile-card {
+      padding: 1.5rem;
+      margin: 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--border-radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all var(--transition-fast);
+    }
+
+    .user-profile-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 3px solid var(--secondary-color);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      color: white;
+      margin-bottom: 0.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-role {
+      color: var(--gray-medium);
+      font-size: 0.85rem;
+    }
+
+    .sidebar-nav {
+      padding: 1rem 0;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin: 0.25rem 1rem;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.85);
       text-decoration: none;
-      transition: all 0.3s;
-      border-left: 4px solid transparent;
+      padding: 0.875rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all var(--transition-fast);
     }
 
-    .sidebar a:hover,
-    .sidebar .nav-item.active a {
-      background-color: #f8f9fa;
-      color: var(--primary);
-      border-left: 4px solid var(--secondary);
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(8px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
+      color: white;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .logout-item {
+      margin-top: auto;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 1rem;
     }
 
     .main-content {
-      margin-left: 200px;
+      margin-left: var(--sidebar-width);
+      transition: margin-left var(--transition-normal);
+      min-height: 100vh;
     }
 
-    /* Barre de navigation supérieure */
+    .main-content.shifted {
+      margin-left: 0;
+    }
+
     .navbar {
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      background: white;
+      box-shadow: var(--shadow-sm);
+      height: var(--header-height);
+      position: sticky;
+      top: 0;
+      z-index: 99;
     }
 
-    /* Cartes de dashboard avec style superadmin */
+    .navbar h5 {
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    .admin-profile {
+      background: var(--gray-light);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
     .dashboard-card {
       background: white;
-      border-radius: 10px;
+      border-radius: var(--border-radius);
       padding: 20px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-fast);
       height: 100%;
-      font-size: 12px;
-      border-top: 4px solid var(--primary);
+      border: 1px solid var(--border-color);
     }
 
     .dashboard-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-lg);
     }
 
     .card-icon {
       font-size: 1.5rem;
-      color: var(--primary);
+      color: var(--primary-color);
       margin-bottom: 15px;
     }
 
@@ -103,121 +279,157 @@
       font-size: 28px;
       font-weight: bold;
       margin: 10px 0;
-      color: #333;
+      color: var(--primary-color);
     }
 
     .btn-primary {
-      background-color: var(--primary);
-      border-color: var(--primary);
-      padding: 5px 20px;
-      border-radius: 30px;
-    }
-
-    .btn-accent {
-      font-size: 10px;
-      background-color: var(--success);
-      color: white;
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
       border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
 
-    .btn-accent:hover {
-      background-color: #27ae60;
-      color: white;
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
-    /* Bouton menu mobile */
-    .mobile-menu-btn {
-      display: none;
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: var(--primary);
-      color: white;
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-color), #27ae60);
       border: none;
-      border-radius: 4px;
-      padding: 8px 10px;
-      z-index: 1001;
-      font-size: 18px;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
 
-    .navbar h5 {
-      font-size: 15px;
-      color: var(--primary);
+    .btn-secondary {
+      background: var(--gray-medium);
+      border: none;
+      color: white;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
 
-    .nav {
-      width: 100%;
+    .btn-warning {
+      background: var(--warning-color);
+      border: none;
+      color: #333;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      font-weight: 500;
+      transition: all var(--transition-fast);
     }
 
-    /* Table */
+    .btn-warning:hover {
+      background: #e67e22;
+      color: white;
+    }
+
+    .btn-outline-primary {
+      border: 1px solid var(--secondary-color);
+      color: var(--secondary-color);
+      background: transparent;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .btn-outline-primary:hover {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
+      color: white;
+    }
+
+    .btn-outline-danger {
+      border: 1px solid var(--accent-color);
+      color: var(--accent-color);
+      background: transparent;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+    }
+
     .table {
       margin-bottom: 0;
-      border-radius: 8px;
+      border-radius: var(--border-radius);
       overflow: hidden;
     }
 
     .table thead th {
-      background-color: #f8f9fa;
+      background-color: var(--primary-color);
       font-weight: 600;
-      color: #495057;
-      border-bottom: 2px solid #dee2e6;
+      color: white;
+      border-bottom: none;
     }
 
     .table tbody td {
       vertical-align: middle;
     }
 
-    /* Badges de statut */
     .badge {
       font-size: 11px;
       font-weight: 600;
       padding: 4px 8px;
+      border-radius: 12px;
     }
 
     .badge.bg-primary {
-      background-color: var(--primary) !important;
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9) !important;
     }
 
     .badge.bg-success {
-      background-color: var(--success) !important;
+      background: var(--success-color) !important;
     }
 
     .badge.bg-danger {
-      background-color: var(--danger) !important;
+      background: var(--accent-color) !important;
     }
 
     .badge.bg-warning {
-      background-color: var(--warning) !important;
+      background: var(--warning-color) !important;
       color: #333;
     }
 
     .badge.bg-info {
-      background-color: #17a2b8 !important;
+      background: #17a2b8 !important;
     }
 
     .badge.bg-secondary {
-      background-color: #6c757d !important;
+      background: var(--gray-medium) !important;
     }
 
-    /* Boutons d'action */
     .btn-group .btn {
       margin-right: 5px;
+      border-radius: var(--border-radius-sm) !important;
     }
 
     .btn-sm {
-      padding: 4px 8px;
+      padding: 6px 10px;
       font-size: 12px;
     }
 
-    /* Filtres */
+    .btn-info {
+      background: #17a2b8;
+      color: white;
+      border: none;
+    }
+
     .filter-section {
       background: white;
-      border-radius: 10px;
+      border-radius: var(--border-radius);
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .filter-section h5 {
+      color: var(--primary-color);
     }
 
     .filter-group {
@@ -227,54 +439,76 @@
     .filter-group label {
       font-weight: 600;
       margin-bottom: 5px;
-      color: var(--primary);
+      color: var(--primary-color);
       font-size: 14px;
     }
 
-    /* Image miniature */
+    .form-control, .form-select {
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-sm);
+      padding: 0.5rem 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
     .property-thumb {
       width: 60px;
       height: 60px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: var(--border-radius-sm);
     }
 
     .property-thumb-placeholder {
       width: 60px;
       height: 60px;
-      border-radius: 6px;
-      background: #f8f9fa;
+      border-radius: var(--border-radius-sm);
+      background: var(--gray-light);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #6c757d;
+      color: var(--gray-dark);
     }
 
-    /* Prix formaté */
     .price-cell {
       font-weight: 600;
-      color: var(--primary);
+      color: var(--primary-color);
     }
 
-    /* Responsive */
+    .pagination .page-link {
+      color: var(--primary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .pagination .page-item.active .page-link {
+      background: linear-gradient(135deg, var(--secondary-color), #2980B9);
+      border-color: var(--secondary-color);
+      color: white;
+    }
+
     @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
       .sidebar {
         transform: translateX(-100%);
-        width: 250px;
       }
 
       .sidebar.active {
         transform: translateX(0);
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
       }
 
-      .sidebar a {
-        font-size: 18px;
-        font-weight: 500;
-        padding: 5px 20px;
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .main-content.shifted {
+        margin-left: 0;
       }
 
       .dashboard-card {
@@ -282,21 +516,17 @@
         padding: 15px;
       }
 
-      .main-content {
-        margin-left: 0;
-      }
-    
-      .mobile-menu-btn {
-        display: block;
-      }
-      
-      .btn-accent {
-        font-size: 14px;
-        padding: 10px 15px;
-      }
-
       .table-responsive {
         font-size: 13px;
+      }
+      
+      .navbar {
+        height: auto;
+        padding: 1rem;
+      }
+      
+      .container-fluid.p-4 {
+        padding: 1rem !important;
       }
     }
 
@@ -306,7 +536,6 @@
       }
     }
 
-    /* Styles spécifiques pour cette page */
     .action-buttons {
       white-space: nowrap;
     }
@@ -323,6 +552,23 @@
     .clear-filters:hover {
       color: #c0392b;
     }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gray-medium);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gray-dark);
+    }
   </style>
 </head>
 <body>
@@ -331,79 +577,85 @@
     <i class="fas fa-bars"></i>
   </button>
 
-  <!-- Sidebar -->
+  <!-- Sidebar (style profil) -->
   <div class="sidebar" id="sidebar">
-    <div class="p-4 menu">
-      <!-- Logo -->
-      <h4 class="text-center mb-4 logo">
-        <i class="fas fa-crown me-2" style="color: var(--secondary);"></i> IMMO<span style="color: var(--secondary);">ABIDJAN</span> <small>Admin</small>
+    <div class="sidebar-header">
+      <h4>
+        <i class="fas fa-crown" style="color: var(--secondary-color);"></i>
+        <span>IMMO ABIDJAN</span>
+        <small style="font-size: 0.7rem; color: var(--secondary-color);">Admin</small>
       </h4>
+    </div>
 
-      <!-- Section profil Super Admin -->
-      <div class="d-flex align-items-center mb-4 p-3 bg-light rounded ma_section_identity">
-        <img src="https://api.dicebear.com/7.x/initials/svg?seed=Admin&background=2c3e50&color=fff"
-          class="rounded-circle me-3" width="40" height="40" alt="Admin">
-        <div class="identity">
-          <h6 class="mb-0">{{ user.get_full_name|default:user.username }}</h6>
-          <small class="text-muted">Administrateur</small>
-        </div>
+    <div class="user-profile-card">
+      <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=3498db&color=fff&bold=true{% endif %}"
+           class="user-avatar"
+           alt="Photo de profil">
+      <div class="user-info">
+        <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
+        <small class="user-role">Administrateur</small>
       </div>
+    </div>
 
-      <!-- Menu navigation -->
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'superadmin' %}">
-            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-          </a>
-        </li>
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+         <li class="nav-item">
+           <a class="nav-link" href="{% url 'profil' %}">
+             <i class="fas fa-user me-2"></i> Mon profil
+           </a>
+         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
-            <i class="fas fa-users-cog me-2"></i> Utilisateurs
+            <i class="fas fa-users-cog"></i>
+            <span>Utilisateurs</span>
           </a>
         </li>
         <li class="nav-item active">
-          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
-            <i class="fas fa-building me-2"></i> Propriétés
+          <a class="nav-link" style="background: var(--secondary-color); color: white;" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fas fa-building"></i>
+            <span>Propriétés</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">
-            <i class="fas fa-flag me-2"></i> Modération
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">
-            <i class="fas fa-chart-line me-2"></i> Analytics
+          <a class="nav-link" href="{% url 'mes_messages' %}">
+            <i class="fas fa-comments"></i>
+            <span>Messages</span>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'index' %}">
-            <i class="fas fa-home me-2"></i> Accueil
+            <i class="fas fa-home"></i>
+            <span>Accueil</span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item logout-item">
           <a class="nav-link" href="{% url 'logout' %}">
-            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Déconnexion</span>
           </a>
         </li>
       </ul>
-    </div>
+    </nav>
   </div>
   
   <!-- Contenu principal -->
-  <div class="main-content">
+  <div class="main-content" id="mainContent">
     <!-- Barre de navigation supérieure -->
-    <nav class="navbar navbar-expand-lg nav">
-      <div class="container-fluid justify-content-end">
-        <div class="d-none d-md-block me-auto">
-          <h5 class="mb-0">Gestion des Propriétés</h5>
-        </div>
-        <div class="search me-3 d-none d-md-block">
-          <input type="text" placeholder="Rechercher une propriété..." class="search-box" id="searchInput">
-          <i class="fas fa-search"></i>
-        </div>
-        <div class="admin-profile">
-          <span>{{ user.username }}</span>
+    <nav class="navbar">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <div>
+            <h5 class="mb-0">Gestion des Propriétés</h5>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="search d-none d-md-block">
+              <input type="text" placeholder="Rechercher une propriété..." class="form-control search-box" id="searchInput">
+            </div>
+            <div class="admin-profile">
+              <i class="fas fa-user-circle me-2"></i>
+              <span>{{ user.username }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
@@ -515,36 +767,64 @@
                 </select>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="filter-group">
-                    <label for="prix_min">Prix min (FCFA)</label>
-                    <input type="number" class="form-control" id="prix_min" name="prix_min" 
-                           placeholder="Min" value="{{ filters.prix_min }}">
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="filter-group">
-                    <label for="prix_max">Prix max (FCFA)</label>
-                    <input type="number" class="form-control" id="prix_max" name="prix_max" 
-                           placeholder="Max" value="{{ filters.prix_max }}">
-                  </div>
+            <div class="col-md-2">
+              <div class="filter-group">
+                <label for="statut_admin">Validation admin</label>
+                <select class="form-select" id="statut_admin" name="statut_admin">
+                  <option value="">Tous</option>
+                  <option value="valide" {% if filters.statut_admin == 'valide' %}selected{% endif %}>Validées</option>
+                  <option value="attente" {% if filters.statut_admin == 'attente' %}selected{% endif %}>En attente</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="filter-group">
+                <label>&nbsp;</label>
+                <div class="d-flex">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
           
-          <div class="row mt-3">
-            <div class="col-12 d-flex justify-content-between">
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search me-2"></i> Appliquer les filtres
-              </button>
-              {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
-              <a href="{% url 'gestion_proprietes_admin' %}" class="btn btn-outline-danger">
-                <i class="fas fa-times me-2"></i> Effacer les filtres
-              </a>
-              {% endif %}
+          <div class="row">
+            <div class="col-md-2">
+              <div class="filter-group">
+                <label for="statut_owner">État propriétaire</label>
+                <select class="form-select" id="statut_owner" name="statut_owner">
+                  <option value="">Tous</option>
+                  <option value="active" {% if filters.statut_owner == 'active' %}selected{% endif %}>Activées</option>
+                  <option value="inactive" {% if filters.statut_owner == 'inactive' %}selected{% endif %}>Désactivées</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="filter-group">
+                <label for="prix_min">Prix min (FCFA)</label>
+                <input type="number" class="form-control" id="prix_min" name="prix_min" 
+                       placeholder="Min" value="{{ filters.prix_min }}">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="filter-group">
+                <label for="prix_max">Prix max (FCFA)</label>
+                <input type="number" class="form-control" id="prix_max" name="prix_max" 
+                       placeholder="Max" value="{{ filters.prix_max }}">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="filter-group">
+                <label>&nbsp;</label>
+                <div class="d-flex gap-2">
+                  {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max or filters.statut_admin or filters.statut_owner %}
+                  <a href="{% url 'gestion_proprietes_admin' %}" class="btn btn-outline-danger">
+                    <i class="fas fa-times me-2"></i> Effacer les filtres
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
             </div>
           </div>
         </form>
@@ -558,8 +838,8 @@
               <a href="{% url 'propriete_create' %}" class="btn btn-success">
                 <i class="fas fa-plus-circle me-2"></i> Ajouter une propriété
               </a>
-              <a href="{% url 'superadmin' %}" class="btn btn-secondary ms-2">
-                <i class="fas fa-arrow-left me-2"></i> Retour au Dashboard
+              <a href="{% url 'gestion_utilisateurs_admin' %}" class="btn btn-secondary ms-2">
+                <i class="fas fa-arrow-left me-2"></i> Aller à la gestion des utilisateurs
               </a>
             </div>
             <div>
@@ -574,8 +854,8 @@
       <!-- Tableau des propriétés -->
       <div class="dashboard-card">
         <div class="table-responsive">
-          <table class="table table-hover table-striped" id="propertiesTable">
-            <thead class="table-dark">
+          <table class="table table-hover" id="propertiesTable">
+            <thead>
               <tr>
                 <th>ID</th>
                 <th>Image</th>
@@ -585,14 +865,16 @@
                 <th>Prix</th>
                 <th>Ville/Commune</th>
                 <th>Statut</th>
+                <th>Validation admin</th>
+                <th>État propriétaire</th>
                 <th>Date publication</th>
                 <th>Vues</th>
                 <th>Actions</th>
-              </tr>
+               </tr>
             </thead>
             <tbody>
               {% for propriete in proprietes %}
-              <tr>
+               <tr>
                 <td>{{ propriete.id }}</td>
                 <td>
                   {% if propriete.image %}
@@ -610,12 +892,16 @@
                   <small class="text-muted">{{ propriete.type|title }}</small>
                 </td>
                 <td>
-                  {% if propriete.proprietaire.photo %}
-                    <img src="{{ propriete.proprietaire.photo.url }}" 
-                         class="rounded-circle me-2" width="20" height="20" 
-                         alt="{{ propriete.proprietaire.username }}">
-                  {% endif %}
-                  {{ propriete.proprietaire.get_full_name|default:propriete.proprietaire.username }}
+                  <div class="d-flex align-items-center">
+                    {% if propriete.proprietaire.photo %}
+                      <img src="{{ propriete.proprietaire.photo.url }}" 
+                           class="rounded-circle me-2" width="20" height="20" 
+                           alt="{{ propriete.proprietaire.username }}">
+                    {% else %}
+                      <i class="fas fa-user-circle me-2 text-muted"></i>
+                    {% endif %}
+                    {{ propriete.proprietaire.get_full_name|default:propriete.proprietaire.username }}
+                  </div>
                 </td>
                 <td>
                   <span class="badge bg-info">
@@ -643,6 +929,28 @@
                     <span class="badge bg-secondary">{{ propriete.statut }}</span>
                   {% endif %}
                 </td>
+                <td>
+                  {% if propriete.statut_propriete_admin %}
+                    <span class="badge bg-success">
+                      <i class="fas fa-check-circle me-1"></i>Validée
+                    </span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">
+                      <i class="fas fa-clock me-1"></i>En attente
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if propriete.statut_propriete_owner %}
+                    <span class="badge bg-success">
+                      <i class="fas fa-eye me-1"></i>Active
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary">
+                      <i class="fas fa-eye-slash me-1"></i>Désactivée
+                    </span>
+                  {% endif %}
+                </td>
                 <td>{{ propriete.date_publication|date:"d/m/Y" }}</td>
                 <td>
                   {% with nb_vues=propriete.visites.count %}
@@ -655,41 +963,47 @@
                 </td>
                 <td class="action-buttons">
                   <div class="btn-group" role="group">
-                    <!-- Bouton Voir -->
                     <a href="{% url 'detail_propriete_web' propriete.pk %}" 
                        class="btn btn-sm btn-info" title="Voir" target="_blank">
                       <i class="fas fa-eye"></i>
                     </a>
                     
-                    <!-- Bouton Modifier -->
+                    <!-- ✅ Bouton Admin : Valider/Invalider (utilise toggle_statut_propriete) -->
+                    <a href="{% url 'toggle_statut_propriete' propriete.pk %}" 
+                       class="btn btn-sm {% if propriete.statut_propriete_admin %}btn-warning{% else %}btn-success{% endif %}" 
+                       title="{% if propriete.statut_propriete_admin %}Invalider cette propriété{% else %}Valider cette propriété{% endif %}">
+                      {% if propriete.statut_propriete_admin %}
+                        <i class="fas fa-ban"></i>
+                      {% else %}
+                        <i class="fas fa-check-circle"></i>
+                      {% endif %}
+                    </a>
+                    
                     <a href="{% url 'propriete_update_admin' pk=propriete.pk %}" 
                        class="btn btn-sm btn-primary" title="Modifier">
-                       
                       <i class="fas fa-edit"></i>
                     </a>
                     
-                    <!-- Bouton Supprimer -->
                     <a href="{% url 'propriete_delete' pk=propriete.pk %}" 
                        class="btn btn-sm btn-danger" title="Supprimer"
                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer la propriété « {{ propriete.titre }} » ? Cette action est irréversible.')">
                       <i class="fas fa-trash"></i>
                     </a>
-                   
                   </div>
                 </td>
-              </tr>
+               </tr>
               {% empty %}
-              <tr>
-                <td colspan="11" class="text-center py-4">
+               <tr>
+                <td colspan="13" class="text-center py-4">
                   <i class="fas fa-building fa-2x text-muted mb-3"></i>
                   <p class="text-muted">Aucune propriété trouvée.</p>
-                  {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
+                  {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max or filters.statut_admin or filters.statut_owner %}
                   <a href="{% url 'gestion_proprietes_admin' %}" class="btn btn-sm btn-outline-primary">
                     Afficher toutes les propriétés
                   </a>
                   {% endif %}
                 </td>
-              </tr>
+               </tr>
               {% endfor %}
             </tbody>
           </table>
@@ -726,101 +1040,110 @@
         </nav>
         {% endif %}
         
-<!-- Résumé des filtres -->
-{% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max %}
-<div class="alert alert-info mt-3">
-  <i class="fas fa-info-circle me-2"></i>
-  <strong>Filtres appliqués:</strong>
-  
-  {% if filters.proprietaire %} | Propriétaire: {{ proprietaire_nom }}{% endif %}
-  {% if filters.type %} | Type: {{ filters.type|title }}{% endif %}
-  {% if filters.statut %} | Statut: {{ filters.statut|title }}{% endif %}
-  {% if filters.commune %} | Commune: {{ filters.commune }}{% endif %}
-  {% if filters.prix_min %} | Prix min: {{ filters.prix_min }} FCFA{% endif %}
-  {% if filters.prix_max %} | Prix max: {{ filters.prix_max }} FCFA{% endif %}
-  
-  - <strong>{{ proprietes.paginator.count }}</strong> propriété(s) trouvée(s)
-</div>
-{% endif %}
+        <!-- Résumé des filtres -->
+        {% if filters.proprietaire or filters.type or filters.statut or filters.commune or filters.prix_min or filters.prix_max or filters.statut_admin or filters.statut_owner %}
+        <div class="alert alert-info mt-3">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>Filtres appliqués:</strong>
+          
+          {% if filters.proprietaire %} | Propriétaire: {{ proprietaire_nom }}{% endif %}
+          {% if filters.type %} | Type: {{ filters.type|title }}{% endif %}
+          {% if filters.statut %} | Statut: {{ filters.statut|title }}{% endif %}
+          {% if filters.commune %} | Commune: {{ filters.commune }}{% endif %}
+          {% if filters.prix_min %} | Prix min: {{ filters.prix_min }} FCFA{% endif %}
+          {% if filters.prix_max %} | Prix max: {{ filters.prix_max }} FCFA{% endif %}
+          {% if filters.statut_admin %} | Validation: {% if filters.statut_admin == 'valide' %}Validées{% else %}En attente{% endif %}{% endif %}
+          {% if filters.statut_owner %} | État: {% if filters.statut_owner == 'active' %}Activées{% else %}Désactivées{% endif %}{% endif %}
+          
+          - <strong>{{ proprietes.paginator.count }}</strong> propriété(s) trouvée(s)
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
 
   <script>
-    // Gestion du menu mobile
-    const btn = document.getElementById('mobileMenuBtn');
-    const sidebar = document.getElementById('sidebar');
-
-    btn.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
-        sidebar.classList.remove('active');
-      }
-    });
-
-    // Recherche en temps réel
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('keyup', function() {
-        const filter = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#propertiesTable tbody tr');
-        
-        rows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          row.style.display = text.includes(filter) ? '' : 'none';
-        });
-      });
-    }
-
-    // Export des données
-    document.getElementById('exportBtn')?.addEventListener('click', function() {
-      // Créer un CSV
-      let csv = 'ID,Titre,Propriétaire,Type,Prix (FCFA),Ville,Commune,Statut,Date publication,Vues\n';
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
       
-      document.querySelectorAll('#propertiesTable tbody tr').forEach(row => {
-        if (row.style.display !== 'none') {
-          const cells = row.querySelectorAll('td');
-          const rowData = [
-            cells[0].textContent.trim(),
-            cells[2].querySelector('strong')?.textContent.trim() || '',
-            cells[3].textContent.trim(),
-            cells[4].textContent.trim(),
-            cells[5].textContent.trim().replace(' FCFA', ''),
-            cells[6].textContent.trim().split('/')[0].trim(),
-            cells[6].textContent.trim().split('/')[1].trim(),
-            cells[7].textContent.trim(),
-            cells[8].textContent.trim(),
-            cells[9].textContent.trim()
-          ];
-          
-          // Nettoyer les données (enlever les virgules dans les textes)
-          const cleanData = rowData.map(data => 
-            data.includes(',') ? `"${data}"` : data
-          );
-          
-          csv += cleanData.join(',') + '\n';
+      mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('shifted');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('shifted');
+          }
         }
       });
       
-      // Télécharger le fichier
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'proprietes_export_' + new Date().toISOString().split('T')[0] + '.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      alert('Export terminé !');
-    });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('shifted');
+        }
+      });
 
-    // Gestion des liens actifs dans la sidebar
-    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+          const filter = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#propertiesTable tbody tr');
+          
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+          });
+        });
+      }
+
+      document.getElementById('exportBtn')?.addEventListener('click', function() {
+        let csv = 'ID,Titre,Propriétaire,Type,Prix (FCFA),Ville,Commune,Statut,Validation admin,État propriétaire,Date publication,Vues\n';
+        
+        document.querySelectorAll('#propertiesTable tbody tr').forEach(row => {
+          if (row.style.display !== 'none') {
+            const cells = row.querySelectorAll('td');
+            const rowData = [
+              cells[0].textContent.trim(),
+              cells[2].querySelector('strong')?.textContent.trim() || '',
+              cells[3].textContent.trim(),
+              cells[4].textContent.trim(),
+              cells[5].textContent.trim().replace(' FCFA', ''),
+              cells[6].textContent.trim().split('/')[0].trim(),
+              cells[6].textContent.trim().split('/')[1].trim(),
+              cells[7].textContent.trim(),
+              cells[8].textContent.trim(),
+              cells[9].textContent.trim(),
+              cells[10].textContent.trim(),
+              cells[11].textContent.trim()
+            ];
+            
+            const cleanData = rowData.map(data => 
+              data.includes(',') ? `"${data}"` : data
+            );
+            
+            csv += cleanData.join(',') + '\n';
+          }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'proprietes_export_' + new Date().toISOString().split('T')[0] + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('Export terminé !');
+      });
+
       const currentPath = window.location.pathname;
       const navLinks = document.querySelectorAll('.sidebar .nav-link');
       
@@ -830,7 +1153,6 @@
         }
       });
       
-      // Formatage automatique des prix
       const prixInputs = document.querySelectorAll('input[name="prix_min"], input[name="prix_max"]');
       prixInputs.forEach(input => {
         input.addEventListener('blur', function() {

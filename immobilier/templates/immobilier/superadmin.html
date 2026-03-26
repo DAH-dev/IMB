@@ -502,7 +502,7 @@
         </div>
       </div>
 
-      <!-- Alertes Critiques -->
+      {% comment %} <!-- Alertes Critiques -->
       <div class="dashboard-card mb-4">
         <h6><i class="fas fa-exclamation-triangle me-2"></i> Alertes Critiques Récentes</h6>
         <div id="critical-alerts" class="mt-3">
@@ -539,11 +539,11 @@
           <p class="text-muted">Aucune activité récente.</p>
           {% endfor %}
         </div>
-      </div>
+      </div> {% endcomment %}
     </section>
 
     <!-- Onglet Modération -->
-    <section id="moderation" class="tab-content">
+    {% comment %} <section id="moderation" class="tab-content">
       <h1>Modération des Annonces</h1>
       
       <!-- Filtres -->
@@ -610,7 +610,7 @@
           </table>
         </div>
       </div>
-    </section>
+    </section> {% endcomment %}
 
     <!-- Onglet Utilisateurs -->
     <section id="users" class="tab-content">
@@ -664,7 +664,7 @@
     <section id="analytics" class="tab-content">
       <h1>Analytics Globales</h1>
       
-      <!-- Graphiques -->
+      {% comment %} <!-- Graphiques -->
       <div class="row mb-4">
         <div class="col-md-6 mb-3">
           <div class="dashboard-card">
@@ -682,10 +682,10 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> {% endcomment %}
       
       <!-- Statistiques par type -->
-      <div class="dashboard-card mb-4">
+      {% comment %} <div class="dashboard-card mb-4">
         <h6>Répartition par type de propriété</h6>
         <div class="row mt-3">
           {% for type_stat in stats_par_type %}
@@ -701,7 +701,7 @@
           </div>
           {% endfor %}
         </div>
-      </div>
+      </div> {% endcomment %}
       
       <!-- Export de données -->
       <div class="dashboard-card">

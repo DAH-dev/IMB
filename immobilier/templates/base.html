@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}IMMOBILIER Abidjan - Plateforme immobilière{% endblock %}</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        crossorigin="anonymous">
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<script>
+// Solution de secours - réinitialiser les événements
+(function() {
+    // Attendre que tout soit chargé
+    window.addEventListener('load', function() {
+        console.log("Window loaded - Réinitialisation des menus");
+        
+        const searchToggler = document.getElementById('search-toggler');
+        const menuToggler = document.getElementById('menu-toggler');
+        const searchContent = document.getElementById('searchContent');
+        const menuContent = document.getElementById('menuContent');
+        
+        if (!searchToggler || !menuToggler) {
+            console.log("Boutons toujours pas trouvés après load");
+            return;
+        }
+        
+        // Supprimer les anciens événements et en ajouter de nouveaux
+        searchToggler.replaceWith(searchToggler.cloneNode(true));
+        menuToggler.replaceWith(menuToggler.cloneNode(true));
+        
+        // Récupérer les nouvelles références
+        const newSearchToggler = document.getElementById('search-toggler');
+        const newMenuToggler = document.getElementById('menu-toggler');
+        
+        function togglePanel(panelToShow, panelToHide) {
+            panelToShow.classList.toggle('show');
+            if (panelToHide.classList.contains('show')) {
+                panelToHide.classList.remove('show');
+            }
+        }
+        
+        newSearchToggler.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Clic search (secours)");
+            togglePanel(searchContent, menuContent);
+        });
+        
+        newMenuToggler.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Clic menu (secours)");
+            togglePanel(menuContent, searchContent);
+        });
+        
+        console.log("Événements réinitialisés");
+    });
+})();
+</script>
+<body>
+    <!-- DEBUT DE L'EN-TÊTE (NAVBAR) -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+                <i class="fa-solid fa-house me-2"></i>
+                <span class="logo">IMB IMMOBILIER Abidjan</span>
+            </a>
+            
+            <div class="mobile-toggles">
+                <button id="search-toggler" type="button" aria-label="Toggle Search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button id="menu-toggler" type="button" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                       <a class="nav-link active" href="{% url 'index' %}">
+                      <i class="fa-solid fa-filter me-1"></i> Filtrer
+                    </a>
+                    </li>
+                    {% comment %} <li class="nav-item">
+                        <a class="nav-link" href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-1"></i> Propriétaires</a>
+                    </li> {% endcomment %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}"><i class="fa-solid fa-star me-1"></i> A propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact' %}"><i class="fa-solid fa-phone me-1"></i> Contact</a>
+                    </li>
+                    
+                 
+
+            <li class="nav-item ms-lg-3 " style="border-left: 1px solid rgba(255, 255, 255, 0.5); background-color: white; border-radius: 5px; padding-left: 5px;padding-right: 5px;">
+        {% if user.is_authenticated %}
+            {% if user_role == "admin" %}
+                <a href="{% url 'gestion_utilisateurs_admin' %}">
+                    <i class="fa-solid fa-user-shield"></i> 
+                    <span>Admin</span>
+                </a>
+            {% elif user_role == "proprietaire" %}
+                <a href="{% url 'profil' %}">
+                    <i class="fa-solid fa-building-user"></i>
+                    <span>Propriétaire</span>
+                </a>
+            {% else %}
+                <a href="{% url 'profil' %}">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Client</span>
+                </a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'connexion' %}">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Connexion</span>
+            </a>
+        {% endif %}
+
+           
+                    </li>
+
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-dropdown-panel" id="searchContent">
+        <form class="recherche" action="#" method="get">
+            <input type="text" name="recherche" id="rech_mobile" placeholder="Recherche de propriété par titre, commune...">
+            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+
+        <ul class="mobile-links">
+            <li>
+                <a href="{% url 'proprietes_maison' %}">
+                    <i class="fa-solid fa-house-chimney me-2"></i> Maisons
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'proprietes_Terrain' %}">
+                    <i class="fa-solid fa-tree me-2"></i> Terrains
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'proprietes_plan' %}">
+                    <i class="fa-solid fa-map me-2"></i> Plans
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'index' %}">
+                    <i class="fa-solid fa-film"></i> toutes sortes
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="mobile-dropdown-panel" id="menuContent">
+        <ul class="mobile-links">
+           
+             <li>
+                 <a class="nav-link active" href="{% url 'index' %}">
+                      <i class="fa-solid fa-filter me-1"></i> Filtrer
+                    </a>
+            </li>
+            <li>
+                <a href="{% url 'about' %}"><i class="fa-solid fa-star me-2"></i> À propos</a>
+            </li>
+            <li>
+                <a href="{% url 'contact' %}"><i class="fa-solid fa-phone me-2"></i> Contact</a>
+            </li>
+            <li>
+                        {% if user.is_authenticated %}
+            {% if user_role == "admin" %}
+                <a href="{% url 'gestion_utilisateurs_admin' %}">
+                    <i class="fa-solid fa-user-shield me-2"></i> 
+                    <span>Admin</span>
+                </a>
+            {% elif user_role == "proprietaire" %}
+                <a href="{% url 'profil' %}">
+                    <i class="fa-solid fa-building-user"></i>
+                    <span>Propriétaire</span>
+                </a>
+            {% else %}
+                <a href="{% url 'profil' %}">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Client</span>
+                </a>
+            {% endif %}
+        {% else %}
+        <hr />
+            <a href="{% url 'connexion' %}">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Connexion</span>
+            </a>
+        {% endif %}
+        </ul>
+    </div>
+    <!-- FIN DE L'EN-TÊTE -->
+    <script>
+        // Script JS pour gérer l'ouverture/fermeture des deux menus mobiles
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchToggler = document.getElementById('search-toggler');
+            const menuToggler = document.getElementById('menu-toggler');
+            const searchContent = document.getElementById('searchContent');
+            const menuContent = document.getElementById('menuContent');
+
+            function togglePanel(panelToShow, panelToHide) {
+                panelToShow.classList.toggle('show');
+                if (panelToHide.classList.contains('show')) {
+                    panelToHide.classList.remove('show');
+                }
+            }
+
+            if (searchToggler && menuToggler) {
+                searchToggler.addEventListener('click', function () {
+                    togglePanel(searchContent, menuContent);
+                });
+
+                menuToggler.addEventListener('click', function () {
+                    togglePanel(menuContent, searchContent);
+                });
+            }
+        });
+    </script>
+
+    <!-- DEBUT DU CONTENU DE LA PAGE -->
+    {% block content %}
+    {% endblock %}
+    <!-- FIN DU CONTENU DE LA PAGE -->
+
+   <!-- DEBUT DU PIED DE PAGE -->
+<!-- DEBUT DU PIED DE PAGE - VERSION AMÉLIORÉE -->
+<footer class="footer-modern">
+    <div class="footer-wave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none">
+            <path fill="#f8f9fa" fill-opacity="1" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"></path>
+        </svg>
+    </div>
+    
+    <div class="footer-content">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Colonne 1: À propos -->
+                <div class="footer-col about-col">
+                    <div class="footer-logo">
+                        <i class="fa-solid fa-building"></i>
+                        <span>IMB Immobilier</span>
+                    </div>
+                    <p class="footer-description">
+                        Votre partenaire de confiance pour l'immobilier à Abidjan. Plus de 5 ans d'expertise à votre service.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Colonne 2: Liens rapides -->
+                <div class="footer-col">
+                    <h3 class="footer-title">Liens rapides</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'index' %}"><i class="fa-solid fa-chevron-right"></i> Accueil</a></li>
+                        <li><a href="{% url 'about' %}"><i class="fa-solid fa-chevron-right"></i> À propos</a></li>
+                        <li><a href="{% url 'contact' %}"><i class="fa-solid fa-chevron-right"></i> Contact</a></li>
+                        <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Propriétés</a></li>
+                        <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Propriétaires</a></li>
+                    </ul>
+                </div>
+
+                <!-- Colonne 3: Catégories -->
+                <div class="footer-col">
+                    <h3 class="footer-title">Catégories</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'proprietes_maison' %}"><i class="fa-solid fa-chevron-right"></i> Maisons</a></li>
+                        <li><a href="{% url 'proprietes_Terrain' %}"><i class="fa-solid fa-chevron-right"></i> Terrains</a></li>
+                        <li><a href="{% url 'proprietes_plan' %}"><i class="fa-solid fa-chevron-right"></i> Plans</a></li>
+                        <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Magasins</a></li>
+                        <li><a href="{% url 'video_shorts' %}"><i class="fa-solid fa-chevron-right"></i> Shorts</a></li>
+                    </ul>
+                </div>
+
+                <!-- Colonne 4: Contact -->
+                <div class="footer-col">
+                    <h3 class="footer-title">Contact</h3>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Plateau, Immeuble CCIA<br>Abidjan, Côte d'Ivoire</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+225 20 30 40 50</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>contact@immo.ci</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            <span>Lun-Ven: 8h30 - 18h</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+           
+            <!-- Copyright et mentions légales -->
+            {% comment %} <div class="footer-bottom">
+                <div class="copyright">
+                    <p>&copy; {% now "Y" %} IMB Immobilier Abidjan. Tous droits réservés.</p>
+                </div>
+                <div class="legal-links">
+                    <a href="#">Mentions légales</a>
+                    <span class="separator">|</span>
+                    <a href="#">Politique de confidentialité</a>
+                    <span class="separator">|</span>
+                    <a href="#">CGU</a>
+                </div>
+            </div> {% endcomment %}
+        </div>
+    </div>
+</footer>
+<!-- FIN DU PIED DE PAGE -->
+<!-- FIN DU PIED DE PAGE -->
+
+    <nav class="bottom-nav">
+        <a href="{% url 'index' %}" class="active">
+            <i class="fa-solid fa-house"></i>
+            <span>Accueil</span>
+        </a>
+        <a href="{% url 'video_shorts'  %}" class="active">
+            <i class="fa-solid fa-bolt"></i>
+            <span>scroll</span>
+        </a>
+        <a href="{% url 'mes_messages' %}" class="active">
+            <i class="fa-solid fa-envelope"></i>
+            <span>Messages</span>
+        
+        </a>
+
+
+        {% if user.is_authenticated %}
+            {% if user_role == "admin" %}
+                <a href="{% url 'gestion_utilisateurs_admin' %}" class="active">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Admin</span>
+                </a>
+            {% elif user_role == "proprietaire" %}
+                <a href="{% url 'profil' %}" class="active">
+                    <i class="fa-solid fa-building-user"></i>
+                    <span>Propriétaire</span>
+                </a>
+            {% else %}
+                <a href="{% url 'profil' %}" class="active">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Client</span>
+                </a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'connexion' %}" class="active">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Connexion</span>
+            </a>
+        {% endif %}
+    </nav>
+    <!-- FIN DU PIED DE PAGE -->
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

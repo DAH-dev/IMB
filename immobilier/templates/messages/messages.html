@@ -8,8 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     {% load static %}
+    {% load custom_filters %}
     <style>
-        /* --- Variables et configuration globale --- */
+        /* Vos styles existants... */
         :root {
             --primary-color: #2C3E50;
             --secondary-color: #3498DB;
@@ -26,6 +27,40 @@
             --transition-fast: 0.2s ease;
             --transition-normal: 0.3s ease;
         }
+
+
+        /* Style pour le badge de messages non lus */
+.badge-nonlu {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+/* Animation pour attirer l'attention */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+/* Dans la liste des conversations */
+.conversation-item {
+    position: relative;
+}
+
+.conversation-item.unread {
+    background-color: rgba(52, 152, 219, 0.05);
+    border-left: 3px solid var(--accent-color);
+}
+
 
         * {
             margin: 0;
@@ -215,6 +250,24 @@
             overflow: hidden;
         }
 
+        /* ✅ NOUVEAU : Style pour le filtre admin */
+        .filter-section {
+            padding: 0.75rem 1rem;
+            background: var(--gray-light);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, var(--accent-color), #c0392b);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+        }
+
         /* --- Liste des conversations --- */
         .conversations-panel {
             width: 320px;
@@ -287,6 +340,12 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .conversation-participants {
+            font-size: 0.7rem;
+            color: var(--gray-medium);
+            margin-top: 0.1rem;
         }
 
         .conversation-property {
@@ -490,6 +549,58 @@
             color: var(--primary-color);
         }
 
+  /* Style pour le menu des options surpression de message */
+.message-bubble {
+    position: relative;
+}
+
+.message-options-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.message-bubble:hover .message-options-btn {
+    opacity: 1;
+}
+
+.message-options-menu {
+    position: fixed;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    padding: 8px 0;
+    z-index: 99999;
+    min-width: 180px;
+    border: 1px solid #e0e0e0;
+}
+
+.message-options-menu .dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.message-options-menu .dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.message-options-menu .dropdown-item i {
+    margin-right: 10px;
+    width: 18px;
+}
+
         /* --- Responsive Design --- */
         @media (max-width: 992px) {
             .conversations-panel {
@@ -608,14 +719,22 @@
             <h4><i class="fas fa-home me-2"></i>IMMO ABIDJAN</h4>
         </div>
         
-        <div class="user-profile d-flex align-items-center">
-            <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=3498db&color=fff&bold=true{% endif %}"
-                 class="user-avatar me-3" alt="Photo de profil">
-            <div class="user-info">
-                <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
-                <small class="text-muted">{{ user.role|capfirst }}</small>
-            </div>
-        </div>
+       <div class="user-profile d-flex align-items-center">
+    <img src="{% if user.photo %}{{ user.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=3498db&color=fff&bold=true{% endif %}"
+         class="user-avatar me-3" alt="Photo de profil">
+    <div class="user-info">
+        <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+        <small class="text-muted">
+            {% if user.is_superuser %}
+                Super Admin
+            {% elif is_admin %}
+                Administrateur
+            {% else %}
+                {{ user.role|capfirst }}
+            {% endif %}
+        </small>
+    </div>
+</div>
 
         <ul class="nav flex-column mt-3">
             <li class="nav-item">
@@ -636,8 +755,14 @@
                     <i class="fas fa-building me-2"></i> Mes propriétés
                 </a>
             </li>
-            {% endif %}
-
+           {% elif is_admin %}
+    <a href="{% url 'gestion_utilisateurs_admin' %}" class="nav-link">
+        <i class="fa-solid fa-user-shield me-2"></i> Gestion utilisateurs
+    </a>
+    <a href="{% url 'gestion_proprietes_admin' %}" class="nav-link">
+        <i class="fa-solid fa-building me-2"></i> Gestion propriétés
+    </a>
+       {% endif %}
             <li class="nav-item">
                 <a class="nav-link active" href="{% url 'mes_messages' %}">
                     <i class="fas fa-comments me-2"></i> Messages
@@ -655,6 +780,8 @@
                     <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
                 </a>
             </li>
+
+            
         </ul>
     </div>
 
@@ -680,7 +807,34 @@
             <div class="conversations-panel" id="conversationsPanel">
                 <div class="conversations-header">
                     <h5>Conversations</h5>
+                    {% if is_admin %}
+                    <span class="admin-badge">Admin</span>
+                    {% endif %}
                 </div>
+                
+               {% if is_admin %}
+<div class="filter-section">
+    <form method="get" class="d-flex gap-2">
+        <select name="filter_type" class="form-select form-select-sm" style="width: auto;">
+            <option value="id" {% if filter_type == 'id' %}selected{% endif %}>Par ID</option>
+            <option value="name" {% if filter_type == 'name' %}selected{% endif %}>Par nom</option>
+        </select>
+        <input type="text" 
+               name="user_id" 
+               value="{{ user_filter }}"
+               class="form-control form-control-sm"
+               placeholder="Rechercher...">
+        <button type="submit" class="btn btn-primary btn-sm" title="Filtrer">
+            <i class="fas fa-filter"></i>
+        </button>
+        {% if user_filter %}
+        <a href="{% url 'mes_messages' %}" class="btn btn-secondary btn-sm" title="Effacer le filtre">
+            <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
                 
                 <div class="conversations-list">
                     {% for conversation in conversations %}
@@ -712,17 +866,65 @@
                                 {% endif %}
                             {% endif %}
                             
+                            <!-- ✅ BLOC 1 MODIFIÉ : Conversation info avec distinction contact général/propriété -->
                             <div class="conversation-info">
-                                <div class="conversation-name">
-                                    {% if conversation.utilisateur == utilisateur %}
-                                        {{ conversation.proprietaire.get_full_name }}
-                                    {% else %}
-                                        {{ conversation.utilisateur.get_full_name|default:"Visiteur" }}
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="conversation-name">
+                                        {% if conversation.utilisateur == utilisateur %}
+                                            {{ conversation.proprietaire.get_full_name }}
+                                        {% else %}
+                                            {{ conversation.utilisateur.get_full_name|default:"Visiteur" }}
+                                        {% endif %}
+                                        
+                                        <!-- ✅ INDICATEUR DE CONTACT GÉNÉRAL -->
+                                        {% if not conversation.propriete %}
+                                            <span class="badge bg-info ms-2" style="font-size: 0.6rem;">
+                                                <i class="fas fa-envelope-open-text me-1"></i>Contact général
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Badge de messages non lus -->
+                                    {% if non_lus_par_conversation and conversation.id in non_lus_par_conversation %}
+                                        {% with non_lus=non_lus_par_conversation|get_item:conversation.id %}
+                                            {% if non_lus > 0 %}
+                                            <span class="badge bg-danger rounded-pill ms-2" 
+                                                  style="font-size: 0.7rem; min-width: 20px;">
+                                                {{ non_lus }}
+                                            </span>
+                                            {% endif %}
+                                        {% endwith %}
                                     {% endif %}
                                 </div>
-                                <div class="conversation-property">
-                                    {{ conversation.propriete.titre|truncatechars:30 }}
+                                
+                                <!-- ✅ AFFICHAGE DIFFÉRENCIÉ SELON LE TYPE DE CONTACT -->
+                                {% if conversation.propriete %}
+                                    <!-- Conversation liée à une propriété -->
+                                    <div class="conversation-property">
+                                        <i class="fas fa-home me-1" style="color: var(--secondary-color);"></i>
+                                        {{ conversation.propriete.titre|truncatechars:30 }}
+                                    </div>
+                                {% else %}
+                                    <!-- Conversation générale (contact admin) -->
+                                    <div class="conversation-property" style="color: var(--accent-color);">
+                                        <i class="fas fa-headset me-1"></i>
+                                        <strong>Sujet:</strong> {{ conversation.sujet|truncatechars:30 }}
+                                    </div>
+                                    <div class="conversation-participants" style="font-size: 0.65rem; margin-top: 2px;">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        {{ conversation.date_envoi|date:"d/m/Y H:i" }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Participants pour l'admin -->
+                                {% if is_admin %}
+                                <div class="conversation-participants">
+                                    <i class="fas fa-user-circle"></i> 
+                                    {{ conversation.utilisateur.get_full_name|default:"Visiteur" }} 
+                                    ↔ 
+                                    {{ conversation.proprietaire.get_full_name }}
                                 </div>
+                                {% endif %}
                             </div>
                         </a>
                         
@@ -748,6 +950,7 @@
             <!-- Panneau de chat -->
             <div class="chat-panel">
                 {% if contact_actuel %}
+                <!-- ✅ BLOC 2 MODIFIÉ : Chat header avec distinction contact général/propriété -->
                 <div class="chat-header">
                     <div class="chat-contact-info">
                         {% if contact_actuel.utilisateur == utilisateur %}
@@ -764,10 +967,30 @@
                             <div>
                                 <div class="chat-contact-name">
                                     {{ contact_actuel.proprietaire.get_full_name }}
+                                    
+                                    <!-- ✅ BADGE CONTACT GÉNÉRAL DANS LE HEADER -->
+                                    {% if not contact_actuel.propriete %}
+                                        <span class="badge bg-info ms-2">
+                                            <i class="fas fa-envelope-open-text me-1"></i>Contact général
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="chat-contact-status">
-                                    <i class="fas fa-circle" style="font-size: 0.6rem;"></i> En ligne
-                                </div>
+                                
+                                <!-- ✅ AFFICHER LE SUJET POUR LES CONTACTS GÉNÉRAUX -->
+                                {% if not contact_actuel.propriete and contact_actuel.sujet %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-tag me-1" style="color: var(--accent-color);"></i>
+                                        <strong>Sujet:</strong> {{ contact_actuel.sujet }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- ✅ AFFICHER LA PROPRIÉTÉ POUR LES AUTRES -->
+                                {% if contact_actuel.propriete %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-home me-1" style="color: var(--secondary-color);"></i>
+                                        {{ contact_actuel.propriete.titre }}
+                                    </div>
+                                {% endif %}
                             </div>
                         {% else %}
                             {% if contact_actuel.utilisateur.photo %}
@@ -783,25 +1006,65 @@
                             <div>
                                 <div class="chat-contact-name">
                                     {{ contact_actuel.utilisateur.get_full_name|default:"Visiteur" }}
+                                    
+                                    <!-- ✅ BADGE CONTACT GÉNÉRAL DANS LE HEADER -->
+                                    {% if not contact_actuel.propriete %}
+                                        <span class="badge bg-info ms-2">
+                                            <i class="fas fa-envelope-open-text me-1"></i>Contact général
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="chat-contact-status">
-                                    <i class="fas fa-circle" style="font-size: 0.6rem;"></i> En ligne
-                                </div>
+                                
+                                <!-- ✅ AFFICHER LE SUJET POUR LES CONTACTS GÉNÉRAUX -->
+                                {% if not contact_actuel.propriete and contact_actuel.sujet %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-tag me-1" style="color: var(--accent-color);"></i>
+                                        <strong>Sujet:</strong> {{ contact_actuel.sujet }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- ✅ AFFICHER LA PROPRIÉTÉ POUR LES AUTRES -->
+                                {% if contact_actuel.propriete %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-home me-1" style="color: var(--secondary-color);"></i>
+                                        {{ contact_actuel.propriete.titre }}
+                                    </div>
+                                {% endif %}
                             </div>
+                        {% endif %}
+                        
+                        <!-- Badge admin dans le chat -->
+                        {% if is_admin %}
+                        <span class="admin-badge ms-3">Mode Admin</span>
                         {% endif %}
                     </div>
                 </div>
 
                 <div class="chat-messages" id="chatMessages">
                     {% for message in messages %}
-                    <div class="message-bubble {% if message.expediteur == utilisateur %}message-sent{% else %}message-received{% endif %} fade-in">
-                        <div class="message-content">
-                            {{ message.contenu }}
-                        </div>
-                        <span class="message-time">
-                            {{ message.date_envoi|date:"H:i" }}
-                        </span>
-                    </div>
+<div class="message-bubble {% if message.expediteur == utilisateur %}message-sent{% else %}message-received{% endif %} fade-in"
+     data-message-id="{{ message.id }}" 
+     style="position: relative;">
+    <div class="message-content">
+        {{ message.contenu }}
+    </div>
+    <div class="message-time">
+        {{ message.date_envoi|date:"H:i" }}
+        <button class="message-options-btn" onclick="toggleMessageOptions(this)" style="background: none; border: none; color: inherit;color: red; margin-left: 5px; cursor: pointer; display: inline-block;">
+            <i class="fas fa-chevron-down" style="font-size: 0.6rem;"></i>
+        </button>
+        <div class="message-options-menu" style="display: none; ">
+            <a href="{% url 'supprimer_message' message.id 'pour_moi' %}" class="dropdown-item">
+                <i class="fas fa-eye-slash"></i> Supprimer pour moi
+            </a>
+            {% if message.expediteur == utilisateur or is_admin %}
+            <a href="{% url 'supprimer_message' message.id 'pour_tous' %}" class="dropdown-item">
+                <i class="fas fa-trash-alt"></i> Supprimer pour tout le monde
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
                     {% endfor %}
                 </div>
 
@@ -832,115 +1095,109 @@
     </div>
 
 <script>
-    // Variables globales pour l'actualisation automatique
-    let autoRefreshInterval;
+    // Variables globales
     let isUserAtBottom = true;
-    let lastMessageCount = 0;
+    let lastMessageId = 0;
     let messageCheckInterval;
 
     document.addEventListener("DOMContentLoaded", function () {
-        // --- Initialisation des variables ---
+        // --- Initialisation ---
         const chatMessages = document.getElementById("chatMessages");
+        
         if (chatMessages) {
-            // Compter les messages actuels
-            lastMessageCount = document.querySelectorAll('.message-bubble').length;
+            // Récupérer le dernier ID de message
+            const lastMessage = document.querySelector('.message-bubble:last-child');
+            lastMessageId = lastMessage ? parseInt(lastMessage.dataset.messageId) || 0 : 0;
             
-            // Vérifier si l'utilisateur est déjà en bas
+            // Vérifier si l'utilisateur est en bas
             checkIfAtBottom();
-            
-            // Écouter le scroll pour savoir si l'utilisateur est en bas
             chatMessages.addEventListener('scroll', checkIfAtBottom);
+            
+            // Scroller en bas au chargement
+            scrollToBottom();
         }
 
-        // --- Système d'actualisation automatique ---
+        // --- Vérification périodique des nouveaux messages ---
         function startAutoRefresh() {
-            // Vérifier les nouveaux messages toutes les 3 secondes
+            if (messageCheckInterval) clearInterval(messageCheckInterval);
             messageCheckInterval = setInterval(checkForNewMessages, 3000);
         }
 
         function stopAutoRefresh() {
-            clearInterval(messageCheckInterval);
+            if (messageCheckInterval) {
+                clearInterval(messageCheckInterval);
+                messageCheckInterval = null;
+            }
         }
 
-        // --- Fonction pour vérifier si l'utilisateur est en bas du chat ---
+        // --- Vérifier si l'utilisateur est en bas ---
         function checkIfAtBottom() {
             if (!chatMessages) return;
-            
-            const threshold = 100; // 100px du bas
-            const isAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + threshold;
-            isUserAtBottom = isAtBottom;
+            const threshold = 100;
+            isUserAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop <= chatMessages.clientHeight + threshold;
         }
 
-        // --- Fonction pour vérifier les nouveaux messages ---
-        function checkForNewMessages() {
-            // Ne pas vérifier si l'utilisateur est en train d'écrire
-            const isTyping = document.activeElement === document.querySelector('input[name="contenu"]');
-            if (isTyping) return;
+        // --- Vérifier les nouveaux messages ---
+       function checkForNewMessages() {
+    const isTyping = document.activeElement === document.querySelector('input[name="contenu"]');
+    if (isTyping) return;
 
-            // Compter les messages actuels dans la page
-            const currentMessageCount = document.querySelectorAll('.message-bubble').length;
-            
-            // Si on a une conversation active, vérifier côté serveur
-            {% if contact_actuel %}
-            fetch(`/api/check-new-messages/?conversation_id={{ contact_actuel.pk }}&last_count=${lastMessageCount}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Erreur réseau');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.has_new_messages && data.new_count > lastMessageCount) {
-                        handleNewMessages(data.new_count);
-                    }
-                })
-                .catch(error => {
-                    console.log('Erreur vérification messages:', error);
-                    // Fallback: vérifier localement
-                    if (currentMessageCount > lastMessageCount) {
-                        handleNewMessages(currentMessageCount);
-                    }
-                });
-            {% else %}
-            // Pas de conversation active, vérifier juste le compte local
-            if (currentMessageCount > lastMessageCount) {
-                handleNewMessages(currentMessageCount);
+    const currentMessageIds = Array.from(document.querySelectorAll('.message-bubble')).map(bubble => parseInt(bubble.dataset.messageId));
+
+    {% if contact_actuel %}
+    fetch(`/api/check-new-messages/?conversation_id={{ contact_actuel.pk }}&last_id=${lastMessageId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.has_new && data.messages.length > 0) {
+                // ✅ Filtrer les messages déjà affichés
+                const newMessages = data.messages.filter(msg => !currentMessageIds.includes(msg.id));
+                if (newMessages.length > 0) {
+                    addNewMessages(newMessages);
+                }
             }
-            {% endif %}
-        }
+        })
+        .catch(error => console.log('Erreur:', error));
+    {% endif %}
+}
 
-        // --- Fonction pour gérer les nouveaux messages ---
-        function handleNewMessages(newCount) {
-            const messageDiff = newCount - lastMessageCount;
-            lastMessageCount = newCount;
+        // --- Ajouter les nouveaux messages ---
+        function addNewMessages(newMessages) {
+            const chatMessages = document.getElementById('chatMessages');
             
-            // Si l'utilisateur est en bas du chat, recharger automatiquement
+            newMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message-bubble ${msg.is_sent ? 'message-sent' : 'message-received'} fade-in`;
+                messageDiv.dataset.messageId = msg.id;
+                messageDiv.innerHTML = `
+                    <div class="message-content">${msg.contenu}</div>
+                    <span class="message-time">${msg.time}</span>
+                `;
+                chatMessages.appendChild(messageDiv);
+                lastMessageId = Math.max(lastMessageId, msg.id);
+            });
+            
             if (isUserAtBottom) {
-                console.log(`${messageDiff} nouveau(x) message(s) - Actualisation automatique`);
-                showNotification(`📩 ${messageDiff} nouveau(x) message(s)`, 'info', 2000);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                // Sinon, afficher une notification pour inviter à recharger
-                showNewMessageNotification(messageDiff);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Afficher une notification si pas en bas
+            if (!isUserAtBottom && newMessages.length > 0) {
+                showNewMessageNotification(newMessages.length);
             }
         }
 
-        // --- Fonction pour afficher une notification de nouveau message ---
+        // --- Notification de nouveaux messages ---
         function showNewMessageNotification(messageCount) {
-            // Vérifier si une notification existe déjà
             let existingBadge = document.getElementById('new-message-badge');
             if (existingBadge) {
-                // Mettre à jour le compteur existant
                 const countSpan = existingBadge.querySelector('.message-count');
                 if (countSpan) {
                     const currentCount = parseInt(countSpan.textContent) || 0;
                     countSpan.textContent = currentCount + messageCount;
                 }
-                existingBadge.style.animation = 'pulse 1s 3';
                 return;
             }
 
-            // Créer une nouvelle notification
             const notificationBadge = document.createElement('div');
             notificationBadge.id = 'new-message-badge';
             notificationBadge.style.cssText = `
@@ -957,130 +1214,26 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                animation: slideInUp 0.3s ease, pulse 1.5s infinite;
+                animation: slideInUp 0.3s ease;
                 font-size: 14px;
                 font-weight: 500;
-                transition: all 0.3s ease;
                 border: 2px solid white;
             `;
             
             notificationBadge.innerHTML = `
-                <i class="fas fa-envelope" style="font-size: 16px;"></i>
+                <i class="fas fa-envelope"></i>
                 <span class="message-count">${messageCount}</span> nouveau(x) message(s)
-                <i class="fas fa-arrow-down ms-2" style="font-size: 12px;"></i>
+                <i class="fas fa-arrow-down ms-2"></i>
             `;
             
-            // Au clic, recharger la page et scroller en bas
             notificationBadge.onclick = () => {
-                notificationBadge.style.background = '#27ae60';
-                notificationBadge.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Actualisation...';
-                setTimeout(() => {
-                    window.location.reload();
-                }, 300);
+                window.location.reload();
             };
-            
-            // Effet hover
-            notificationBadge.addEventListener('mouseenter', () => {
-                notificationBadge.style.transform = 'translateY(-3px)';
-                notificationBadge.style.boxShadow = '0 10px 25px rgba(52, 152, 219, 0.5)';
-            });
-            
-            notificationBadge.addEventListener('mouseleave', () => {
-                notificationBadge.style.transform = 'translateY(0)';
-                notificationBadge.style.boxShadow = '0 6px 20px rgba(52, 152, 219, 0.4)';
-            });
             
             document.body.appendChild(notificationBadge);
         }
 
-        // --- Fonction utilitaire pour les notifications toast ---
-        function showNotification(message, type = 'info', duration = 3000) {
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'info' ? '#3498db' : type === 'success' ? '#27ae60' : '#e74c3c'};
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                z-index: 2100;
-                animation: slideInRight 0.3s ease;
-                font-size: 14px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
-            
-            toast.innerHTML = `
-                <i class="fas fa-${type === 'info' ? 'info-circle' : type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Supprimer après la durée
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // --- Ajouter les animations CSS nécessaires ---
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInUp {
-                from { transform: translateY(100px); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-            
-            @keyframes slideInRight {
-                from { transform: translateX(100px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100px); opacity: 0; }
-            }
-            
-            @keyframes pulse {
-                0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
-                70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
-                100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // --- Gestion du menu mobile ---
-        const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-        const sidebar = document.getElementById("sidebar");
-
-        mobileMenuBtn.addEventListener("click", function () {
-            sidebar.classList.toggle("active");
-        });
-
-        // --- Gestion du panneau des conversations en mobile ---
-        const toggleConversations = document.getElementById("toggleConversations");
-        const conversationsPanel = document.getElementById("conversationsPanel");
-
-        if (toggleConversations) {
-            toggleConversations.addEventListener("click", function () {
-                conversationsPanel.classList.toggle("active");
-            });
-        }
-
-        // --- Fermer le panneau des conversations après sélection sur mobile ---
-        document.querySelectorAll('.conversation-item a').forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth < 768) {
-                    conversationsPanel.classList.remove('active');
-                }
-            });
-        });
-
-        // --- Défilement automatique vers le bas des messages ---
+        // --- Scroller en bas ---
         function scrollToBottom() {
             if (chatMessages) {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1088,84 +1241,128 @@
             }
         }
 
-        // Initial scroll
-        scrollToBottom();
+        // --- Gestion du menu mobile ---
+        const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+        const sidebar = document.getElementById("sidebar");
+        const toggleConversations = document.getElementById("toggleConversations");
+        const conversationsPanel = document.getElementById("conversationsPanel");
 
-        // --- Gestion du focus sur le champ de saisie (mobile) ---
-        const messageInput = document.querySelector('.message-input');
-        if (messageInput) {
-            messageInput.addEventListener('focus', () => {
-                setTimeout(scrollToBottom, 300);
-                // Arrêter la vérification pendant la saisie
-                stopAutoRefresh();
-            });
-            
-            messageInput.addEventListener('blur', () => {
-                // Redémarrer la vérification après la saisie
-                startAutoRefresh();
-            });
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener("click", () => sidebar.classList.toggle("active"));
         }
 
-        // --- Animation de soumission du formulaire ---
+        if (toggleConversations) {
+            toggleConversations.addEventListener("click", () => conversationsPanel.classList.toggle("active"));
+        }
+
+        // --- Focus sur le champ de saisie ---
+        const messageInput = document.querySelector('.message-input');
+        if (messageInput) {
+            messageInput.addEventListener('focus', stopAutoRefresh);
+            messageInput.addEventListener('blur', startAutoRefresh);
+        }
+
+        // --- Soumission du formulaire ---
         const messageForm = document.getElementById('messageForm');
         if (messageForm) {
             messageForm.addEventListener('submit', function(e) {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                    submitBtn.disabled = true;
-                    // Mettre à jour le compteur de messages
-                    lastMessageCount++;
+                const input = this.querySelector('input[name="contenu"]');
+                if (!input.value.trim()) {
+                    e.preventDefault();
+                    return;
                 }
+                
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                submitBtn.disabled = true;
+                
+                // Réactiver après 1 seconde (au cas où)
+                setTimeout(() => {
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                    submitBtn.disabled = false;
+                }, 1000);
             });
         }
-
-        // --- Effet de survol amélioré pour les conversations ---
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateX(5px)';
-            });
-            item.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateX(0)';
-            });
-        });
-
-        // --- Fermer le sidebar en cliquant à l'extérieur (mobile) ---
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth < 768) {
-                const isClickInsideSidebar = sidebar.contains(event.target);
-                const isClickOnMenuBtn = mobileMenuBtn.contains(event.target);
-                
-                if (!isClickInsideSidebar && !isClickOnMenuBtn && sidebar.classList.contains('active')) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
 
         // --- Gestion de la visibilité de la page ---
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                // Page cachée : arrêter la vérification
                 stopAutoRefresh();
             } else {
-                // Page visible : redémarrer la vérification
                 startAutoRefresh();
-                // Vérifier immédiatement s'il y a de nouveaux messages
-                setTimeout(checkForNewMessages, 500);
+                checkForNewMessages();
             }
         });
 
-        // --- Démarrer le système d'actualisation automatique ---
+        // --- Démarrer le système ---
         startAutoRefresh();
         
-        // --- Nettoyage lors du déchargement de la page ---
-        window.addEventListener('beforeunload', function() {
-            stopAutoRefresh();
-        });
-
-        // --- Vérifier les nouveaux messages au chargement ---
-        setTimeout(checkForNewMessages, 1000);
+        // Nettoyage
+        window.addEventListener('beforeunload', stopAutoRefresh);
+        
+        // Debug
+        console.log('Badges non lus:', {{ non_lus_par_conversation|safe }});
     });
+
+
+// --- Gestion du menu d'options surpression des messages ---
+// --- Gestion du menu d'options surpression des messages ---
+function toggleMessageOptions(btn) {
+    // Fermer tous les autres menus
+    document.querySelectorAll('.message-options-menu').forEach(menu => {
+        if (menu !== btn.nextElementSibling) {
+            menu.style.display = 'none';
+        }
+    });
+    
+    const menu = btn.nextElementSibling;
+    
+    if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+        return;
+    }
+    
+    // Récupérer la position du bouton
+    const rect = btn.getBoundingClientRect();
+    const menuWidth = 180;
+    const menuHeight = 100;
+    
+    // Positionner le menu
+    let left = rect.right - menuWidth;
+    let top = rect.top - menuHeight - 10;
+    
+    // Vérifier si le menu sort à gauche
+    if (left < 10) {
+        left = rect.left;
+    }
+    
+    // Vérifier si le menu sort en haut
+    if (top < 10) {
+        top = rect.bottom + 10;
+    }
+    
+    // Vérifier si le menu sort à droite
+    if (left + menuWidth > window.innerWidth - 10) {
+        left = window.innerWidth - menuWidth - 10;
+    }
+    
+    // Appliquer la position
+    menu.style.position = 'fixed';
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.bottom = 'auto';
+    menu.style.right = 'auto';
+    menu.style.display = 'block';
+}
+
+// Fermer le menu en cliquant ailleurs
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.message-options-btn') && !e.target.closest('.message-options-menu')) {
+        document.querySelectorAll('.message-options-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    }
+});
 </script>
 </body>
 </html>

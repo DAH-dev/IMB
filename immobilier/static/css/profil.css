@@ -4,7 +4,9 @@
 :root {
   /* Couleurs principales */
   --primary-color: #2C3E50;
-  --secondary-color: #3498DB;
+  /* --primary-color: #1e4a8d; */
+  --secondary-color: #1e4a8d;
+
   --accent-color: #E74C3C;
   --success-color: #27AE60;
   --warning-color: #F39C12;
@@ -81,6 +83,7 @@ p {
   top: 20px;
   left: 20px;
   background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+  background-color: #153a70;
   color: white;
   border: none;
   width: 48px;

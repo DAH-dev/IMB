@@ -184,9 +184,30 @@ def login_view(request):
 
     return render(request, 'login.html', {'form': form})
 
+@login_required(login_url='connexion')
+def verifier_cni(request, pk):
+    utilisateur = get_object_or_404(Utilisateur, pk=pk)
+    
+    if not utilisateur.cni:
+        return redirect('gestion_utilisateurs_admin')
+    
+    if request.method == 'POST':
+        utilisateur.cni_verifie = True
+        utilisateur.cni_verifie_le = timezone.now()
+        utilisateur.cni_verifie_par = request.user
+        utilisateur.cni_commentaire = request.POST.get('commentaire', '')
+        utilisateur.save()
+        
+        # messages.success(request, f"CNI de {utilisateur.username} vérifiée.")
+        return redirect('gestion_utilisateurs_admin')
+    
+    return render(request, 'utilisateurs/verifier_cni.html', {'utilisateur': utilisateur})
+
+def contact(request):
+
+    return render(request, 'contact.html', {})
 
 
-# Vues générales du site
 def page_accueil(request):
     user_role = None
     if request.user.is_authenticated:
@@ -199,79 +220,193 @@ def page_accueil(request):
         else:
             user_role = "client"
 
-    proprietes_recentes = Propriete.objects.filter(
-        Q(statut='disponible') | Q(statut='en_netoyage') | Q(statut='en_construction')
+    # Compter les messages non lus
+    total_non_lus = 0
+    if request.user.is_authenticated:
+        total_non_lus = Message.objects.filter(
+            destinataire=request.user,
+            statut='envoye'
+        ).count()        
+
+    # Récupérer le terme de recherche
+    recherche = request.GET.get('recherche', '').strip()
+    
+    # Base des propriétés
+    proprietes = Propriete.objects.filter(
+        Q(statut='disponible') | Q(statut='en_netoyage') | Q(statut='en_construction'),
+        proprietaire__statut=True,
+        statut_propriete_admin=True,
+        statut_propriete_owner=True
     ).annotate(
         nb_vues=Count('visites', distinct=True)
-    ).order_by('-date_publication')[:6]
-
+    )
+    
+    # ✅ RECHERCHE AVANCÉE AVEC CORRESPONDANCE PARTIELLE
+    if recherche:
+        # Recherche exacte ou partielle
+        q_objects = Q()
+        
+        # Recherche dans les champs de la propriété (correspondance partielle)
+        q_objects |= Q(titre__icontains=recherche)
+        q_objects |= Q(description__icontains=recherche)
+        q_objects |= Q(ville__icontains=recherche)
+        q_objects |= Q(commune__icontains=recherche)
+        q_objects |= Q(type__icontains=recherche)
+        q_objects |= Q(caracteristiques__icontains=recherche)
+        
+        # ✅ RECHERCHE DANS LES INFORMATIONS DU PROPRIÉTAIRE
+        q_objects |= Q(proprietaire__username__icontains=recherche)
+        q_objects |= Q(proprietaire__first_name__icontains=recherche)
+        q_objects |= Q(proprietaire__last_name__icontains=recherche)
+        q_objects |= Q(proprietaire__email__icontains=recherche)
+        q_objects |= Q(proprietaire__telephone__icontains=recherche)
+        
+        # ✅ RECHERCHE COMBINÉE POUR LES NOMS COMPLETS
+        # Chercher "Jean Paul" même si c'est écrit "Jean" ou "Paul"
+        parts = recherche.split()
+        if len(parts) > 1:
+            # Recherche du prénom et nom combinés
+            q_objects |= Q(proprietaire__first_name__icontains=parts[0]) & Q(proprietaire__last_name__icontains=' '.join(parts[1:]))
+            q_objects |= Q(proprietaire__first_name__icontains=parts[-1]) & Q(proprietaire__last_name__icontains=' '.join(parts[:-1]))
+        
+        proprietes_recentes = proprietes.filter(q_objects).distinct().order_by('-nb_vues', '-date_publication')
+    else:
+        proprietes_recentes = proprietes.order_by('-nb_vues', '-date_publication')
+    
     context = {
         "user_role": user_role,
         "proprietes_recentes": proprietes_recentes,
+        "total_non_lus": total_non_lus,
+        "recherche": recherche,
+        "nombre_resultats": proprietes_recentes.count(),
     }
 
     return render(request, "index.html", context)
 
 
 def proprietes_maison(request):
-    # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type__iexact='maison').annotate(
+    # Récupère toutes les propriétés où le type est 'Maison' et validées
+    proprietes = Propriete.objects.filter(
+        type__iexact='maison',
+        proprietaire__statut=True,
+        statut_propriete_admin=True,   # ✅ Validé par l'admin
+        statut_propriete_owner=True    # ✅ Activé par le propriétaire
+    ).annotate(
         nb_vues=Count('visites', distinct=True)
     )
     
     context = {
         'proprietes_recentes': proprietes,
     }
-    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
     return render(request, 'index.html', context)
 
 
 
 def proprietes_Terrain(request):
-    # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='terrain').annotate(
+    # Récupère toutes les propriétés où le type est 'terrain' et validées
+    proprietes = Propriete.objects.filter(
+        type='terrain',
+        proprietaire__statut=True,
+        statut_propriete_admin=True,   # ✅ Validé par l'admin
+        statut_propriete_owner=True    # ✅ Activé par le propriétaire
+    ).annotate(
         nb_vues=Count('visites', distinct=True)
     )
     
     context = {
         'proprietes_recentes': proprietes,
     }
-    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
     return render(request, 'index.html', context)
 
 def magasin(request):
-    # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='magasin').annotate(
+    # Récupère toutes les propriétés où le type est 'magasin' et validées
+    proprietes = Propriete.objects.filter(
+        type='magasin',
+        proprietaire__statut=True,
+        statut_propriete_admin=True,   # ✅ Validé par l'admin
+        statut_propriete_owner=True    # ✅ Activé par le propriétaire
+    ).annotate(
         nb_vues=Count('visites', distinct=True)
     )
     
     context = {
         'proprietes_recentes': proprietes,
     }
-    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
     return render(request, 'index.html', context)
 
 def proprietes_plan(request):
-    # Récupère toutes les propriétés où le type est 'Maison'
-    proprietes = Propriete.objects.filter(type='magasin').annotate(
+    # Récupère toutes les propriétés où le type est 'magasin' et validées
+    proprietes = Propriete.objects.filter(
+        type='magasin',
+        proprietaire__statut=True,
+        statut_propriete_admin=True,   # ✅ Validé par l'admin
+        statut_propriete_owner=True    # ✅ Activé par le propriétaire
+    ).annotate(
         nb_vues=Count('visites', distinct=True)
     )
     
     context = {
         'proprietes_recentes': proprietes,
     }
-    # Assurez-vous d'avoir un template 'maison.html' si vous ne voulez pas utiliser 'index.html'
     return render(request, 'index.html', context)
 
 def video_shorts(request):
-    # Filtre pour les propriétés qui ont une vidéo non nulle et dont la durée est <= 60 secondes
-    proprietes_shorts = Propriete.objects.all()
-       
+    # Filtre pour les propriétés qui ont une vidéo et sont validées
+    proprietes_shorts = Propriete.objects.filter(
+        proprietaire__statut=True,
+        statut_propriete_admin=True,
+        statut_propriete_owner=True
+    ).annotate(
+        nb_conversations=Count('contacts_propriete', distinct=True)  # ← Compte TOUTES les conversations
+    )
+    
+    # Recherche
+    recherche = request.GET.get('q', '').strip()
+    if recherche:
+        proprietes_shorts = proprietes_shorts.filter(
+            Q(titre__icontains=recherche) |
+            Q(description__icontains=recherche) |
+            Q(ville__icontains=recherche) |
+            Q(commune__icontains=recherche) |
+            Q(type__icontains=recherche) |
+            Q(proprietaire__username__icontains=recherche) |
+            Q(proprietaire__first_name__icontains=recherche) |
+            Q(proprietaire__last_name__icontains=recherche)
+        )
+    
     context = {
         'proprietes_shorts': proprietes_shorts,
+        'recherche': recherche,
     }
     
     return render(request, 'courtes_videos.html', context)
+
+
+@login_required(login_url='connexion')
+def demarrer_conversation(request, propriete_pk):
+    """
+    Démarre une conversation pour une propriété
+    """
+    propriete = get_object_or_404(Propriete, pk=propriete_pk)
+    utilisateur = request.user
+    
+    # Vérifier si une conversation existe déjà
+    contact = Contact.objects.filter(
+        utilisateur=utilisateur,
+        propriete=propriete,
+        proprietaire=propriete.proprietaire
+    ).first()
+    
+    if not contact:
+        # Créer une nouvelle conversation
+        contact = Contact.objects.create(
+            utilisateur=utilisateur,
+            proprietaire=propriete.proprietaire,
+            propriete=propriete,
+            statut='non_lu'
+        )
+    
+    return redirect('mes_messages_detail', contact_pk=contact.pk)
 
 
 
@@ -290,6 +425,18 @@ def detail_propriete_web(request, pk):
             utilisateur_connecte = Utilisateur.objects.get(pk=request.user.id)
         except Utilisateur.DoesNotExist:
             pass
+
+    # 🔹 Déterminer le rôle de l'utilisateur
+    user_role = None
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            user_role = "admin"
+        elif hasattr(request.user, 'role') and request.user.role == "proprietaire":
+            user_role = "proprietaire"
+        elif hasattr(request.user, 'role') and request.user.role == "admin":
+            user_role = "admin"
+        else:
+            user_role = "client"    
 
     # 🔹 Si on reçoit un POST
     if request.method == 'POST':
@@ -347,9 +494,17 @@ def detail_propriete_web(request, pk):
         for caracteristique_nom in propriete.caracteristiques:
             conditions |= Q(caracteristiques__icontains=caracteristique_nom)
 
-    proprietes_similaires = Propriete.objects.filter(conditions).exclude(
+    # ✅ CORRECTION : Propriétés similaires (seulement celles qui sont activées ET validées)
+    # On exclut la propriété actuelle et on filtre les propriétés similaires visibles
+    proprietes_similaires = Propriete.objects.filter(
+        conditions
+    ).exclude(
         pk=propriete.pk
+    ).filter(
+        statut_propriete_admin=True,   # ✅ Validé par l'admin
+        statut_propriete_owner=True    # ✅ Activé par le propriétaire
     ).distinct()[:8]
+    
     if request.user.is_authenticated:
         # ⚠️ On utilise directement request.user qui est l'instance Utilisateur
         client_visiteur = request.user 
@@ -369,11 +524,13 @@ def detail_propriete_web(request, pk):
                 # L'entrée existe déjà (vue unique à vie).
                 print(f"🚫 Vue non enregistrée : existe déjà pour {client_visiteur.username}.")
                 pass
+                
     # 🔹 Contexte rendu
     context = {
         'propriete': propriete,
         'proprietes_similaires': proprietes_similaires,
         'form': form,
+        'user_role': user_role,
     }
 
     return render(request, 'detail_propriete.html', context)
@@ -473,51 +630,89 @@ def propriete_list(request):
 
 def propriete_par_proprietaire(request, proprietaire_pk):
     proprietaire = get_object_or_404(Utilisateur, pk=proprietaire_pk)
-    proprietes = Propriete.objects.filter(proprietaire=proprietaire).order_by('-date_publication')
+    
+    user_role = None
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            user_role = "admin"
+        elif request.user.role == "proprietaire":
+            user_role = "proprietaire"
+        elif request.user.role == "admin":
+            user_role = "admin"
+        else:
+            user_role = "client"
+    
+    total_non_lus = 0
+    if request.user.is_authenticated:
+        total_non_lus = Message.objects.filter(
+            destinataire=request.user,
+            statut='envoye'
+        ).count()
+    
+    proprietaire_actif = proprietaire.statut
+    
+    # Filtrer les propriétés du propriétaire (seulement les validées et activées)
+    if proprietaire_actif or (request.user.is_authenticated and 
+                              (request.user.is_superuser or request.user.role in ['admin', 'superadmin'])):
+        proprietes = Propriete.objects.filter(
+            proprietaire=proprietaire,
+            statut_propriete_admin=True,   # ✅ Validé par l'admin
+            statut_propriete_owner=True    # ✅ Activé par le propriétaire
+        ).annotate(
+            nb_vues=Count('visites', distinct=True)
+        ).order_by('-date_publication')
+    else:
+        proprietes = Propriete.objects.none()
+    
     context = {
         'proprietaire': proprietaire,
         'proprietes': proprietes,
-        'titre_page': f'Propriétés de {proprietaire.last_name} {proprietaire.first_name}', # Pour le titre de la page
-         }
+        'proprietaire_actif': proprietaire_actif,
+        'titre_page': f'Propriétés de {proprietaire.last_name} {proprietaire.first_name}',
+        'user_role': user_role,
+        'total_non_lus': total_non_lus,
+    }
     return render(request, 'proprietes_par_proprietaire.html', context)
-
 
 @login_required(login_url='connexion')
 def propriete_create(request):
     
     is_admin = request.user.role in ('admin', 'superadmin')
     
-    # Sécurité: Vérification d'autorisation
     if request.user.role not in ('proprietaire', 'admin', 'superadmin'):
-        return redirect('index') # Redirige vers la page d'accueil ou une page d'erreur 403
+        return redirect('index')
 
     if request.method == 'POST':
         form = ProprieteForm(request.POST, request.FILES)
         
-        # 🟢 CORRECTION CRUCIALE 1 (POST): Supprimer le champ avant la validation 🟢
-        # Si ce n'est pas un admin, on retire le champ pour que Django l'ignore lors de la validation
         if not is_admin and 'proprietaire' in form.fields:
             del form.fields['proprietaire']
             
         if form.is_valid():
-            # L'assignation manuelle de request.user empêche l'utilisateur
-            # de s'attribuer la propriété à un autre compte (même si le champ était visible)
             propriete = form.save(commit=False)
-            propriete.proprietaire = request.user 
-            propriete.save() 
+            propriete.proprietaire = request.user
+            
+            # ✅ LOGIQUE :
+            # - Admin crée : directement validé et actif
+            # - Propriétaire crée : en attente de validation admin, mais activé par lui-même
+            if is_admin:
+                propriete.statut_propriete_admin = True   # Validé par admin
+                propriete.statut_propriete_owner = True   # Actif
+            else:
+                propriete.statut_propriete_admin = False  # En attente validation
+                propriete.statut_propriete_owner = True   # Le propriétaire veut le publier
+                
+            propriete.save()
             
             if is_admin: 
                 return redirect('propriete_list')
             else: 
-                return redirect('mes_proprietes') 
+                return redirect('mes_proprietes')
     else:
-        # Initialisation du formulaire pour la méthode GET
         form = ProprieteForm()
         
-    # 🟢 CORRECTION CRUCIALE 2 (GET): Supprimer le champ avant le rendu 🟢
-    # Retirer le champ de la liste des champs du formulaire avant le rendu (si l'utilisateur n'est pas admin)
     if not is_admin and 'proprietaire' in form.fields:
-        del form.fields['proprietaire'] 
+        del form.fields['proprietaire']
             
     return render(request, 'proprietes/form.html', {'form': form, 'action': 'Créer'})
 
@@ -534,25 +729,27 @@ def propriete_update(request, pk):
     if request.method == 'POST':
         form = ProprieteForm(request.POST, request.FILES, instance=objet)
         
-        # 🟢 CORRECTION CRUCIALE 1: Supprimer le champ avant la validation 🟢
-        # Si ce n'est pas un admin, on retire le champ pour que Django l'ignore lors de la validation
         if not is_admin and 'proprietaire' in form.fields:
             del form.fields['proprietaire']
         
         if form.is_valid():
-            # ... le reste de la logique de sauvegarde ...
-            form.save() 
+            propriete = form.save(commit=False)
+            
+            # ✅ Si c'est le propriétaire, on ne modifie pas les statuts admin
+            if is_owner and not is_admin:
+                # Garder les statuts admin inchangés
+                propriete.statut_propriete_admin = objet.statut_propriete_admin
+                propriete.statut_propriete_owner = objet.statut_propriete_owner
+            
+            propriete.save()
             
             if is_admin: 
                 return redirect('gestion_proprietes_admin')
             else: 
-                return redirect('mes_proprietes') 
+                return redirect('mes_proprietes')
     else:
-        # Initialisation pour GET
-        form = ProprieteForm(instance=objet) 
+        form = ProprieteForm(instance=objet)
         
-    # 🟢 CORRECTION CRUCIALE 2: Supprimer le champ AVANT le rendu (si ce n'est pas un admin) 🟢
-    # Ce code est le même que celui qui était dans le bloc 'else' précédent
     if not is_admin and 'proprietaire' in form.fields:
         del form.fields['proprietaire']
         
@@ -565,71 +762,6 @@ def propriete_delete(request, pk):
         return redirect('propriete_list')
     return render(request, 'proprietes/confirm_delete.html', {'objet': objet})
 
-# Annonce
-def annonce_list(request):
-    objets = Annonce.objects.all()
-    return render(request, 'annonces/list.html', {'objets': objets})
-
-def annonce_create(request):
-    if request.method == 'POST':
-        form = AnnonceForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('annonce_list')
-    else:
-        form = AnnonceForm()
-    return render(request, 'annonces/form.html', {'form': form, 'action': 'Créer'})
-
-def annonce_update(request, pk):
-    objet = get_object_or_404(Annonce, pk=pk)
-    if request.method == 'POST':
-        form = AnnonceForm(request.POST, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('annonce_list')
-    else:
-        form = AnnonceForm(instance=objet)
-    return render(request, 'annonces/form.html', {'form': form, 'action': 'Modifier'})
-
-def annonce_delete(request, pk):
-    objet = get_object_or_404(Annonce, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('annonce_list')
-    return render(request, 'annonces/confirm_delete.html', {'objet': objet})
-
-# Transaction
-def transaction_list(request):
-    objets = Transaction.objects.all()
-    return render(request, 'transactions/list.html', {'objets': objets})
-
-def transaction_create(request):
-    if request.method == 'POST':
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('transaction_list')
-    else:
-        form = TransactionForm()
-    return render(request, 'transactions/form.html', {'form': form, 'action': 'Créer'})
-
-def transaction_update(request, pk):
-    objet = get_object_or_404(Transaction, pk=pk)
-    if request.method == 'POST':
-        form = TransactionForm(request.POST, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('transaction_list')
-    else:
-        form = TransactionForm(instance=objet)
-    return render(request, 'transactions/form.html', {'form': form, 'action': 'Modifier'})
-
-def transaction_delete(request, pk):
-    objet = get_object_or_404(Transaction, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('transaction_list')
-    return render(request, 'transactions/confirm_delete.html', {'objet': objet})
 
 # Visite
 def visite_list(request):
@@ -663,71 +795,6 @@ def visite_delete(request, pk):
         return redirect('visite_list')
     return render(request, 'visites/confirm_delete.html', {'objet': objet})
 
-# Alerte
-def alerte_list(request):
-    objets = Alerte.objects.all()
-    return render(request, 'alertes/list.html', {'objets': objets})
-
-def alerte_create(request):
-    if request.method == 'POST':
-        form = AlerteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('alerte_list')
-    else:
-        form = AlerteForm()
-    return render(request, 'alertes/form.html', {'form': form, 'action': 'Créer'})
-
-def alerte_update(request, pk):
-    objet = get_object_or_404(Alerte, pk=pk)
-    if request.method == 'POST':
-        form = AlerteForm(request.POST, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('alerte_list')
-    else:
-        form = AlerteForm(instance=objet)
-    return render(request, 'alertes/form.html', {'form': form, 'action': 'Modifier'})
-
-def alerte_delete(request, pk):
-    objet = get_object_or_404(Alerte, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('alerte_list')
-    return render(request, 'alertes/confirm_delete.html', {'objet': objet})
-    
-# Activite
-def activite_list(request):
-    objets = Activite.objects.all()
-    return render(request, 'activites/list.html', {'objets': objets})
-
-def activite_create(request):
-    if request.method == 'POST':
-        form = ActiviteForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('activite_list')
-    else:
-        form = ActiviteForm()
-    return render(request, 'activites/form.html', {'form': form, 'action': 'Créer'})
-
-def activite_update(request, pk):
-    objet = get_object_or_404(Activite, pk=pk)
-    if request.method == 'POST':
-        form = ActiviteForm(request.POST, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('activite_list')
-    else:
-        form = ActiviteForm(instance=objet)
-    return render(request, 'activites/form.html', {'form': form, 'action': 'Modifier'})
-
-def activite_delete(request, pk):
-    objet = get_object_or_404(Activite, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('activite_list')
-    return render(request, 'activites/confirm_delete.html', {'objet': objet})
 
 # Message
 def message_list(request):
@@ -766,13 +833,50 @@ def message_delete(request, pk):
 @login_required(login_url='connexion')
 def mes_messages(request, contact_pk=None):
     utilisateur = request.user
+    is_admin = utilisateur.is_superuser or utilisateur.role in ['admin', 'superadmin']
 
-    # Récupérer les conversations où l'utilisateur est soit le "contact" soit le "proprietaire"
-    # ET la conversation n'a pas été marquée comme "supprimée" par l'utilisateur actuel.
-    conversations = Contact.objects.filter(
-        Q(utilisateur=utilisateur, supprime_par_utilisateur=False) |
-        Q(proprietaire=utilisateur, supprime_par_proprietaire=False)
-    )
+    # Récupérer les conversations
+    if is_admin:
+        conversations = Contact.objects.all()
+        
+        # Gestion du filtre
+        user_filter = request.GET.get('user_id', '').strip()
+        if user_filter:
+            try:
+                user_id = int(user_filter)
+                conversations = conversations.filter(
+                    Q(utilisateur_id=user_id) | Q(proprietaire_id=user_id)
+                )
+            except ValueError:
+                conversations = conversations.filter(
+                    Q(utilisateur__username__icontains=user_filter) |
+                    Q(utilisateur__first_name__icontains=user_filter) |
+                    Q(utilisateur__last_name__icontains=user_filter) |
+                    Q(proprietaire__username__icontains=user_filter) |
+                    Q(proprietaire__first_name__icontains=user_filter) |
+                    Q(proprietaire__last_name__icontains=user_filter)
+                )
+    else:
+        conversations = Contact.objects.filter(
+            Q(utilisateur=utilisateur, supprime_par_utilisateur=False) |
+            Q(proprietaire=utilisateur, supprime_par_proprietaire=False)
+        )
+
+    # ✅ Garder 'conversations' pour le template
+    conversations = conversations.order_by('-date_envoi')
+    
+    # ✅ Ajouter les infos de non lus dans un dictionnaire séparé
+    non_lus_par_conversation = {}
+    total_non_lus = 0
+    
+    for conversation in conversations:
+        count = Message.objects.filter(
+            contact=conversation,
+            destinataire=utilisateur,
+            statut='envoye'
+        ).count()
+        non_lus_par_conversation[conversation.id] = count
+        total_non_lus += count
 
     messages_du_fil = []
     contact_actuel = None
@@ -780,41 +884,66 @@ def mes_messages(request, contact_pk=None):
     if contact_pk:
         contact_actuel = get_object_or_404(Contact, pk=contact_pk)
 
-        # Vérification des droits pour accéder à cette conversation
-        if contact_actuel.utilisateur != utilisateur and contact_actuel.proprietaire != utilisateur:
-            return redirect('mes_messages')
-
-        # Si l'utilisateur a marqué cette conversation comme supprimée, on la masque aussi
-        if (contact_actuel.utilisateur == utilisateur and contact_actuel.supprime_par_utilisateur) or \
-           (contact_actuel.proprietaire == utilisateur and contact_actuel.supprime_par_proprietaire):
-            return redirect('mes_messages')
+        if not is_admin:
+            if contact_actuel.utilisateur != utilisateur and contact_actuel.proprietaire != utilisateur:
+                return redirect('mes_messages')
             
-        # Récupérer les messages du fil
-        messages_du_fil = Message.objects.filter(contact=contact_actuel).order_by('date_envoi')
+        # Marquer les messages comme lus
+        Message.objects.filter(
+            contact=contact_actuel,
+            destinataire=utilisateur,
+            statut='envoye'
+        ).update(statut='lu')
+        
+        # ✅ Récupérer les messages en filtrant ceux qui sont supprimés
+        messages_du_fil = Message.objects.filter(
+            contact=contact_actuel,
+            supprime_pour_tous=False  # ← Ne pas afficher les messages supprimés pour tous
+        ).exclude(
+            # Ne pas afficher les messages supprimés par l'expéditeur si l'utilisateur est l'expéditeur
+            Q(supprime_par_expediteur=True, expediteur=utilisateur) |
+            # Ne pas afficher les messages supprimés par le destinataire si l'utilisateur est le destinataire
+            Q(supprime_par_destinataire=True, destinataire=utilisateur)
+        ).order_by('date_envoi')
 
     context = {
-        'utilisateur': utilisateur,
-        'conversations': conversations.order_by('-date_envoi'),  # C'est mieux de trier par date d'envoi que par ID
-        'messages': messages_du_fil,
-        'contact_actuel': contact_actuel,
-    }
+    'utilisateur': utilisateur,
+    'conversations': conversations,
+    'non_lus_par_conversation': non_lus_par_conversation,  # ← Important !
+    'messages': messages_du_fil,
+    'contact_actuel': contact_actuel,
+    'is_admin': is_admin,
+    'user_filter': request.GET.get('user_id', ''),
+    'filter_type': request.GET.get('filter_type', 'id'),
+}
     return render(request, 'messages/messages.html', context)
+
 
 @login_required
 def supprimer_conversation(request, contact_pk):
     contact = get_object_or_404(Contact, pk=contact_pk)
     utilisateur = request.user
 
+    # ✅ NOUVEAU : Vérifier si l'utilisateur est admin
+    is_admin = utilisateur.is_superuser or utilisateur.role in ['admin', 'superadmin']
+
+    # ✅ MODIFIÉ : Les admins peuvent supprimer n'importe quelle conversation
+    if is_admin:
+        # L'admin peut supprimer définitivement
+        contact.delete()
+        return redirect('mes_messages')
+
+    # Comportement normal pour les non-admins
     if utilisateur == contact.utilisateur:
         contact.supprime_par_utilisateur = True
     elif utilisateur == contact.proprietaire:
         contact.supprime_par_proprietaire = True
     else:
-        # Empêcher un utilisateur de supprimer une conversation qui n'est pas la sienne
         return redirect('mes_messages')
 
     contact.save()
     return redirect("mes_messages")
+
 
 @login_required(login_url='login')
 def send_message(request, contact_pk):
@@ -823,193 +952,103 @@ def send_message(request, contact_pk):
         contenu = request.POST.get('contenu')
         
         if contenu:
+            is_admin = request.user.is_superuser or request.user.role in ['admin', 'superadmin']
+            
+            # Déterminer le destinataire
+            if is_admin:
+                if contact.utilisateur == request.user:
+                    destinataire = contact.proprietaire
+                elif contact.proprietaire == request.user:
+                    destinataire = contact.utilisateur
+                else:
+                    destinataire = contact.proprietaire
+            else:
+                destinataire = contact.proprietaire if contact.utilisateur == request.user else contact.utilisateur
+            
+            # ✅ NOUVEAU : Créer le message avec statut 'envoye' (non lu)
             Message.objects.create(
                 contact=contact,
-                expediteur=Utilisateur.objects.get(pk=request.user.id),
-                destinataire=contact.proprietaire if contact.utilisateur == Utilisateur.objects.get(pk=request.user.id) else contact.utilisateur,
-                contenu=contenu
+                expediteur=request.user,
+                destinataire=destinataire,
+                contenu=contenu,
+                statut='envoye'  # ← Important : non lu pour le destinataire
             )
     return redirect('mes_messages_detail', contact_pk=contact_pk)
 
-@login_required
-@csrf_exempt  # Permet les requêtes AJAX sans CSRF token (à sécuriser en production)
-def check_new_messages(request):
-    """
-    API pour vérifier les nouveaux messages en temps réel
-    Retourne un JSON indiquant s'il y a de nouveaux messages
-    """
-    try:
-        # Récupérer les paramètres
-        conversation_id = request.GET.get('conversation_id')
-        last_count = int(request.GET.get('last_count', 0))
-        user_id = request.user.id
-        
-        # Si pas de conversation spécifiée
-        if not conversation_id or conversation_id == '0':
-            return JsonResponse({
-                'success': False,
-                'has_new_messages': False,
-                'new_count': 0,
-                'message': 'Aucune conversation spécifiée'
-            })
-        
-        # Vérifier que la conversation existe et que l'utilisateur y a accès
-        conversation = get_object_or_404(Contact, pk=conversation_id)
-        
-        # Vérifier les permissions
-        if conversation.utilisateur_id != user_id and conversation.proprietaire_id != user_id:
-            return JsonResponse({
-                'success': False,
-                'has_new_messages': False,
-                'new_count': 0,
-                'message': 'Accès non autorisé'
-            })
-        
-        # Compter les messages de la conversation
-        total_messages = Message.objects.filter(contact=conversation).count()
-        
-        # Vérifier s'il y a de nouveaux messages
-        has_new = total_messages > last_count
-        
-        # Optionnel : récupérer les derniers messages
-        new_messages_data = []
-        if has_new:
-            new_messages = Message.objects.filter(
-                contact=conversation
-            ).order_by('-date_envoi')[:5]  # 5 derniers messages
-            
-            for msg in new_messages:
-                new_messages_data.append({
-                    'id': msg.id,
-                    'contenu': msg.contenu,
-                    'expediteur_id': msg.expediteur_id,
-                    'date_envoi': msg.date_envoi.strftime('%H:%M'),
-                    'est_expediteur': msg.expediteur_id == user_id
-                })
-        
-        return JsonResponse({
-            'success': True,
-            'has_new_messages': has_new,
-            'new_count': total_messages,
-            'message_diff': total_messages - last_count if has_new else 0,
-            'new_messages': new_messages_data,
-            'timestamp': timezone.now().isoformat()
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'has_new_messages': False,
-            'new_count': 0,
-            'error': str(e),
-            'message': 'Erreur lors de la vérification'
-        })
+# views.py
+from django.http import JsonResponse
 
+@login_required
+def api_check_new_messages(request):
+    """API pour vérifier les nouveaux messages"""
+    conversation_id = request.GET.get('conversation_id')
+    last_id = request.GET.get('last_id', 0)
+    
+    try:
+        last_id = int(last_id)
+        conversation_id = int(conversation_id)
+        
+        # ✅ Récupérer les messages plus récents que last_id, en excluant les supprimés
+        nouveaux_messages = Message.objects.filter(
+            contact_id=conversation_id,
+            id__gt=last_id,
+            supprime_pour_tous=False  # ← Exclure les messages supprimés pour tous
+        ).exclude(
+            # Exclure les messages supprimés par l'expéditeur si c'est l'utilisateur
+            Q(supprime_par_expediteur=True, expediteur=request.user) |
+            # Exclure les messages supprimés par le destinataire si c'est l'utilisateur
+            Q(supprime_par_destinataire=True, destinataire=request.user)
+        ).order_by('date_envoi')
+        
+        messages_data = []
+        for msg in nouveaux_messages:
+            messages_data.append({
+                'id': msg.id,
+                'contenu': msg.contenu,
+                'time': msg.date_envoi.strftime('%H:%M'),
+                'is_sent': msg.expediteur_id == request.user.id
+            })
+        
+        return JsonResponse({
+            'has_new': len(messages_data) > 0,
+            'messages': messages_data
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 @login_required
 def supprimer_message(request, message_pk, mode):
     message = get_object_or_404(Message, pk=message_pk)
     utilisateur = request.user
     contact_pk = message.contact.pk
+    
+    # Vérifier si l'utilisateur est admin
+    is_admin = utilisateur.is_superuser or (hasattr(utilisateur, 'role') and utilisateur.role in ['admin', 'superadmin'])
 
-    # L'utilisateur doit être l'expéditeur ou le destinataire du message
-    if utilisateur != message.expediteur and utilisateur != message.contact.proprietaire and utilisateur != message.contact.utilisateur:
+    # L'utilisateur doit être l'expéditeur, le destinataire ou admin
+    if not (is_admin or utilisateur == message.expediteur or utilisateur == message.destinataire):
         return redirect('mes_messages_detail', contact_pk=contact_pk)
 
     # Logique de suppression
     if mode == 'pour_moi':
+        # Supprimer seulement pour l'utilisateur actuel
         if utilisateur == message.expediteur:
             message.supprime_par_expediteur = True
-        else: # C'est le destinataire
+        elif utilisateur == message.destinataire:
             message.supprime_par_destinataire = True
         message.save()
-    elif mode == 'pour_tous' and utilisateur == message.expediteur:
-        # Seul l'expéditeur peut choisir de supprimer pour tout le monde
-        message.supprime_pour_tous = True
-        message.save()
+        
+    elif mode == 'pour_tous':
+        # Supprimer pour tout le monde (admin ou expéditeur)
+        if is_admin or utilisateur == message.expediteur:
+            message.supprime_pour_tous = True
+            message.save()
     
     return redirect('mes_messages_detail', contact_pk=contact_pk)
 
-def success_page(request):
-    return render(request, 'success_message.html')
-    
-# Information
-
-def information_list(request):
-    objets = Information.objects.all()
-    return render(request, 'informations/list.html', {'objets': objets})
-
-def information_create(request):
-    if request.method == 'POST':
-        form = InformationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('information_list')
-    else:
-        form = InformationForm()
-    return render(request, 'informations/form.html', {'form': form, 'action': 'Créer'})
-
-def information_update(request, pk):
-    objet = get_object_or_404(Information, pk=pk)
-    
-    if request.method == 'POST':
-        # C'est ici que se trouve l'erreur la plus probable.
-        # Vous devez ajouter 'request.FILES' pour que les fichiers soient traités.
-        form = InformationForm(request.POST, request.FILES, instance=objet)
-        
-        if form.is_valid():
-            form.save()
-            return redirect('information_list') # Redirection vers la liste
-    else:
-        form = InformationForm(instance=objet)
-        
-    return render(request, 'informations/form.html', {'form': form, 'action': 'Modifier'})
-
-def information_delete(request, pk):
-    objet = get_object_or_404(Information, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('information_list')
-    return render(request, 'informations/confirm_delete.html', {'objet': objet})
-    
-# Temoignage
-def temoignage_list(request):
-    objets = Temoignage.objects.all()
-    return render(request, 'temoignages/list.html', {'objets': objets})
-
-def temoignage_create(request):
-    if request.method == 'POST':
-        form = TemoignageForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('temoignage_list')
-    else:
-        form = TemoignageForm()
-    return render(request, 'temoignages/form.html', {'form': form, 'action': 'Créer'})
-
-def temoignage_update(request, pk):
-    objet = get_object_or_404(Temoignage, pk=pk)
-    if request.method == 'POST':
-        form = TemoignageForm(request.POST, instance=objet)
-        if form.is_valid():
-            form.save()
-            return redirect('temoignage_list')
-    else:
-        form = TemoignageForm(instance=objet)
-    return render(request, 'temoignages/form.html', {'form': form, 'action': 'Modifier'})
-
-def temoignage_delete(request, pk):
-    objet = get_object_or_404(Temoignage, pk=pk)
-    if request.method == 'POST':
-        objet.delete()
-        return redirect('temoignage_list')
-    return render(request, 'temoignages/confirm_delete.html', {'objet': objet})
 
 def abaut(request):
     objets = Information.objects.all()
     return render(request,'about.html', {'objets': objets} ) 
-
-def nav_bar(request):
-    return render(request , 'includes/nav_bar.html' )
 
 
 
@@ -1023,234 +1062,6 @@ def detail_propriete(request):
     return render(request ,'immobilier/detail_propriete.html', {})
 
 
-
-@login_required(login_url='connexion')
-def superadmin(request):
-    """
-    Vue pour le super admin avec statistiques globales du site.
-    Accessible uniquement aux super administrateurs.
-    """
-    user = request.user
-    
-    # Vérifier que l'utilisateur est un super admin
-    if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
-        return redirect('index')
-    
-    # --- STATISTIQUES GLOBALES ---
-    
-    # 1. Statistiques principales
-    total_proprietes = Propriete.objects.count()
-    total_utilisateurs = Utilisateur.objects.count()
-    total_vues = Visite.objects.count()
-    total_messages = Message.objects.count()
-    
-    # 2. Propriétés à modérer (statut 'en_attente' pour Annonce ou propriétés signalées)
-    # Pour Annonce avec statut 'attente'
-    annonces_a_moderer = Annonce.objects.filter(statut='attente').count()
-    
-    # Pour propriétés qui pourraient avoir besoin de modération
-    # (vous n'avez pas de statut 'signale' dans Propriete, donc on utilise Annonce)
-    proprietes_a_moderer = annonces_a_moderer
-    
-    # 3. Utilisateurs suspendus (statut=False)
-    utilisateurs_suspendus = Utilisateur.objects.filter(statut=False).count()
-    
-    # 4. Transactions totales
-    transactions_totales = Transaction.objects.count()
-    
-    # 5. Alertes critiques récentes (non résolues)
-    alertes_critiques = Alerte.objects.filter(
-        statut='non_resolue'
-    ).select_related('propriete', 'admin').order_by('-date_creation')[:10]
-    
-    # 6. Activité récente (dernières 24h)
-    activite_recente = Activite.objects.filter(
-        date_action__gte=timezone.now() - timezone.timedelta(days=1)
-    ).select_related('utilisateur').order_by('-date_action')[:10]
-    
-    # 7. Liste des annonces à modérer
-    annonces_a_moderer_liste = Annonce.objects.filter(
-        statut='attente'
-    ).select_related('propriete', 'utilisateur').order_by('-date_publication')[:50]
-    
-    # 8. Liste de tous les utilisateurs
-    utilisateurs_liste = Utilisateur.objects.all().order_by('-date_joined')[:50]
-    
-    # 9. Statistiques par type de propriété
-    from django.db.models import Count
-    stats_par_type = Propriete.objects.values('type').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # 10. Statistiques temporelles (30 derniers jours)
-    date_30_jours = timezone.now() - timezone.timedelta(days=30)
-    
-    # Propriétés créées dans les 30 derniers jours
-    nouvelles_proprietes_30j = Propriete.objects.filter(
-        date_publication__gte=date_30_jours
-    ).count()
-    
-    # Utilisateurs inscrits dans les 30 derniers jours
-    nouveaux_utilisateurs_30j = Utilisateur.objects.filter(
-        date_joined__gte=date_30_jours
-    ).count()
-    
-    # Visites dans les 30 derniers jours
-    visites_30j = Visite.objects.filter(
-        date_visite__gte=date_30_jours
-    ).count()
-    
-    # 11. Top 5 des propriétés les plus vues
-    top_proprietes_vues = Propriete.objects.annotate(
-        nb_vues=Count('visites')
-    ).order_by('-nb_vues')[:5]
-    
-    # 12. Top 5 des propriétaires les plus actifs
-    top_proprietaires = Utilisateur.objects.filter(
-        role='proprietaire'
-    ).annotate(
-        nb_proprietes=Count('proprietes')
-    ).order_by('-nb_proprietes')[:5]
-    
-    # 13. Messages non lus (statut='envoye' pour non lu, 'lu' pour lu)
-    messages_non_lus = Message.objects.filter(statut='envoye').count()
-    
-    # 14. Contacts récents (derniers 7 jours)
-    contacts_recents = Contact.objects.filter(
-        date_envoi__gte=timezone.now() - timezone.timedelta(days=7)
-    ).count()
-    
-    # 15. Répartition par rôle d'utilisateur
-    repartition_roles = Utilisateur.objects.values('role').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # 16. Propriétés par commune
-    proprietes_par_commune = Propriete.objects.values('commune').annotate(
-        count=Count('id')
-    ).order_by('-count')[:10]
-    
-    # 17. Témoignages en attente de validation
-    temoignages_en_attente = Temoignage.objects.filter(statut='attente').count()
-    
-    # 18. Transactions par type
-    transactions_par_type = Transaction.objects.values('type').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # 19. Propriétés par statut
-    proprietes_par_statut = Propriete.objects.values('statut').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # 20. Chiffre d'affaires total (somme des transactions)
-    chiffre_affaires_total = Transaction.objects.aggregate(
-        total=Sum('montant')
-    )['total'] or 0
-    
-    # 21. Propriétés avec vidéo
-    proprietes_avec_video = Propriete.objects.exclude(video='').count()
-    
-    # 22. Messages échangés aujourd'hui
-    messages_aujourdhui = Message.objects.filter(
-        date_envoi__date=timezone.now().date()
-    ).count()
-    
-    # 23. Visites aujourd'hui
-    visites_aujourdhui = Visite.objects.filter(
-        date_visite__date=timezone.now().date()
-    ).count()
-    
-    # 24. Top 5 des villes les plus populaires
-    proprietes_par_ville = Propriete.objects.values('ville').annotate(
-        count=Count('id')
-    ).order_by('-count')[:5]
-    
-    # 25. Contacts non lus
-    contacts_non_lus = Contact.objects.filter(statut='non_lu').count()
-    
-    # 26. Alertes non résolues
-    alertes_non_resolues = Alerte.objects.filter(statut='non_resolue').count()
-    
-    # 27. Derniers témoignages validés
-    derniers_temoignages = Temoignage.objects.filter(
-        statut='valide'
-    ).select_related('utilisateur').order_by('-date_creation')[:5]
-    
-    # 28. Informations par type
-    informations_par_type = Information.objects.values('type').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # 29. Utilisateurs par statut
-    utilisateurs_par_statut = Utilisateur.objects.values('statut').annotate(
-        count=Count('id')
-    )
-    
-    # 30. Annonces par statut
-    annonces_par_statut = Annonce.objects.values('statut').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # Préparation du contexte
-    context = {
-        # --- STATISTIQUES PRINCIPALES ---
-        'total_proprietes': total_proprietes,
-        'total_utilisateurs': total_utilisateurs,
-        'total_vues': total_vues,
-        'total_messages': total_messages,
-        
-        # --- MODÉRATION ---
-        'proprietes_a_moderer': proprietes_a_moderer,
-        'annonces_a_moderer': annonces_a_moderer,
-        'utilisateurs_suspendus': utilisateurs_suspendus,
-        'transactions_totales': transactions_totales,
-        
-        # --- DONNÉES POUR LES TABLEAUX ---
-        'alertes_critiques': alertes_critiques,
-        'activite_recente': activite_recente,
-        'annonces_a_moderer_liste': annonces_a_moderer_liste,
-        'utilisateurs_liste': utilisateurs_liste,
-        
-        # --- STATISTIQUES DÉTAILLÉES ---
-        'stats_par_type': stats_par_type,
-        'nouvelles_proprietes_30j': nouvelles_proprietes_30j,
-        'nouveaux_utilisateurs_30j': nouveaux_utilisateurs_30j,
-        'visites_30j': visites_30j,
-        
-        # --- TOPS ET CLASSEMENTS ---
-        'top_proprietes_vues': top_proprietes_vues,
-        'top_proprietaires': top_proprietaires,
-        'proprietes_par_ville': proprietes_par_ville,
-        'derniers_temoignages': derniers_temoignages,
-        
-        # --- STATISTIQUES DIVERSES ---
-        'messages_non_lus': messages_non_lus,
-        'contacts_recents': contacts_recents,
-        'repartition_roles': repartition_roles,
-        'proprietes_par_commune': proprietes_par_commune,
-        'temoignages_en_attente': temoignages_en_attente,
-        'transactions_par_type': transactions_par_type,
-        'proprietes_par_statut': proprietes_par_statut,
-        'chiffre_affaires_total': chiffre_affaires_total,
-        'proprietes_avec_video': proprietes_avec_video,
-        'messages_aujourdhui': messages_aujourdhui,
-        'visites_aujourdhui': visites_aujourdhui,
-        'contacts_non_lus': contacts_non_lus,
-        'alertes_non_resolues': alertes_non_resolues,
-        'informations_par_type': informations_par_type,
-        'utilisateurs_par_statut': utilisateurs_par_statut,
-        'annonces_par_statut': annonces_par_statut,
-        
-        # --- INFO UTILISATEUR ---
-        'user': user,
-        
-        # --- DATES POUR LES FILTRES ---
-        'today': timezone.now().date(),
-        'date_30_jours': date_30_jours.date(),
-    }
-    
-    return render(request, 'immobilier/superadmin.html', context)
 
 
 @login_required(login_url='connexion')
@@ -1458,15 +1269,12 @@ def creer_utilisateur_admin(request):
 def gestion_proprietes_admin(request):
     """
     Page admin pour gérer toutes les propriétés avec filtres.
-    Accessible uniquement aux super administrateurs et administrateurs.
     """
     user = request.user
     
-    # Vérifier que l'utilisateur est un admin
     if not user.is_superuser and user.role not in ["superadmin", "admin"]:
         return redirect('index')
     
-    # Récupérer toutes les propriétés
     proprietes = Propriete.objects.all().order_by('-date_publication')
     
     # Appliquer les filtres
@@ -1476,19 +1284,17 @@ def gestion_proprietes_admin(request):
     commune_filter = request.GET.get('commune')
     prix_min = request.GET.get('prix_min')
     prix_max = request.GET.get('prix_max')
+    statut_propriete_admin_filter = request.GET.get('statut_admin')
+    statut_propriete_owner_filter = request.GET.get('statut_owner')
     
-    # Récupérer le nom du propriétaire filtré (pour l'affichage)
     proprietaire_nom = None
     
     if proprietaire_filter:
-        # Vérifier que le propriétaire existe
         try:
             proprietaire_obj = Utilisateur.objects.get(id=proprietaire_filter)
             proprietaire_nom = proprietaire_obj.get_full_name() or proprietaire_obj.username
-            # Filtrer les propriétés de ce propriétaire
             proprietes = proprietes.filter(proprietaire=proprietaire_obj)
         except Utilisateur.DoesNotExist:
-            # Si le propriétaire n'existe pas, on ne filtre pas
             proprietaire_nom = "Propriétaire inconnu"
     
     if type_filter:
@@ -1506,6 +1312,17 @@ def gestion_proprietes_admin(request):
     if prix_max:
         proprietes = proprietes.filter(prix__lte=prix_max)
     
+    # ✅ Filtres pour les statuts
+    if statut_propriete_admin_filter == 'valide':
+        proprietes = proprietes.filter(statut_propriete_admin=True)
+    elif statut_propriete_admin_filter == 'attente':
+        proprietes = proprietes.filter(statut_propriete_admin=False)
+    
+    if statut_propriete_owner_filter == 'active':
+        proprietes = proprietes.filter(statut_propriete_owner=True)
+    elif statut_propriete_owner_filter == 'inactive':
+        proprietes = proprietes.filter(statut_propriete_owner=False)
+    
     # Statistiques
     total_proprietes = Propriete.objects.count()
     proprietes_disponibles = Propriete.objects.filter(statut='disponible').count()
@@ -1515,23 +1332,13 @@ def gestion_proprietes_admin(request):
     from django.db.models import Avg
     prix_moyen = Propriete.objects.aggregate(Avg('prix'))['prix__avg'] or 0
     
-    # Propriétaires distincts pour le filtre
-    proprietaires_distincts = Utilisateur.objects.filter(
-        role='proprietaire'
-    ).distinct()
-    
-    # Types distincts
+    proprietaires_distincts = Utilisateur.objects.filter(role='proprietaire').distinct()
     types_distincts = Propriete.objects.values_list('type', flat=True).distinct()
-    
-    # Communes distinctes
     communes_distinctes = Propriete.objects.values_list('commune', flat=True).distinct()
-    
-    # Statuts distincts
     statuts_distincts = Propriete.objects.values_list('statut', flat=True).distinct()
     
-    # Pagination
     from django.core.paginator import Paginator
-    paginator = Paginator(proprietes, 50)  # 50 propriétés par page
+    paginator = Paginator(proprietes, 50)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -1554,8 +1361,10 @@ def gestion_proprietes_admin(request):
             'commune': commune_filter,
             'prix_min': prix_min,
             'prix_max': prix_max,
+            'statut_admin': statut_propriete_admin_filter,
+            'statut_owner': statut_propriete_owner_filter,
         },
-        'proprietaire_nom': proprietaire_nom,  # Pour l'affichage dans le résumé
+        'proprietaire_nom': proprietaire_nom,
     }
     
     return render(request, 'immobilier/gestion_proprietes.html', context)
@@ -1583,6 +1392,80 @@ def propriete_update_admin(request, pk):
         'objet': propriete,
         'action': 'Modifier'
     })
+
+
+
+
+
+
+
+@login_required(login_url='connexion')
+def toggle_admin_statut_propriete(request, pk):
+    """
+    Permet à l'admin de valider/invalider une propriété.
+    Si l'admin invalide, le propriétaire ne peut plus réactiver.
+    """
+    user = request.user
+    
+    if not (user.is_superuser or user.role in ['admin', 'superadmin']):
+        return redirect('index')
+    
+    propriete = get_object_or_404(Propriete, pk=pk)
+    
+    # ✅ L'admin peut changer le statut admin (validation)
+    propriete.statut_propriete_admin = not propriete.statut_propriete_admin
+    
+    # ✅ Si l'admin invalide, on force la désactivation du propriétaire
+    if not propriete.statut_propriete_admin:
+        propriete.statut_propriete_owner = False
+    # ✅ Si l'admin valide, on ne touche pas au statut du propriétaire
+    # Il reste à son état précédent (True ou False)
+    
+    propriete.save()
+    
+    return redirect('gestion_proprietes_admin')
+
+@login_required(login_url='connexion')
+def toggle_owner_statut_propriete(request, pk):
+    """
+    Permet au propriétaire d'activer/désactiver sa propriété.
+    Seulement si l'admin a validé (statut_propriete_admin = True)
+    """
+    propriete = get_object_or_404(Propriete, pk=pk, proprietaire=request.user)
+    
+    # ✅ Vérifier que l'admin a validé
+    if propriete.statut_propriete_admin:
+        propriete.statut_propriete_owner = not propriete.statut_propriete_owner
+        propriete.save()
+    
+    return redirect('mes_proprietes')
+
+@login_required(login_url='connexion')
+def toggle_statut_propriete(request, pk):
+    """
+    Vue pour l'admin (à garder dans gestion_proprietes_admin)
+    """
+    user = request.user
+    
+    if not (user.is_superuser or user.role in ['admin', 'superadmin']):
+        return redirect('index')
+    
+    propriete = get_object_or_404(Propriete, pk=pk)
+    
+    # ✅ L'admin peut bloquer/débloquer
+    propriete.statut_propriete_admin = not propriete.statut_propriete_admin
+    
+    # ✅ Si l'admin bloque, on force la désactivation
+    if not propriete.statut_propriete_admin:
+        propriete.statut_propriete_owner = False
+    else:
+        # Si l'admin débloque, le propriétaire peut réactiver s'il veut
+        # On ne touche pas à statut_propriete_owner, il reste à son état précédent
+        pass
+    
+    propriete.save()
+    
+    return redirect('gestion_proprietes_admin')    
 
 @login_required(login_url='connexion')
 def export_proprietes_pdf(request):
@@ -1651,8 +1534,7 @@ def toggle_statut_utilisateur(request, pk):
 
 
 
-def proprietaire_parametres(request):
-    return render(request, 'immobilier/parametres_proprietaire.html' )
+
  
 
 def temoingnages(request):
@@ -1668,7 +1550,29 @@ def espace_client(request):
 @login_required(login_url='connexion')
 def profil(request):
     user = request.user  # utilisateur actuellement connecté
-    return render(request, 'profil.html', {'user': user})
+    
+    # Déterminer si l'utilisateur est admin
+    is_admin = user.is_superuser or (hasattr(user, 'role') and user.role in ['admin', 'superadmin'])
+    
+    # Déterminer le rôle pour le template
+    user_role = None
+    if user.is_authenticated:
+        if user.is_superuser:
+            user_role = "admin"
+        elif hasattr(user, 'role') and user.role == "proprietaire":
+            user_role = "proprietaire"
+        elif hasattr(user, 'role') and user.role == "admin":
+            user_role = "admin"
+        else:
+            user_role = "client"
+    
+    context = {
+        'user': user,
+        'is_admin': is_admin,  # ← AJOUTER CETTE LIGNE
+        'user_role': user_role,  # ← AJOUTER CETTE LIGNE
+    }
+    
+    return render(request, 'profil.html', context)
 
 @login_required(login_url='connexion')
 def proprietaire(request):
@@ -1732,14 +1636,102 @@ def mes_proprietes(request):
     """
     Affiche toutes les propriétés appartenant au propriétaire connecté.
     """
-    user = request.user  # utilisateur connecté
+    user = request.user
 
-    # Vérifie que l'utilisateur est bien un propriétaire
     if hasattr(user, 'role') and user.role != 'proprietaire':
         return render(request, 'erreur.html', {'message': "Accès réservé aux propriétaires."})
 
-    # On récupère toutes les propriétés de ce propriétaire
+    # On récupère toutes les propriétés du propriétaire
     proprietes = Propriete.objects.filter(proprietaire=user).order_by('-date_publication')
 
-    # Envoi au template
     return render(request, 'proprietes/mes_proprietes.html', {'proprietes': proprietes})
+
+
+#contact en utilisation le model contact et message pour creer une conversation entre l'utilisateur et les admins pour le formulaire de contact general
+
+from django.contrib import messages as django_messages
+
+def contact(request):
+    """
+    Vue pour le formulaire de contact général.
+    Crée une conversation entre l'utilisateur et les administrateurs.
+    """
+    if request.method == 'POST':
+        # Récupérer les données du formulaire
+        nom = request.POST.get('nom')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+        sujet = request.POST.get('sujet')
+        message_content = request.POST.get('message')
+        
+        # Trouver un admin pour recevoir le message
+        # Priorité: superadmin > admin
+        admin_user = Utilisateur.objects.filter(
+            Q(is_superuser=True) | Q(role__in=['superadmin', 'admin'])
+        ).first()
+        
+        if not admin_user:
+            # Si aucun admin n'existe, créer le message quand même ou afficher une erreur
+            django_messages.error(request, "Aucun administrateur disponible pour traiter votre demande.")
+            return redirect('contact')
+        
+        # Récupérer l'utilisateur connecté (peut être None)
+        utilisateur_connecte = request.user if request.user.is_authenticated else None
+        
+        # Vérifier si un contact existe déjà entre cet utilisateur et cet admin
+        contact_fil = Contact.objects.filter(
+            utilisateur=utilisateur_connecte,
+            proprietaire=admin_user,
+            propriete__isnull=True  # Contact général (pas lié à une propriété)
+        ).first()
+        
+        if not contact_fil:
+            # Créer un nouveau contact
+            contact_fil = Contact.objects.create(
+                utilisateur=utilisateur_connecte,
+                proprietaire=admin_user,
+                propriete=None,  # Pas de propriété liée
+                nom=nom,
+                email=email,
+                telephone=telephone,
+                sujet=sujet,
+                message=message_content,
+                statut='non_lu'  # Statut initial
+            )
+        
+        # Créer le message associé
+        Message.objects.create(
+            contact=contact_fil,
+            expediteur=utilisateur_connecte if utilisateur_connecte else None,
+            destinataire=admin_user,
+            contenu=message_content,
+            statut='envoye'
+        )
+        
+        django_messages.success(request, "Votre message a été envoyé avec succès. veillez verifier vos conversations pour voir la réponse de nos admins.")
+        return redirect('contact')
+    
+    return render(request, 'contact.html', {})
+
+# pour que les admins puissent voir tous les contacts généraux (pas liés à une propriété) et y répondre facilement, on crée une vue dédiée
+
+@login_required(login_url='connexion')
+def contacts_admin(request):
+    """
+    Affiche tous les contacts généraux pour les administrateurs.
+    """
+    if not (request.user.is_superuser or request.user.role in ['admin', 'superadmin']):
+        return redirect('index')
+    
+    contacts = Contact.objects.filter(
+        propriete__isnull=True  # Contacts généraux uniquement
+    ).order_by('-date_envoi')
+    
+    # Statistiques
+    non_lus = contacts.filter(statut='non_lu').count()
+    
+    context = {
+        'contacts': contacts,
+        'non_lus': non_lus,
+    }
+    return render(request, 'contacts/admin_list.html', context)

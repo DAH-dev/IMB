@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contacts généraux - Administration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Messages de contact généraux</h2>
+    
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total</h5>
+                    <p class="card-text display-6">{{ contacts.count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Non lus</h5>
+                    <p class="card-text display-6">{{ non_lus }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liste des contacts -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Sujet</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.date_envoi|date:"d/m/Y H:i" }}</td>
+                    <td>{{ contact.nom }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>{{ contact.telephone|default:"-" }}</td>
+                    <td>{{ contact.sujet }}</td>
+                    <td>
+                        {% if contact.statut == 'non_lu' %}
+                        <span class="badge bg-warning">Non lu</span>
+                        {% elif contact.statut == 'en_cours' %}
+                        <span class="badge bg-info">En cours</span>
+                        {% else %}
+                        <span class="badge bg-success">Traité</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'mes_messages_detail' contact.pk %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Voir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Aucun message de contact</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

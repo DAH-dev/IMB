@@ -8,6 +8,8 @@
       --dark: #343a40;
     }
 
+    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -161,6 +163,7 @@
       padding: 0;
       margin-top: 10px;
       padding-bottom: 5px;
+      
     }
 
     .mobile-links li a {
@@ -168,7 +171,7 @@
       padding: 8px 0;
       color: var(--dark);
       border-bottom: 1px solid #eee;
-      font-size: 0.9rem;
+      font-size: 0.97rem;
       font-weight: 500;
     }
 
@@ -253,7 +256,7 @@
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s, color 0.3s;
-      font-size: 0, 80rem;
+      font-size: 0, 95rem;
     }
 
     .commune-badge:hover,
@@ -562,7 +565,7 @@
 
       /* Ajuste le padding du body pour que le contenu ne soit pas caché par la barre du bas */
       body {
-        padding-bottom: 50px;
+        padding-bottom: 5px;
       }
 
       /* BARRE DE NAVIGATION INFÉRIEURE FIXE */

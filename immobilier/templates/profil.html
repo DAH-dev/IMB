@@ -34,14 +34,22 @@
            alt="Photo de profil">
       <div class="user-info">
         <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
-        <small class="user-role">{{ user.role|capfirst }}</small>
+        <small class="user-role">
+          {% if user.is_superuser %}
+            Super Admin
+          {% elif is_admin %}
+            Administrateur
+          {% else %}
+            {{ user.role|capfirst }}
+          {% endif %}
+        </small>
       </div>
     </div>
 
     <nav class="sidebar-nav">
-      <ul class="nav-list">
+       <ul class="nav-list">
         <li class="nav-item active">
-          <a class="nav-link" href="{% url 'profil' %}">
+          <a class="nav-link" style="background: var(--secondary-color); color: white;" href="{% url 'profil' %}">
             <i class="fas fa-user"></i>
             <span>Mon profil</span>
           </a>
@@ -61,6 +69,26 @@
             <span>Mes propriétés</span>
           </a>
         </li>
+
+       {% elif is_admin %}
+
+
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'gestion_utilisateurs_admin' %}">
+            <i class="fa-solid fa-user-shield me-2"></i>
+            <span>Gestion utilisateurs</span>
+          </a>
+        </li>
+
+       
+
+                <li class="nav-item">
+          <a class="nav-link" href="{% url 'gestion_proprietes_admin' %}">
+            <i class="fa-solid fa-building me-2"></i>
+            <span>Gestion propriétés</span>
+          </a>
+        </li>
+
         {% endif %}
 
         <li class="nav-item">
@@ -83,7 +111,7 @@
             <span>Déconnexion</span>
           </a>
         </li>
-      </ul>
+       </ul>
     </nav>
   </div>
 
@@ -105,7 +133,7 @@
             </a>
             <a href="{% url 'modifier_profil' %}" class="btn btn-primary btn-edit-profile">
               <i class="fas fa-user-edit"></i>
-              Modifier mon profil
+              Modifier mon profil 
             </a>
           </div>
         </div>
@@ -141,7 +169,15 @@
                   </div>
                   <div class="avatar-info">
                     <h5 class="avatar-name">{{ user.get_full_name|default:user.username }}</h5>
-                    <p class="avatar-role">{{ user.role|capfirst }}</p>
+                    <p class="avatar-role">
+                      {% if user.is_superuser %}
+                        Super Admin
+                      {% elif is_admin %}
+                        Administrateur
+                      {% else %}
+                        {{ user.role|capfirst }}
+                      {% endif %}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -195,7 +231,15 @@
                     </div>
                     <div class="info-content">
                       <label class="info-label">Rôle</label>
-                      <p class="info-value role-badge">{{ user.role|capfirst }}</p>
+                      <p class="info-value role-badge">
+                        {% if user.is_superuser %}
+                          Super Admin
+                        {% elif is_admin %}
+                          Administrateur
+                        {% else %}
+                          {{ user.role|capfirst }}
+                        {% endif %}
+                      </p>
                     </div>
                   </div>
                   

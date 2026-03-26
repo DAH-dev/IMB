@@ -3,189 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier mon profil</title> 
+    <title>Modifier mon profil - IMMO ABIDJAN</title>
+    
+    <!-- Liens vers Bootstrap et Font Awesome (comme les autres pages) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ------------------------------------------- */
-        /* STYLES GÉNÉRAUX POUR LE FORMULAIRE (Inchangés) */
-        /* ------------------------------------------- */
-        
+        /* Variables du profil */
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #3498DB;
+            --accent-color: #E74C3C;
+            --success-color: #27AE60;
+            --warning-color: #F39C12;
+            --light-color: #F8F9FA;
+            --dark-color: #1A2530;
+            --gray-light: #ECF0F1;
+            --gray-medium: #BDC3C7;
+            --gray-dark: #7F8C8D;
+            --border-color: #E0E0E0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            
+            --shadow-sm: 0 2px 8px var(--shadow-color);
+            --shadow-md: 0 4px 16px var(--shadow-color);
+            --shadow-lg: 0 8px 32px var(--shadow-color);
+            
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+            
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f5f7fa; 
-            font-family: Arial, sans-serif;
-        }
-
-        .form-container {
-            max-width: 400px;
-            margin: 40px auto;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            {% comment %} background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); {% endcomment %}
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .form-container h2 {
+        /* Carte de formulaire */
+        .form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* En-tête de la carte */
+        .form-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 30px 30px 20px;
             text-align: center;
-            color: #1e4a8d;
-            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-header h2 {
+            color: white;
             font-size: 1.8rem;
-            border-bottom: 3px solid #ff6b00; 
-            display: block;
-            width: fit-content;
-            margin: 0 auto 25px auto;
-            padding-bottom: 5px;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
 
-        .form-container form p {
-            margin-bottom: 15px;
+        .form-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin: 0;
         }
 
-        /* ------------------------------------------- */
-        /* NOUVEAU: Style de la photo de profil */
-        /* ------------------------------------------- */
-        .profile-photo {
-            display: block;
-            width: 100px;
-            height: 100px;
+        /* Avatar */
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: -60px auto 20px;
+            z-index: 10;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #ff6b00;
-            margin: 0 auto 10px auto;
+            border: 4px solid white;
+            box-shadow: var(--shadow-md);
+            background: white;
         }
 
-        /* ------------------------------------------- */
-        /* STYLES DES CHAMPS (form-control) et LABELS (Inchangés) */
-        /* ------------------------------------------- */
-        .form-container label {
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            cursor: pointer;
+            border: 4px solid white;
+        }
+
+        .avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .avatar-overlay i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        /* Corps du formulaire */
+        .form-body {
+            padding: 20px 30px 30px;
+        }
+
+        .current-photo-info {
+            text-align: center;
+            background: var(--light-color);
+            padding: 10px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--gray-dark);
+            border: 1px dashed var(--secondary-color);
+        }
+
+        .current-photo-info i {
+            color: var(--secondary-color);
+            margin-right: 5px;
+        }
+
+        /* Groupes de formulaire */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 600;
-            color: #343a40;
+            color: var(--primary-color);
             font-size: 0.9rem;
         }
 
-        .form-container .form-control {
-            width: 100%;
-            padding: 7px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box; 
-            transition: border-color 0.3s, box-shadow 0.3s;
+        .form-group label i {
+            color: var(--secondary-color);
+            width: 20px;
+            margin-right: 5px;
         }
 
-        .form-container .form-control:focus {
-            border-color: #1e4a8d;
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem;
+            transition: all var(--transition-fast);
+            background: var(--light-color);
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(30, 74, 141, 0.2);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+            background: white;
         }
 
-        .form-container input[type="file"] {
-            padding: 5px;
-            background-color: #f8f9fa;
-        }
-
-        /* ------------------------------------------- */
-        /* STYLES DU BOUTON (Légèrement modifiés) */
-        /* ------------------------------------------- */
-        .form-container button[type="submit"] {
+        /* Champ fichier stylisé */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
             width: 100%;
-            padding: 8px;
-            background-color: #1e4a8d; /* Changement de couleur pour une action de sauvegarde */
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            background: var(--light-color);
+            border: 2px dashed var(--secondary-color);
+            border-radius: var(--border-radius-sm);
+            padding: 12px;
+            text-align: center;
+            color: var(--secondary-color);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .file-input-button:hover {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .file-input-button i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Messages d'erreur */
+        .error-message {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .error-message i {
+            margin-right: 5px;
+        }
+
+        .help-text {
+            color: var(--gray-dark);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Bouton de soumission */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--secondary-color), #2980B9);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--border-radius-sm);
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
+            transition: all var(--transition-fast);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-submit i {
+            font-size: 1.2rem;
+        }
+
+        /* Lien d'annulation */
+        .cancel-link {
+            text-align: center;
             margin-top: 20px;
         }
 
-        .form-container button[type="submit"]:hover {
-            background-color: #15386d;
+        .cancel-link a {
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color var(--transition-fast);
         }
-        
-        /* ------------------------------------------- */
-        /* RESPONSIVE MOBILE (Inchangés) */
-        /* ------------------------------------------- */
 
+        .cancel-link a:hover {
+            color: var(--secondary-color);
+        }
+
+        .cancel-link a i {
+            margin-right: 5px;
+        }
+
+        /* Erreurs non field */
+        .non-field-errors {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-color);
+            font-weight: 500;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
-            .form-container {
-                margin: 0;
-                padding: 15px;
-                box-shadow: none; 
+            body {
+                padding: 0;
+            }
+            
+            .form-card {
                 border-radius: 0;
-                max-width: 100%; 
                 min-height: 100vh;
+            }
+            
+            .form-header {
+                padding: 20px;
+            }
+            
+            .form-body {
+                padding: 15px 20px 20px;
+            }
+            
+            .avatar-container {
+                width: 100px;
+                height: 100px;
+                margin: -50px auto 15px;
+            }
+            
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="form-container"> 
-        <h2>Modifier mon profil</h2>
-
-        {% if utilisateur.photo %}
-            <img src="{{ utilisateur.photo.url }}" alt="Photo de profil actuelle" class="profile-photo">
-            <p style="text-align: center; font-size: 0.8rem; margin-bottom: 15px;">
-                Ceci est votre photo actuelle. Chargez une nouvelle photo pour la remplacer.
-            </p>
-        {% endif %}
+    <div class="form-card">
+        <!-- En-tête décoratif -->
+        <div class="form-header">
+            <h2>Modifier mon profil</h2>
+            <p>Mettez à jour vos informations personnelles</p>
+        </div>
         
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            {% for field in form %}
-                <p>
-                    {{ field.label_tag }}
-                    {{ field }}
-                    
-                    {% for error in field.errors %}
-                        <small style="color: red; display: block;">{{ error }}</small>
-                    {% endfor %}
-
-                    {% if field.help_text %}
-                        <small style="color: #6c757d; display: block;">{{ field.help_text }}</small>
-                    {% endif %}
-                </p>
-            {% endfor %}
-            
-            {% if form.non_field_errors %}
-                <div style="color: red; margin-bottom: 10px; font-weight: bold;">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
+        <!-- Avatar et formulaire -->
+        <div class="form-body">
+            <!-- Avatar avec upload intégré -->
+            <div class="avatar-container" onclick="document.getElementById('id_photo').click();">
+                <img src="{% if utilisateur.photo %}{{ utilisateur.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ utilisateur.first_name }}+{{ utilisateur.last_name }}&background=3498db&color=fff&bold=true&size=200{% endif %}" 
+                     alt="Photo de profil" 
+                     class="profile-avatar"
+                     id="profilePreview">
+                <div class="avatar-overlay">
+                    <i class="fas fa-camera"></i>
                 </div>
-            {% endif %}
-
-            <button type="submit">Enregistrer les modifications</button>
+            </div>
             
-            <p style="text-align: center; margin-top: 15px;">
-                <a href="{% url 'profil' %}" style="color: #1e4a8d; text-decoration: none;">
-                    Annuler
-                </a>
-            </p>
-        </form>
-    </div>
+            <!-- Info photo actuelle (si photo existe) -->
+            {% if utilisateur.photo %}
+            <div class="current-photo-info">
+                <i class="fas fa-info-circle"></i>
+                Ceci est votre photo actuelle. Cliquez sur l'image pour la modifier.
+            </div>
+            {% endif %}
+            
+            <!-- Formulaire -->
+            <form method="post" enctype="multipart/form-data" id="profileForm">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="form-group">
+                        {{ field.label_tag }}
+                        
+                        {% if field.name == 'photo' %}
+                            <!-- Champ fichier stylisé (caché, car on utilise l'avatar cliquable) -->
+                            <div class="file-input-wrapper" style="display: none;">
+                                {{ field }}
+                            </div>
+                            <!-- Bouton alternatif pour upload (optionnel) -->
+                            <div class="file-input-button" onclick="document.getElementById('id_photo').click();">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                Choisir une nouvelle photo
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        
+                        {% for error in field.errors %}
+                            <small class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ error }}
+                            </small>
+                        {% endfor %}
 
+                        {% if field.help_text %}
+                            <small class="help-text">
+                                <i class="fas fa-question-circle"></i>
+                                {{ field.help_text }}
+                            </small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                {% if form.non_field_errors %}
+                    <div class="non-field-errors">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i>
+                    Enregistrer les modifications
+                </button>
+                
+                <div class="cancel-link">
+                    <a href="{% url 'profil' %}">
+                        <i class="fas fa-arrow-left"></i>
+                        Annuler et retourner au profil
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 💡 Assurez-vous que l'ID ci-dessous correspond au nom de votre champ 'photo'
-        const fileInput = document.getElementById('id_photo'); 
-        const MAX_SIZE_MB = 5; 
+        const fileInput = document.getElementById('id_photo');
+        const profilePreview = document.getElementById('profilePreview');
+        const MAX_SIZE_MB = 5;
         const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
         
-        if (fileInput) { // Vérifie si le champ existe
+        if (fileInput) {
+            // Prévisualisation de l'image
             fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    const fileSize = this.files[0].size;
-                    if (fileSize > MAX_SIZE_BYTES) {
-                        alert(`Attention : La photo est trop grande. La taille maximale est de ${MAX_SIZE_MB} Mo.`);
-                        this.value = ""; // Réinitialise le champ
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    
+                    // Vérification de la taille
+                    if (file.size > MAX_SIZE_BYTES) {
+                        alert(`⚠️ Attention : La photo est trop grande. La taille maximale est de ${MAX_SIZE_MB} Mo.`);
+                        this.value = "";
+                        return;
+                    }
+                    
+                    // Prévisualisation
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        profilePreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                    
+                    // Afficher une notification de succès
+                    const infoDiv = document.querySelector('.current-photo-info') || document.createElement('div');
+                    if (!infoDiv.classList.contains('current-photo-info')) {
+                        const newInfo = document.createElement('div');
+                        newInfo.className = 'current-photo-info';
+                        newInfo.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Nouvelle photo sélectionnée !';
+                        document.querySelector('.avatar-container').after(newInfo);
+                    } else {
+                        infoDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Nouvelle photo sélectionnée !';
+                        infoDiv.style.background = 'rgba(39, 174, 96, 0.1)';
+                        infoDiv.style.borderColor = '#27ae60';
                     }
                 }
+            });
+        }
+        
+        // Animation de soumission du formulaire
+        const form = document.getElementById('profileForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+                submitBtn.disabled = true;
             });
         }
     });

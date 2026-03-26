@@ -13,10 +13,10 @@
 <body>
     <div class="shorts-wrapper">
         <div class="search-bar">
-            <form action="" method="GET">
-                <input type="search" name="q" placeholder="Rechercher une propriété...">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
+           <form action="{% url 'video_shorts' %}" method="GET">
+             <input type="search" name="q" placeholder="Rechercher une propriété..." value="{{ recherche|default:'' }}">
+             <button type="submit"><i class="fas fa-search"></i></button>
+          </form>
         </div>
 
         <div class="feed" id="feed">
@@ -28,7 +28,7 @@
 
                 <video preload="metadata" muted playsinline webkit-playsinline>
                     <source src="{{ propriete.video.url }}" type="video/mp4">
-                    Votre navigateur ne supporte pas la vidéo.
+                    Votre navigateur ne supporte pas la balise vidéo.
                 </video>
 
                 <div class="heart-pop" aria-hidden="true"></div>
@@ -39,13 +39,10 @@
                     <p>{{ propriete.commune }}</p>
 
                     <div class="shorts-characteristics">
-
                         {% for caracteristique in propriete.caracteristiques|slice:":3" %}
                         <span class="char-item"> <i class="fas fa-check-circle"></i> {{ caracteristique }}</span>
                         {% endfor %}
                     </div>
-
-
                 </div>
 
                 <div class="shorts-actions" aria-hidden="true">
@@ -54,20 +51,30 @@
                         <div class="count">210k</div>
                     </button>
 
-                    <button class="action-btn dislike" title="Je n'aime pas" aria-label="Je n'aime pas">
-                        <i class="fas fa-thumbs-down"></i>
+                    <!-- Bouton Partager -->
+                    <button class="action-btn share" title="Partager" aria-label="Partager" onclick="afficherMenuPartage('{{ propriete.pk }}', this)">
+                        <i class="fas fa-share-alt"></i>
+                        <div class="count">Partager</div>
                     </button>
 
-                    <button class="action-btn comment" title="Commenter" aria-label="Commenter">
+                    <button class="action-btn comment" title="Nombre de discussions" aria-label="Discussions">
                         <i class="fas fa-comment"></i>
-                        <div class="count">1 387</div>
+                        <div class="count">{{ propriete.nb_conversations|default:0 }}</div>
                     </button>
-                <a href="{% url 'detail_propriete_web' pk=propriete.pk %}">
-                    <button class="action-btn comment" title="Commenter" aria-label="Commenter">
-                        <i class="fa-solid fa-magnifying-glass-plus"></i>
-                        <div class="count">details</div>
-                    </button>
+
+                    <a href="{% url 'detail_propriete_web' pk=propriete.pk %}">
+                        <button class="action-btn comment" title="Détails" aria-label="Détails">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            <div class="count">details</div>
+                        </button>
                     </a>
+                    
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'demarrer_conversation' propriete.pk %}" class="action-btn message" title="Discuter">
+                        <i class="fas fa-comment"></i>
+                        <div class="count">Discuter</div>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}
@@ -75,6 +82,34 @@
                 <p style="padding:20px; text-align:center;">Aucune vidéo disponible pour le moment.</p>
             </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <!-- Menu de partage -->
+    <div id="shareMenu" class="share-menu" style="display: none;">
+        <div class="share-menu-content">
+            <div class="share-menu-header">
+                <h4>Partager cette vidéo</h4>
+                <button onclick="fermerMenuPartage()">×</button>
+            </div>
+            <div class="share-options">
+                <button onclick="partagerSur('facebook', '{{ propriete.pk }}')">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </button>
+                <button onclick="partagerSur('twitter', '{{ propriete.pk }}')">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+                <button onclick="partagerSur('whatsapp', '{{ propriete.pk }}')">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button onclick="copierLien('{{ propriete.pk }}')">
+                    <i class="fas fa-link"></i> Copier le lien
+                </button>
+            </div>
+            <div class="share-link-container">
+                <input type="text" id="shareLink" readonly>
+                <button onclick="copierLienDepuisInput()">Copier</button>
+            </div>
         </div>
     </div>
 
@@ -89,10 +124,9 @@
             function playAt(index) {
                 if (index < 0 || index >= videos.length) return;
 
-                // Met en pause la vidéo précédente si elle est différente de la nouvelle
                 if (videos[currentIndex] && currentIndex !== index) {
                     videos[currentIndex].pause();
-                    videos[currentIndex].currentTime = 0; // Remet la vidéo à 0
+                    videos[currentIndex].currentTime = 0;
                 }
 
                 currentIndex = index;
@@ -100,7 +134,6 @@
                 const spinner = containers[currentIndex].querySelector('.loading-spinner');
                 spinner.style.display = 'flex';
 
-                // Relance la vidéo depuis le début
                 currentVideo.currentTime = 0;
                 currentVideo.play().then(() => {
                     if (spinner) spinner.style.display = 'none';
@@ -222,7 +255,97 @@
                 feed.scrollTo({ top: currentIndex * feed.clientHeight, behavior: 'instant' });
             });
         })();
+
+        // Variables pour le menu de partage
+        let currentProprieteId = null;
+
+        function afficherMenuPartage(proprieteId, btn) {
+            currentProprieteId = proprieteId;
+            const url = window.location.origin + "{% url 'detail_propriete_web' 0 %}".replace('0', proprieteId);
+            document.getElementById('shareLink').value = url;
+            
+            const menu = document.getElementById('shareMenu');
+            menu.style.display = 'block';
+            
+            // Positionner le menu près du bouton
+            const rect = btn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+            menu.style.right = '20px';
+            menu.style.left = 'auto';
+        }
+        
+        function fermerMenuPartage() {
+            document.getElementById('shareMenu').style.display = 'none';
+        }
+        
+        function partagerSur(reseau, proprieteId) {
+            const url = window.location.origin + "{% url 'detail_propriete_web' 0 %}".replace('0', proprieteId);
+            const titre = "Vidéo Immobilier - IMMO ABIDJAN";
+            
+            let shareUrl = '';
+            switch(reseau) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(titre)}&url=${encodeURIComponent(url)}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(titre + ' ' + url)}`;
+                    break;
+            }
+            
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+            fermerMenuPartage();
+        }
+        
+        function copierLien(proprieteId) {
+            const url = window.location.origin + "{% url 'detail_propriete_web' 0 %}".replace('0', proprieteId);
+            navigator.clipboard.writeText(url).then(function() {
+                showNotification('Lien copié !', 'success');
+                fermerMenuPartage();
+            }).catch(function() {
+                showNotification('Erreur lors de la copie', 'error');
+            });
+        }
+        
+        function copierLienDepuisInput() {
+            const input = document.getElementById('shareLink');
+            input.select();
+            document.execCommand('copy');
+            showNotification('Lien copié !', 'success');
+            fermerMenuPartage();
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'share-notification';
+            notification.innerHTML = `
+                <div class="notification-content ${type}">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Fermer le menu en cliquant à l'extérieur
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('shareMenu');
+            if (menu && menu.style.display === 'block') {
+                if (!e.target.closest('.share-menu') && !e.target.closest('.share')) {
+                    fermerMenuPartage();
+                }
+            }
+        });
+
+        
     </script>
 </body>
-
 </html>

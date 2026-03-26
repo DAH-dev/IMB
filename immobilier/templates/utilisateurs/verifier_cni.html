@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vérification CNI - {{ utilisateur.username }} | IMMO ABIDJAN Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styles spécifiques pour la page de vérification */
+    .verification-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+   .card-header {
+    background:  #3498DB;
+    background: #deeaf6;
+    border-bottom: 2px solid #3498DB;
+    padding: 20px 25px;
+   
+}
+
+    .card-header h4 {
+        font-weight: 600;
+        letter-spacing: -0.3px;
+    }
+
+    .info-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .info-section:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-section h5 {
+        color: #2C3E50;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3498DB;
+        display: inline-block;
+    }
+
+    .user-info-table {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .user-info-table tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .user-info-table th {
+        padding: 12px 0;
+        font-weight: 600;
+        color: #2C3E50;
+        width: 40%;
+    }
+
+    .user-info-table td {
+        padding: 12px 0;
+        color: #4a5568;
+    }
+
+    .cni-container {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        height: 100%;
+    }
+
+    .cni-image-wrapper {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .cni-image {
+        max-width: 100%;
+        max-height: 350px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .cni-image:hover {
+        transform: scale(1.02);
+    }
+
+    .verification-checklist {
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        border-left: 4px solid #3498DB;
+    }
+
+    .verification-checklist h6 {
+        color: #2C3E50;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        color: #4a5568;
+    }
+
+    .checklist-item i {
+        color: #3498DB;
+        font-size: 14px;
+    }
+
+    .comment-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .comment-section label {
+        font-weight: 600;
+        color: #2C3E50;
+        margin-bottom: 10px;
+    }
+
+    .comment-section textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .comment-section textarea:focus {
+        border-color: #3498DB;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        outline: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-cancel {
+        background: #f1f3f5;
+        color: #4a5568;
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+    }
+
+    .btn-validate {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        padding: 10px 28px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-validate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .btn-validate:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .alert-warning-custom {
+        background: linear-gradient(135deg, #fff3e0, #ffe6cc);
+        border: none;
+        border-left: 4px solid #f39c12;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .badge-role {
+        background: #3498DB;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-cancel, .btn-validate {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .info-section, .cni-container {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card verification-card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>
+                        Vérification de la Carte Nationale d'Identité
+                    </h4>
+                    <p class="text-white-50 mt-2 mb-0 small">
+                        Veuillez vérifier attentivement les informations avant de valider
+                    </p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Colonne gauche - Infos utilisateur -->
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <h5>
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    Informations de l'utilisateur
+                                </h5>
+                                <table class="user-info-table">
+                                    <tr>
+                                        <th><i class="fas fa-user me-2"></i>Nom d'utilisateur</th>
+                                        <td><strong>{{ utilisateur.username }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-user-tag me-2"></i>Nom complet</th>
+                                        <td>{{ utilisateur.get_full_name|default:"Non renseigné" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-envelope me-2"></i>Email</th>
+                                        <td>{{ utilisateur.email|default:"Non renseigné" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-phone me-2"></i>Téléphone</th>
+                                        <td>{{ utilisateur.telephone|default:"Non renseigné" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-tag me-2"></i>Rôle</th>
+                                        <td>
+                                            <span class="badge-role">
+                                                {{ utilisateur.get_role_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-2"></i>Membre depuis</th>
+                                        <td>{{ utilisateur.date_joined|date:"d/m/Y" }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne droite - CNI -->
+                        <div class="col-md-6">
+                            <div class="cni-container">
+                                <h5>
+                                    <i class="fas fa-id-card me-2"></i>
+                                    Document à vérifier
+                                </h5>
+                                
+                                {% if utilisateur.cni %}
+                                    <div class="cni-image-wrapper">
+                                        <img src="{{ utilisateur.cni.url }}" 
+                                             alt="CNI de {{ utilisateur.username }}" 
+                                             class="cni-image"
+                                             onclick="window.open(this.src, '_blank')"
+                                             title="Cliquez pour agrandir">
+                                    </div>
+                                    
+                                    <div class="verification-checklist">
+                                        <h6>
+                                            <i class="fas fa-clipboard-list me-2"></i>
+                                            Points à vérifier :
+                                        </h6>
+                                        <div class="checklist-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>La CNI est lisible (photo, nom, numéro)</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Le nom correspond aux informations ci-dessus</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>La photo ressemble à la photo de profil</span>
+                                        </div>
+                                        <div class="checklist-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Le document n'est pas expiré</span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning-custom text-center">
+                                        <i class="fas fa-exclamation-triangle fa-2x mb-3" style="color: #f39c12;"></i>
+                                        <h5 class="mb-2">Aucune CNI disponible</h5>
+                                        <p class="mb-0">Cet utilisateur n'a pas encore téléchargé sa carte d'identité.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de validation -->
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        
+                        <div class="comment-section">
+                            <label for="commentaire">
+                                <i class="fas fa-pen me-2"></i>
+                                Commentaire (optionnel)
+                            </label>
+                            <textarea class="form-control" 
+                                      id="commentaire" 
+                                      name="commentaire" 
+                                      rows="3" 
+                                      placeholder="Ajoutez une remarque sur la vérification..."></textarea>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <a href="{% url 'gestion_utilisateurs_admin' %}" class="btn-cancel text-decoration-none">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn-validate" {% if not utilisateur.cni %}disabled{% endif %}>
+                                <i class="fas fa-check-circle me-2"></i>
+                                Valider la CNI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Animation au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.verification-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+    
+    // Confirmation avant validation
+    const validateBtn = document.querySelector('.btn-validate');
+    if (validateBtn && !validateBtn.disabled) {
+        validateBtn.addEventListener('click', function(e) {
+            const comment = document.querySelector('#commentaire').value;
+            if (!comment) {
+                if (!confirm('Aucun commentaire ajouté. Voulez-vous continuer sans commentaire ?')) {
+                    e.preventDefault();
+                }
+            } else {
+                if (!confirm('Confirmez-vous la validation de cette CNI ?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,33 +1,15 @@
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Villa moderne à Cocody - Immobilier Abidjan</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/detail_propriete.css' %}">
+{% block title %}{{ propriete.titre }} - Immobilier Abidjan{% endblock %}
 
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detail_propriete.css' %}">
 
-<body>
 
-  <header>
-    <div class="logo"><i class="fas fa-home"></i> IMMOBILIER Abidjan</div>
-    <div class="nav-toggle" onclick="document.querySelector('nav').classList.toggle('active')">
-      <i class="fas fa-bars"></i>
-    </div>
-    <nav>
-      <a href="#">Rechercher</a>
-      <a href="#">Propriétaires</a>
-      <a href="#">Avantages</a>
-      <a href="#" >Contact</a>
-      <a href="{% url 'connexion' %}" class="btn-orange">Connexion</a>
-      <a href="{% url 'inscription' %}" class="btn-orange">Inscription</a>
-    </nav>
-  </header>
+{% endblock %}
 
+{% block content %}
   <div class="container dtle">
     <!-- <h2 class="section-title">Découvrez la propriété en détail</h2> -->
     <div class="property-detail">
@@ -48,18 +30,57 @@
           {% endif %}
         </div>
         <h1>{{ propriete.titre }}</h1>
+        
+        <!-- =========================================== -->
+        <!-- ✅ INSÉREZ LE CODE DU PROPRIÉTAIRE ICI (APRÈS LE TITRE) -->
+        <!-- =========================================== -->
+        
+        <!-- Début du bloc à insérer -->
+        <div class="owner-info" style="margin: 15px 0; padding: 12px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #1e4a8d;">
+          <a href="{% url 'propriete_par_proprietaire' propriete.proprietaire.id %}" style="display: flex; align-items: center; gap: 15px; text-decoration: none; color: inherit;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, #1e4a8d, #2c5ba8); display: flex; justify-content: center; align-items: center;">
+              {% if propriete.proprietaire.photo %}
+                <img src="{{ propriete.proprietaire.photo.url }}" alt="Photo" style="width: 100%; height: 100%; object-fit: cover;">
+              {% else %}
+                <i class="fas fa-user" style="font-size: 1.5rem; color: white;"></i>
+              {% endif %}
+            </div>
+            <div>
+              <div style="font-weight: 600; color: #1e4a8d; font-size: 1.1rem;">
+                {% if propriete.proprietaire.first_name %}
+                  {{ propriete.proprietaire.first_name }} {{ propriete.proprietaire.last_name }}
+                {% else %}
+                  {{ propriete.proprietaire.username }}
+                {% endif %}
+              </div>
+              <div style="font-size: 0.85rem; color: #666;">
+                <i class="fas fa-building me-1"></i> Propriétaire • 
+                <i class="fas fa-eye ms-2 me-1"></i> {{ propriete.nb_vues|default:0 }} vues
+              </div>
+            </div>
+            <div style="margin-left: auto; color: #1e4a8d;">
+              <i class="fas fa-chevron-right"></i>
+            </div>
+          </a>
+        </div>
+        <!-- Fin du bloc à insérer -->
+        
+        <!-- =========================================== -->
+        <!-- FIN DE L'INSERTION -->
+        <!-- =========================================== -->
+        
         <h3>Description</h3>
+        <div class="owner-info" style="margin: 10px 0; padding: 8px; background-color: #f8f9fa; border-radius: 8px;border-left: 4px solid #1e4a8d; ">
         <p>{{ propriete.description }}</p>
+        </div>
         <div class="characteristics">
           <h4>Caractéristiques</h4>
           <ul>
             {% for caracteristique in propriete.caracteristiques|slice:":7" %}
             <p><i class="fas fa-check-circle"></i> {{ caracteristique }}</p>
             {% endfor %}
-
           </ul>
         </div>
-
       </div>
 
       <div class="property-contact">
@@ -72,10 +93,8 @@
             <input type="email" name="email" placeholder="Votre email" value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
             <input type="tel" name="telephone" placeholder="Votre téléphone" value="{% if request.user.is_authenticated %}{{ request.user.telephone }}{% endif %}">
             <textarea name="message" rows="3">Bonjour, je suis intéressé par la propriété {{ propriete.titre }} ({{ propriete.prix }} FCFA) à {{ propriete.ville }}, {{ propriete.commune }}.</textarea>
-            
             <input type="hidden" name="sujet" value="Demande d'information pour la propriété : {{ propriete.titre }}">
-
-            <button type="submit">Envoyer le message</button>
+            <button style="background-color: #ff6b00; cursor: pointer;" type="submit">Envoyer le message</button>
         </form>
 
         {% if request.user.is_authenticated %}
@@ -83,22 +102,18 @@
             <button style="background-color: #007bff; cursor: pointer;">Démarrer une discussion</button>
         </a>
         {% endif %}
-
-        <!-- <a href="{% url 'mes_messages' %}"> <button style="background-color: #007bff; cursor: pointer;">demarer une
-            discution</button></a> -->
+        
         <div class="carte_google">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d254236.51213307356!2d-4.144482858417774!3d5.348769974316888!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sci!4v1752891909877!5m2!1sfr!2sci"
             width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"></iframe>
-
         </div>
       </div>
     </div>
   </div>
 
-
-<div class="container">
+  <div class="container">
     <h2 class="section-title">Propriétés type </h2>
     <div class="row">
         {% for prop_similaire in proprietes_similaires %}
@@ -106,6 +121,11 @@
             <div class="img_appartement">
                 <a href="{% url 'detail_propriete_web' pk=prop_similaire.pk %}">
                     {% if prop_similaire.image %}
+                    {% if propriete.video %}
+                        <div class="video-indicator">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        {% endif %}
                         <img src="{{ prop_similaire.image.url }}" alt="{{ prop_similaire.titre }}">
                     {% elif prop_similaire.video %}
                         <video controls muted>
@@ -117,12 +137,39 @@
                     {% endif %}
                 </a>
             </div>
-            <div class="descrip_appartement">
-                <h5>{{ prop_similaire.titre }}</h5>
+                    <div class="descrip_appartement">
+                <!-- =========================================== -->
+                <!-- ✅ LOGO ET NOM DU PROPRIÉTAIRE POUR PROPRIÉTÉS SIMILAIRES -->
+                <!-- =========================================== -->
+                <div class="owner-info" style="margin: 10px 0; padding: 5px; background-color: #f8f9fa; border-radius: 8px;  border-left: 4px solid #1e4a8d;">
+                    <a href="{% url 'propriete_par_proprietaire' prop_similaire.proprietaire.id %}">
+                        <div class="owner-photo-wrapper" style="background: linear-gradient(135deg, #1e4a8d, #2c5ba8);">
+                            {% if prop_similaire.proprietaire.photo %}
+
+                                <img src="{{ prop_similaire.proprietaire.photo.url }}"
+                                     alt="Photo de {{ prop_similaire.proprietaire.nom_complet }}">
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <span class="owner-name">
+                        <span class="h5">{{ prop_similaire.titre }}</span><br>
+                        {% if prop_similaire.proprietaire.first_name %}
+                            Posteur(se) {{ prop_similaire.proprietaire.first_name }} {{ prop_similaire.proprietaire.last_name }}
+                        {% else %}
+                            Posteur(se) Anonyme
+                        {% endif %}
+                    </span>
+                </div>
+                <!-- =========================================== -->
+                <!-- FIN DU LOGO PROPRIÉTAIRE -->
+                <!-- =========================================== -->
+                
                 {% for caracteristique in prop_similaire.caracteristiques|slice:":3" %}
-                <p><i class="fas fa-check-circle"></i> {{ caracteristique }}</p>
+                    <p><i class="fas fa-check-circle"></i> {{ caracteristique }}</p>
                 {% endfor %}
-                <p>
+                  <p>
                     <strong> <i class="fas fa-calendar-alt me-2"></i> publié le {{ prop_similaire.date_publication|date:"d/m/Y" }}</strong>
                     <strong>
               <i class="fa-solid fa-eye"></i>
@@ -135,53 +182,47 @@
         <p>Aucune autre propriété de ce type n'est disponible pour le moment.</p>
         {% endfor %}
     </div>
-</div>
+  </div>
+{% endblock %}
 
-  <footer class="footer">
-    <div class="footer-content-wrapper">
-      <div class="footer-columns">
-        <div class="footer-column">
-          <h4>IMMOBILIER Abidjan</h4>
-          <p>Plateforme innovante pour faciliter la recherche et la présentation de propriétés à Abidjan.</p>
-          <div class="socials">
-            <i class="fab fa-facebook"></i>
-            <i class="fab fa-twitter"></i>
-            <i class="fab fa-instagram"></i>
-          </div>
-        </div>
-        <div class="footer-column">
-          <h4>Liens rapides</h4>
-          <a href="#">Accueil</a>
-          <a href="#">Rechercher une propriété</a>
-          <a href="#">Devenir propriétaire</a>
-          <a href="#">À propos</a>
-          <a href="#">Contact</a>
-        </div>
-        <div class="footer-column">
-          <h4>Contactez-nous</h4>
-          <p><i class="fas fa-map-marker-alt"></i> Plateau, Abidjan, Côte d’Ivoire</p>
-          <p><i class="fas fa-phone"></i> +225 20 30 40 50</p>
-          <p><i class="fas fa-envelope"></i> contact@immobilier-abidjan.ci</p>
-        </div>
-      </div>
-    </div>
-    <p style="text-align:center; margin-top:20px;">© 2023 IMMOBILIER Abidjan. Tous droits réservés.</p>
-  </footer>
+{% block extra_js %}
+<script>
+    // Script JS pour gérer l'ouverture/fermeture des deux menus mobiles
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("DOM chargé - Initialisation des menus mobiles"); // Pour debug
+        
+        const searchToggler = document.getElementById('search-toggler');
+        const menuToggler = document.getElementById('menu-toggler');
+        const searchContent = document.getElementById('searchContent');
+        const menuContent = document.getElementById('menuContent');
 
+        console.log("searchToggler:", searchToggler); // Pour debug
+        console.log("menuToggler:", menuToggler); // Pour debug
 
- <script>
-    const video = document.getElementById("video");
+        function togglePanel(panelToShow, panelToHide) {
+            panelToShow.classList.toggle('show');
+            if (panelToHide.classList.contains('show')) {
+                panelToHide.classList.remove('show');
+            }
+        }
 
-    // Lecture automatique dès que la page est chargée
-    window.addEventListener("load", () => {
-      video.play().catch(e => {
-        // Certains navigateurs peuvent bloquer autoplay
-        console.log("Autoplay bloqué : ", e);
-      });
+        if (searchToggler && menuToggler) {
+            searchToggler.addEventListener('click', function (e) {
+                e.preventDefault();
+                console.log("Clic sur search"); // Pour debug
+                togglePanel(searchContent, menuContent);
+            });
+
+            menuToggler.addEventListener('click', function (e) {
+                e.preventDefault();
+                console.log("Clic sur menu"); // Pour debug
+                togglePanel(menuContent, searchContent);
+            });
+        } else {
+            console.log("Boutons non trouvés !");
+        }
     });
+
+    
 </script>
-
-
-</body>
-
-</html>
+{% endblock %}

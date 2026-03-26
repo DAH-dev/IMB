@@ -1,348 +1,121 @@
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'base.html' %}
+{% load static %}
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IMMOBILIER Abidjan - Plateforme immobilière</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    crossorigin="anonymous">
-
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/index.css' %}">
-
-</head>
-
-<script>
-  // Script JS pour gérer l'ouverture/fermeture des deux menus mobiles
-  document.addEventListener('DOMContentLoaded', function () {
-    const searchToggler = document.getElementById('search-toggler');
-    const menuToggler = document.getElementById('menu-toggler');
-    const searchContent = document.getElementById('searchContent');
-    const menuContent = document.getElementById('menuContent');
-
-    function togglePanel(panelToShow, panelToHide) {
-      // Inverse l'état du panneau à afficher
-      panelToShow.classList.toggle('show');
-
-      // Ferme l'autre panneau si ouvert
-      if (panelToHide.classList.contains('show')) {
-        panelToHide.classList.remove('show');
-      }
-    }
-
-    if (searchToggler && menuToggler) {
-      searchToggler.addEventListener('click', function () {
-        togglePanel(searchContent, menuContent);
-      });
-
-      menuToggler.addEventListener('click', function () {
-        togglePanel(menuContent, searchContent);
-      });
-    }
-  });
-</script>
-
-<body>
-
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <i class="fa-solid fa-house me-2"></i>
-        <span class="logo">IMB</span>
-      </a>
-      
-      <div class="mobile-toggles">
-        <button id="search-toggler" type="button" aria-label="Toggle Search">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-        <button id="menu-toggler" type="button" aria-label="Toggle Menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-      </div>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link active" href="#"><i class="fa-solid fa-magnifying-glass me-1"></i> Rechercher</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-1"></i> Propriétaires</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'about' %}"><i class="fa-solid fa-star me-1"></i> A propos</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#contact"><i class="fa-solid fa-phone me-1"></i> Contact</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'superadmin' %}"><i class="fa-solid fa-phone me-1"></i> admin</a>
-          </li>
-
-          <li class="nav-item ms-lg-3">
-            <a class="btn btn-accent" href="{% url 'connexion' %}">
-              <i class="fa-solid fa-right-to-bracket me-1"></i> Connexion
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <div class="mobile-dropdown-panel" id="searchContent">
-
-    <form class="recherche" action="#" method="get">
-      <input type="text" name="recherche" id="rech_mobile" placeholder="Recherche de propriété par titre, commune...">
-      <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </form>
-
-    <ul class="mobile-links">
-      <li>
-        <a href="{% url 'proprietes_maison' %}">
-          <i class="fa-solid fa-house-chimney me-2"></i> Maisons
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'proprietes_Terrain' %}">
-          <i class="fa-solid fa-tree me-2"></i> Terrains
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'proprietes_plan' %}">
-          <i class="fa-solid fa-map me-2"></i> Plans
-        </a>
-      </li>
-      <li>
-        <a href="{% url 'index' %}">
-          <i class="fa-solid fa-film"></i> toutes sortes
-        </a>
-      </li>
-    </ul>
-  </div>
-
-  <div class="mobile-dropdown-panel" id="menuContent">
-    <ul class="mobile-links">
-      <li>
-        <a href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-2"></i> Propriétaires</a>
-      </li>
-      <li>
-        <a href="{% url 'about' %}"><i class="fa-solid fa-star me-2"></i> À propos</a>
-      </li>
-      <li>
-        <a href="#contact"><i class="fa-solid fa-phone me-2"></i> Contact</a>
-      </li>
-      <li>
-        <a href="{% url 'superadmin' %}"><i class="fa-solid fa-user-shield me-2"></i> Admin</a>
-      </li>
-      <hr />
-      <li>
-        <a href="{% url 'connexion' %}"><i class="fa-solid fa-right-to-bracket me-2"></i> Connexion / Inscription</a>
-      </li>
-    </ul>
-  </div>
-
-
-
-
-  <section class="py-5 bg-light">
-
-    <form class="recherche" action="#" method="get">
-      <input type="text" name="recherche" id="rech" placeholder="Recherche...">
-      <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+{% block content %}
+<section class="py-5 bg-light">
+   <form class="recherche" action="{% url 'index' %}" method="get">
+        <input type="text" name="recherche" id="rech" placeholder="Recherche..." value="{{ recherche|default:'' }}">
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
     </form>
 
     <div class="container">
-      <h2 class="section-title"></h2>
-      <div class="commune-badges">
-        <span class="commune-badge">
-          <a href="{% url 'proprietes_maison' %}">
-            <i class="fa-solid fa-house-chimney me-2"></i> Maisons
-          </a>
+        <h2 class="section-title"></h2>
+        <div class="commune-badges">
+            <span class="commune-badge">
+                <a href="{% url 'proprietes_maison' %}">
+                    <i class="fa-solid fa-house-chimney me-2"></i> Maisons
+                </a>
+            </span>
+            <span class="commune-badge">
+                <a href="{% url 'proprietes_Terrain' %}">
+                    <i class="fa-solid fa-tree me-2"></i> Terrains
+                </a>
+            </span>
+            <span class="commune-badge">
+                <a href="{% url 'proprietes_plan' %}">
+                    <i class="fa-solid fa-map me-2"></i> Plans
+                </a>
+            </span>
+            <span class="commune-badge">
+                <a href="{% url 'proprietes_plan' %}">
+                    <i class="fa-solid fa-map me-2"></i> magasin
+                </a>
+            </span>
+            <span class="commune-badge">
+                <a href="{% url 'video_shorts' %}">
+                    <i class="fa-solid fa-video me-2"></i> Shorts
+                </a>
+            </span>
+           <span class="commune-badge position-relative">
+    <a class="nav-link" href="{% url 'mes_messages' %}">
+        <i class="fa-solid fa-envelope me-2"></i> Messagerie
+        {% if total_non_lus > 0 %}
+        <span  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+              style="font-size: 0.6rem; padding: 0.2rem 0.4rem; color: white; background-color: red; border-radius: 50%;">
+            {{ total_non_lus }}
         </span>
-        <span class="commune-badge">
-          <a href="{% url 'proprietes_Terrain' %}">
-            <i class="fa-solid fa-tree me-2"></i> Terrains
-          </a>
-        </span>
-        <span class="commune-badge">
-          <a href="{% url 'proprietes_plan' %}">
-            <i class="fa-solid fa-map me-2"></i> Plans
-          </a>
-        </span>
-                <span class="commune-badge">
-          <a href="{% url 'proprietes_plan' %}">
-            <i class="fa-solid fa-map me-2"></i>  magasin
-          </a>
-        </span>
-       
-        <span class="commune-badge">
-          <a href="{% url 'video_shorts' %}">
-            <i class="fa-solid fa-video me-2"></i> Shorts
-          </a>
-        </span>
-        <span class="commune-badge">
-          <a class="nav-link" href="{% url 'mes_messages' %}">
-            <i class="fa-solid fa-envelope me-2"></i> Messagerie
-          </a>
-        </span>
-      </div>
+        {% endif %}
+    </a>
+</span>
+        </div>
     </div>
-  </section>
+</section>
 
-
-  <div class="container">
+<div class="container">
     <div class="row" id="propriete-container">
-      {% for propriete in proprietes_recentes %}
-      
+        {% for propriete in proprietes_recentes %}
         <div class="cart_appartement">
-          <a href="{% url 'detail_propriete_web' propriete.pk %}" class="cart_appartement flex-fill "
-        style="text-decoration: none;">
-         <div class="img_appartement">
-       {% if propriete.image %}
- 
-                {% if propriete.video %}
-                <div class="video-indicator">
-                    <i class="fa-solid fa-play"></i>
+            <a href="{% url 'detail_propriete_web' propriete.pk %}" class="cart_appartement flex-fill"
+                style="text-decoration: none;">
+                <div class="img_appartement">
+                    {% if propriete.image %}
+                        {% if propriete.video %}
+                        <div class="video-indicator">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                        {% endif %}
+                        <img src="{{ propriete.image.url }}" alt="Image de {{ propriete.titre }}">
+                    {% elif propriete.video %}
+                        <video controls muted>
+                            <source src="{{ propriete.video.url }}" type="video/mp4">
+                            Votre navigateur ne supporte pas la balise vidéo.
+                        </video>
+                    {% else %}
+                        <img src="{% static 'images/placeholder.jpg' %}" alt="Image non disponible">
+                    {% endif %}
                 </div>
-                {% endif %}
-                
-        <img src="{{ propriete.image.url }}" alt="Image de {{ propriete.titre }}">
-                
-        {% elif propriete.video %}
-                 <video controls muted>
-         <source src="{{ propriete.video.url }}" type="video/mp4">
-            Votre navigateur ne supporte pas la balise vidéo.
-         </video>
-        {% else %}
-          <img src="{% static 'images/placeholder.jpg' %}" alt="Image non disponible">
-          {% endif %}
-         </div>
-           </a>
-          <div class="descrip_appartement">
-            
-            <div class="owner-info">
-               <a href="{% url 'propriete_par_proprietaire' propriete.proprietaire.id %}">
-              <div class="owner-photo-wrapper">
-                {% if propriete.proprietaire.photo %}
-               
-                <img src="{{ propriete.proprietaire.photo.url }}"
-                  alt="Photo de {{ propriete.proprietaire.nom_complet }}">
-                {% else %}
-                <i class="fas fa-user"></i>
-               
-                {% endif %}
-              </div>
-             </a>
-              <span class="owner-name">
-
-                <span class="h5">{{ propriete.titre }}</span> <br>
-                {% if propriete.proprietaire.first_name %}
-                Posteur(se) {{ propriete.proprietaire.first_name }} {{ propriete.proprietaire.last_name }}</span>
-                {% else %}
-                 Posteur(se) Anonyme
-                {% endif %}
-              </span>
+            </a>
+            <div class="descrip_appartement">
+                <div class="owner-info"  style="margin: 10px 0; padding: 5px; background-color: #f8f9fa; border-radius: 8px;  border-left: 4px solid #1e4a8d;">
+                    <a href="{% url 'propriete_par_proprietaire' propriete.proprietaire.id %}">
+                        <div class="owner-photo-wrapper"  style="background: linear-gradient(135deg, #1e4a8d, #2c5ba8);">
+                            {% if propriete.proprietaire.photo %}
+                                <img src="{{ propriete.proprietaire.photo.url }}"
+                                    alt="Photo de {{ propriete.proprietaire.nom_complet }}">
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <span class="owner-name">
+                        <span class="h5">{{ propriete.titre }}</span> <br>
+                        {% if propriete.proprietaire.first_name %}
+                            Posteur(se) {{ propriete.proprietaire.first_name }} {{ propriete.proprietaire.last_name }}
+                        {% else %}
+                            Posteur(se) Anonyme
+                        {% endif %}
+                    </span>
+                </div>
+                {% for caracteristique in propriete.caracteristiques|slice:":2" %}
+                    <p><i class="fa-solid fa-circle-check"></i> {{ caracteristique }}</p>
+                {% endfor %}
+                <p>
+                    <strong><i class="fa-solid fa-calendar-alt me-2"></i> publié le {{propriete.date_publication|date:"d/m/Y" }}</strong>
+                    <strong>
+                        <i class="fa-solid fa-eye"></i>
+                        {{ propriete.nb_vues|default:0 }} vues
+                    </strong>
+                </p>
             </div>
-            {% for caracteristique in propriete.caracteristiques|slice:":2" %}
-            <p><i class="fa-solid fa-circle-check"></i> {{ caracteristique }}</p>
-            {% endfor %}
-            <p>
-              <strong> <i class="fa-solid fa-calendar-alt me-2"></i> publié le {{propriete.date_publication|date:"d/m/Y" }}</strong>
-              <strong>
-              <i class="fa-solid fa-eye"></i>
-                 {{ propriete.nb_vues|default:0 }} vues
-                 </strong>
-            </p>
-
-       
-          </div>
         </div>
-     
-      {% endfor %}
+
+         {% empty %}
+        <!-- ✅ Simple message quand aucun résultat -->
+        <div class="col-12 text-center py-5">
+            <p class="text-muted" style="font-size: 1.2rem;">Aucun résultat trouvé.</p>
+        </div>
+        
+        {% endfor %}
     </div>
-  </div>
-
-
-  <nav class="bottom-nav">
-    <a href="#" class="active">
-      <i class="fa-solid fa-house"></i>
-      <span>Accueil</span>
-    </a>
-    <a href="{% url 'video_shorts' %}">
-      <!-- <i class="fa-solid fa-right-to-bracket"></i> -->
-      <i class="fa-solid fa-bolt"></i>
-      <span>scroll</span>
-    </a>
-    <a href="{% url 'mes_messages' %}">
-      <i class="fa-solid fa-envelope"></i>
-      <span>Messages</span>
-    </a>
-    <!-- <a href="{% url 'proprietaire' %}">
-      <i class="fa-solid fa-user"></i>
-      <span>Vous</span>
-    </a> -->
-   {% if user.is_authenticated %}
-    {% if user_role == "admin" %}
-        <!-- Redirection si l'utilisateur est admin -->
-        <a href="{% url 'superadmin' %}">
-            <i class="fa-solid fa-user-shield"></i>
-            <span>Admin</span>
-        </a>
-      {% elif user_role == "proprietaire" %}
-        <!-- Redirection si l'utilisateur est propriétaire -->
-        <a href="{% url 'profil' %}">
-            <i class="fa-solid fa-building-user"></i>
-            <span>Propriétaire</span>
-        </a>
-    {% else %}
-        <!-- Redirection si c’est un client -->
-        <a href="{% url 'profil' %}">
-            <i class="fa-solid fa-user"></i>
-            <span>Client</span>
-        </a>
-    {% endif %}
-{% else %}
-    <!-- Redirection si la personne n’est pas connectée -->
-    <a href="{% url 'connexion' %}">
-        <i class="fa-solid fa-right-to-bracket"></i>
-        <span>Connexion</span>
-    </a>
-{% endif %}
-
-
-  </nav>
-
-    <footer class="footer">
-    <div class="footer-content-wrapper">
-      <div class="footer-columns">
-        <div class="footer-column">
-          <h4>IMMOBILIER Abidjan</h4>
-          <p>Plateforme innovante pour faciliter la recherche et la présentation de propriétés à Abidjan.</p>
-          <div class="socials">
-            <i class="fab fa-facebook"></i>
-            <i class="fab fa-twitter"></i>
-            <i class="fab fa-instagram"></i>
-          </div>
-        </div>
-        <div class="footer-column">
-          <h4>Liens rapides</h4>
-          <a href="#">Accueil</a>
-          <a href="#">Rechercher une propriété</a>
-          <a href="#">Devenir propriétaire</a>
-          <a href="#">À propos</a>
-          <a href="#">Contact</a>
-        </div>
-        <div class="footer-column">
-          <h4>Contactez-nous</h4>
-          <p><i class="fas fa-map-marker-alt"></i> Plateau, Abidjan, Côte d’Ivoire</p>
-          <p><i class="fas fa-phone"></i> +225 20 30 40 50</p>
-          <p><i class="fas fa-envelope"></i> contact@immobilier-abidjan.ci</p>
-        </div>
-      </div>
-    </div>
-    <p style="text-align:center; margin-top:20px;">© 2023 IMMOBILIER Abidjan. Tous droits réservés.</p>
-  </footer>
-
-</body>
-
-</html>
+</div>
+{% endblock %}
