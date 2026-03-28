@@ -70,9 +70,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
-                <i class="fa-solid fa-house me-2"></i>
-                <span class="logo">IMB IMMOBILIER Abidjan</span>
-            </a>
+    <img src="{% static 'images_static/logo.png' %}" alt="Logo" class="logo-img">
+</a>
             
             <div class="mobile-toggles">
                 <button id="search-toggler" type="button" aria-label="Toggle Search">
@@ -319,19 +318,7 @@
             </div>
 
            
-            <!-- Copyright et mentions légales -->
-            {% comment %} <div class="footer-bottom">
-                <div class="copyright">
-                    <p>&copy; {% now "Y" %} IMB Immobilier Abidjan. Tous droits réservés.</p>
-                </div>
-                <div class="legal-links">
-                    <a href="#">Mentions légales</a>
-                    <span class="separator">|</span>
-                    <a href="#">Politique de confidentialité</a>
-                    <span class="separator">|</span>
-                    <a href="#">CGU</a>
-                </div>
-            </div> {% endcomment %}
+
         </div>
     </div>
 </footer>

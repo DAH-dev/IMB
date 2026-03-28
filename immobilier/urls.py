@@ -144,6 +144,9 @@ path('deconnexion/', views.deconnexion, name='logout'),
     path('superadmin/utilisateurs/<int:pk>/supprimer/', views.supprimer_utilisateur_admin, name='supprimer_utilisateur_admin'),
     path('superadmin/utilisateurs/<int:pk>/toggle-statut/', views.toggle_statut_utilisateur, name='toggle_statut_utilisateur'),
 
+    path('conditions_utilisation/', views.conditions_utilisation, name='conditions_utilisation'),
+    path('politique_confidentialite/', views.politique_confidentialite, name='politique_confidentialite'),
+
     path('utilisateur/verifier-cni/<int:pk>/', views.verifier_cni, name='verifier_cni'),
     # Gestion des proprietes (admin)
     path('superadmin/proprietes/', views.gestion_proprietes_admin, name='gestion_proprietes_admin'),

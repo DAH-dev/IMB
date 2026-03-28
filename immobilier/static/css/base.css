@@ -33,6 +33,7 @@ a:hover {
 }
 
 /* ========== NAVBAR ========== */
+/* ========== NAVBAR ========== */
 nav.navbar {
     background: linear-gradient(to right, var(--primary), #2c5ba8);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -42,9 +43,9 @@ nav.navbar {
 }
 
 nav.navbar .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 10px;
+    max-width: 100%;  /* ← Changé de 1000px à 100% */
+    margin: 0;
+    padding: 0 20px;  /* ← Garde un petit padding pour ne pas coller au bord */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -53,6 +54,25 @@ nav.navbar .container {
 
 .logo {
     font-size: 20px;
+}
+
+.logo-img {
+    height:     40px;
+    width: auto;
+    object-fit: contain;
+
+}
+
+.logo-img {
+    height: 50px;  /* Taille par défaut pour desktop */
+    width: auto;
+    object-fit: contain;
+    transition: height 0.3s ease;
+     /* background-color: white;
+    padding: 2px; */
+    border-radius: 4px; 
+    filter: drop-shadow(0 0 3px rgba(0,0,0,0.5));
+    
 }
 
 nav.navbar .navbar-brand {
@@ -638,30 +658,25 @@ section.py-5.bg-light {
 
 /* Desktop styles (769px et plus) */
 @media (min-width: 769px) {
-    nav.navbar {
+     nav.navbar {
         padding: 8px 0;
         height: auto;
         min-height: 60px;
     }
     
     nav.navbar .container {
-        max-width: 1200px;
-        padding: 0 20px;
+        max-width: 100%;  /* ← Pour que le contenu prenne toute la largeur */
+        padding: 0 20px;  /* ← Petit padding pour ne pas coller au bord */
         height: auto;
     }
     
     nav.navbar .navbar-brand {
         font-size: 1.2rem;
         gap: 10px;
-        margin-right: 30px;
+        margin-right: 0;  /* ← Supprimer la marge à droite */
     }
     
-    nav.navbar .navbar-brand i {
-        font-size: 1.4rem;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 8px;
-        border-radius: 50%;
-    }
+   
     
     .logo {
         font-size: 1.1rem;
@@ -706,11 +721,28 @@ section.py-5.bg-light {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* Tablette (768px à 992px) */
 @media (max-width: 992px) and (min-width: 769px) {
     .footer-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
+    }
+     .logo-img {
+        height: 35px;
     }
 }
 
@@ -724,6 +756,15 @@ section.py-5.bg-light {
         display: block;
     }
     
+
+    .logo-img {
+        height: 30px;  /* Plus petit sur mobile */
+    }
+    
+    nav.navbar .container {
+        height: 50px;  /* Ajuster la hauteur de la navbar sur mobile */
+        padding: 0 15px;
+    }
     body {
         padding-bottom: 50px;
     }

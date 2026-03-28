@@ -1,152 +1,425 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
-    
-    <style>
-        /* ------------------------------------------- */
-        /* STYLES GÉNÉRAUX POUR LE FORMULAIRE */
-        /* ------------------------------------------- */
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription - IMB IMMOBILIER Abidjan{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables déjà définies dans base.css, mais on garde pour cohérence */
+    :root {
+        --primary: #1e4a8d;
+        --accent: #ff6b00;
+        --secondary: #f8f9fa;
+        --success: #28a745;
+        --light: #ffffff;
+        --dark: #343a40;
+        --gray-light: #e9ecef;
+        --gray: #6c757d;
+    }
+
+    /* Container principal */
+    .register-container {
+        max-width: 550px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    /* Carte formulaire */
+    .register-card {
+        background: var(--light);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .register-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* En-tête */
+    .register-header {
+        background: linear-gradient(135deg, var(--primary), #2c5ba8);
+        padding: 30px 25px;
+        text-align: center;
+    }
+
+    .register-header i {
+        font-size: 3rem;
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    .register-header h2 {
+        color: white;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .register-header p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    /* Corps du formulaire */
+    .register-body {
+        padding: 30px 25px;
+    }
+
+    /* Style des champs */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
+
+    .form-group label i {
+        margin-right: 8px;
+        color: var(--primary);
+        width: 18px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: var(--secondary);
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        background: var(--light);
+        box-shadow: 0 0 0 3px rgba(30, 74, 141, 0.1);
+    }
+
+    /* Style spécifique pour les champs de fichier */
+    input[type="file"] {
+        padding: 10px;
+        background: var(--secondary);
+        cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: background 0.3s;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background: #153a70;
+    }
+
+    /* Aide pour les champs */
+    .help-text {
+        font-size: 0.7rem;
+        color: var(--gray);
+        margin-top: 5px;
+    }
+
+    .errorlist {
+        list-style: none;
+        margin-top: 5px;
+        padding: 0;
+    }
+
+    .errorlist li {
+        font-size: 0.75rem;
+        color: #dc3545;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Conditions d'utilisation */
+    .terms-section {
+        margin: 25px 0;
+        padding: 15px;
+        background: var(--secondary);
+        border-radius: 12px;
+    }
+
+    .terms-checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        cursor: pointer;
+    }
+
+    .terms-checkbox input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .terms-checkbox span {
+        font-size: 0.85rem;
+        color: var(--gray);
+        line-height: 1.4;
+    }
+
+    .terms-checkbox a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .terms-checkbox a:hover {
+        text-decoration: underline;
+    }
+
+    /* Bouton d'inscription */
+    .btn-register {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--primary), #2c5ba8);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 74, 141, 0.3);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    /* Lien de connexion */
+    .login-link {
+        text-align: center;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid var(--gray-light);
+    }
+
+    .login-link p {
+        color: var(--gray);
+        font-size: 0.9rem;
+    }
+
+    .login-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 700;
+        margin-left: 5px;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Messages d'erreur globaux */
+    .global-error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-card {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .register-container {
+            margin: 20px auto;
+            padding: 0 15px;
+        }
         
-        body {
-            /* Un fond légèrement gris pour contraster avec le formulaire blanc */
-            background-color: #f5f7fa; 
-            font-family: Arial, sans-serif;
+        .register-body {
+            padding: 25px 20px;
         }
+    }
+</style>
+{% endblock %}
 
-        /* Le conteneur principal: gère la largeur et le centrage */
-        .form-container {
-            max-width: 400px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+{% block content %}
+<main>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <i class="fa-solid fa-building"></i>
+                <h2>Créer un compte</h2>
+                <p>Rejoignez IMB Immobilier Abidjan</p>
+            </div>
+            
+            <div class="register-body">
+                {% if form.errors %}
+                <div class="global-error">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Veuillez corriger les erreurs ci-dessous.</span>
+                </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            <i class="fa-solid {% if 'username' in field.name %}fa-user{% elif 'email' in field.name %}fa-envelope{% elif 'password' in field.name %}fa-lock{% elif 'photo' in field.name %}fa-camera{% elif 'cni' in field.name %}fa-id-card{% elif 'telephone' in field.name %}fa-phone{% elif 'first_name' in field.name %}fa-user-pen{% elif 'last_name' in field.name %}fa-user-pen{% else %}fa-circle-info{% endif %}"></i>
+                            {{ field.label }}
+                            {% if field.field.required %}<span style="color: var(--accent);">*</span>{% endif %}
+                        </label>
+                        
+                        {{ field }}
+                        
+                        {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                            <li><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Conditions d'utilisation -->
+                    <div class="terms-section">
+                        <label class="terms-checkbox">
+                            <input type="checkbox" id="acceptTerms" required>
+                            <span>
+                                En créant un compte, j'accepte les 
+                                
+                                <a href="{% url 'conditions_utilisation' %}"  >conditions d'utilisation</a> 
+                                et la 
+                                <a href="{% url 'politique_confidentialite' %}"  >politique de confidentialité</a>
+                            </span>
+                        </label>
+                    </div>
 
-        /* Titre du formulaire */
-        .form-container h2 {
-            text-align: center;
-            color: #1e4a8d; /* Couleur primaire */
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-            border-bottom: 3px solid #ff6b00; /* Couleur accent */
-            display: block;
-            width: fit-content;
-            margin: 0 auto 25px auto;
-            padding-bottom: 5px;
-        }
-
-        /* Styles des paragraphes (générés par {{ form.as_p }}) */
-        .form-container form p {
-            margin-bottom: 15px;
-        }
-
-        /* ------------------------------------------- */
-        /* STYLES DES CHAMPS (form-control) et LABELS */
-        /* ------------------------------------------- */
-
-        .form-container label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #343a40;
-            font-size: 0.9rem;
-        }
-
-        /* Styles appliqués à la classe 'form-control' ajoutée dans Django */
-        .form-container .form-control {
-            width: 100%;
-            padding: 7px 8px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box; 
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .form-container .form-control:focus {
-            border-color: #1e4a8d;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(30, 74, 141, 0.2);
-        }
-
-        /* Styles spécifiques pour le champ de fichier (Photo de profil) */
-        .form-container input[type="file"] {
-            padding: 5px; /* Moins de padding pour les champs file */
-            background-color: #f8f9fa;
-        }
-
-        /* ------------------------------------------- */
-        /* STYLES DU BOUTON S'INSCRIRE */
-        /* ------------------------------------------- */
-
-        .form-container button[type="submit"] {
-            width: 100%;
-            padding: 8px;
-            background-color: #ff6b00; /* Couleur accent */
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            margin-top: 20px;
-        }
-
-        .form-container button[type="submit"]:hover {
-            background-color: #e05a00;
-        }
-        
-        /* ------------------------------------------- */
-        /* RESPONSIVE MOBILE */
-        /* ------------------------------------------- */
-
-        @media (max-width: 600px) {
-            .form-container {
-                margin: 0;
-                padding: 15px;
-                box-shadow: none; 
-                border-radius: 0;
-                max-width: 100%; 
-                min-height: 100vh; /* Utilise toute la hauteur sur mobile */
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="form-container"> 
-        <h2>Inscription erri</h2>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    {{ form.as_p }}
-
-    <button type="submit">S’inscrire</button>
-</form>
+                    <button type="submit" id="submitBtn" class="btn-register">
+                        <i class="fa-solid fa-user-plus"></i>
+                        S'inscrire
+                    </button>
+                    
+                    <div class="login-link">
+                        <p>
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            Vous avez déjà un compte ?
+                            <a href="{% url 'connexion' %}">Connectez-vous</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</main>
+{% endblock %}
 
-
-    <script>
+{% block extra_js %}
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Ciblez votre champ de fichier (Photo de profil)
+        // Validation de la taille de la photo
         const fileInput = document.getElementById('id_photo'); 
-        const MAX_SIZE_MB = 5; // Définissez la même limite que dans settings.py (5 Mo)
+        const MAX_SIZE_MB = 5;
         const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
         
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                const fileSize = this.files[0].size;
-                if (fileSize > MAX_SIZE_BYTES) {
-                    alert(`Attention : La photo est trop grande. La taille maximale est de ${MAX_SIZE_MB} Mo.`);
-                    this.value = ""; // Réinitialise le champ pour empêcher l'envoi
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileSize = this.files[0].size;
+                    if (fileSize > MAX_SIZE_BYTES) {
+                        alert(`⚠️ La photo est trop grande. Taille maximale : ${MAX_SIZE_MB} Mo.`);
+                        this.value = "";
+                    }
                 }
+            });
+        }
+        
+        // Validation CNI
+        const cniInput = document.getElementById('id_cni');
+        const MAX_CNI_MB = 10;
+        const MAX_CNI_BYTES = MAX_CNI_MB * 1024 * 1024;
+        
+        if (cniInput) {
+            cniInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileSize = this.files[0].size;
+                    if (fileSize > MAX_CNI_BYTES) {
+                        alert(`⚠️ La CNI est trop grande. Taille maximale : ${MAX_CNI_MB} Mo.`);
+                        this.value = "";
+                    }
+                }
+            });
+        }
+        
+        // Empêcher l'envoi si les conditions ne sont pas acceptées
+        const submitBtn = document.getElementById('submitBtn');
+        const acceptTerms = document.getElementById('acceptTerms');
+        
+        if (submitBtn && acceptTerms) {
+            submitBtn.addEventListener('click', function(e) {
+                if (!acceptTerms.checked) {
+                    e.preventDefault();
+                    alert('📝 Veuillez accepter les conditions d\'utilisation pour continuer.');
+                }
+            });
+        }
+        
+        // Ajout de classes CSS aux champs pour un meilleur style
+        const formControls = document.querySelectorAll('input, select, textarea');
+        formControls.forEach(field => {
+            if (!field.classList.contains('btn-register') && field.type !== 'checkbox' && field.type !== 'file') {
+                field.classList.add('form-control');
+            }
+            if (field.type === 'file') {
+                field.classList.add('form-control');
             }
         });
     });
 </script>
-</body>
-</html>
+{% endblock %}

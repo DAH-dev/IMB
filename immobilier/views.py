@@ -283,6 +283,13 @@ def page_accueil(request):
 
     return render(request, "index.html", context)
 
+def conditions_utilisation(request):
+    """Affiche les conditions d'utilisation"""
+    return render(request, 'legal/conditions_utilisation.html')
+
+def politique_confidentialite(request):
+    """Affiche la politique de confidentialité"""
+    return render(request, 'legal/politique_confidentialite.html')
 
 def proprietes_maison(request):
     # Récupère toutes les propriétés où le type est 'Maison' et validées
