@@ -1265,8 +1265,7 @@ def supprimer_message(request, message_pk, mode):
 
 
 def abaut(request):
-    objets = Information.objects.all()
-    return render(request,'about.html', {'objets': objets} ) 
+    return render(request,'about.html' ) 
 
 
 
