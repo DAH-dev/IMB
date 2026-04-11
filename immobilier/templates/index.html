@@ -3,10 +3,10 @@
 
 {% block content %}
 <section class="py-5 bg-light">
-   <form class="recherche" action="{% url 'index' %}" method="get">
+   {% comment %} <form class="recherche" action="{% url 'index' %}" method="get">
         <input type="text" name="recherche" id="rech" placeholder="Recherche..." value="{{ recherche|default:'' }}">
         <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </form>
+    </form> {% endcomment %}
 
     <div class="container">
         <h2 class="section-title"></h2>

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Utilisateur, Propriete, Annonce,
-    Transaction, Visite, Alerte, Activite,
-    Message, Information, Temoignage  # <-- Ajout des modèles manquants ici
+    Utilisateur, Contact, Propriete, Visite, Message
 )
 
 # ---------------------------
@@ -11,14 +9,36 @@ from .models import (
 @admin.register(Utilisateur)
 class UtilisateurAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "username", "email",
-        "telephone", "role", "statut",
-        "is_staff", "is_superuser"
+        "id", "username", "email", "first_name", "last_name",
+        "telephone", "role", "statut", "cni_verifie",
+        "phone_verified", "is_staff", "is_superuser"
     )
-    list_filter = ("role", "statut", "is_staff", "is_superuser")
-    search_fields = ("username", "email", "telephone")
-    ordering = ("username",)
+    list_filter = ("role", "statut", "cni_verifie", "phone_verified", "is_staff", "is_superuser")
+    search_fields = ("username", "email", "telephone", "first_name", "last_name")
+    ordering = ("-date_joined",)
     filter_horizontal = ("groups", "user_permissions")
+    readonly_fields = ("date_joined", "last_login")
+
+    fieldsets = (
+        ("Informations de connexion", {
+            "fields": ("username", "email", "password")
+        }),
+        ("Informations personnelles", {
+            "fields": ("first_name", "last_name", "telephone", "photo")
+        }),
+        ("Vérification CNI", {
+            "fields": ("cni", "cni_verifie")
+        }),
+        ("Validation OTP", {
+            "fields": ("phone_verified", "otp_code", "otp_created_at", "otp_attempts")
+        }),
+        ("Statut et rôle", {
+            "fields": ("role", "statut", "is_active", "is_staff", "is_superuser")
+        }),
+        ("Permissions", {
+            "fields": ("groups", "user_permissions")
+        }),
+    )
 
     def save_model(self, request, obj, form, change):
         if obj.role == "superadmin":
@@ -26,43 +46,61 @@ class UtilisateurAdmin(admin.ModelAdmin):
             obj.is_staff = True
         super().save_model(request, obj, form, change)
 
+
+# ---------------------------
+# Admin pour Contact (Conversation)
+# ---------------------------
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = (
+        "id", "utilisateur", "proprietaire", "propriete",
+        "sujet_court", "statut", "date_envoi"
+    )
+    list_filter = ("statut", "date_envoi", "supprime_par_utilisateur", "supprime_par_proprietaire")
+    search_fields = ("nom", "email", "telephone", "sujet", "message")
+    ordering = ("-date_envoi",)
+    readonly_fields = ("date_envoi",)
+
+    def sujet_court(self, obj):
+        return obj.sujet[:50] + "..." if obj.sujet and len(obj.sujet) > 50 else obj.sujet
+    sujet_court.short_description = "Sujet"
+
+
 # ---------------------------
 # Admin pour Propriete
 # ---------------------------
 @admin.register(Propriete)
 class ProprieteAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "titre", "type", "prix",
-        "statut", "proprietaire", "date_publication"
+        "id", "titre", "type", "prix", "ville", "commune",
+        "statut", "statut_propriete_admin", "statut_propriete_owner",
+        "proprietaire", "date_publication"
     )
-    list_filter = ("type", "statut")
-    search_fields = ("titre", "description", "ville", "commune")
+    list_filter = ("type", "statut", "statut_propriete_admin", "statut_propriete_owner", "ville")
+    search_fields = ("titre", "description", "ville", "commune", "proprietaire__username")
     ordering = ("-date_publication",)
+    readonly_fields = ("date_publication", "duree_video")
 
-
-# ---------------------------
-# Admin pour Annonce
-# ---------------------------
-@admin.register(Annonce)
-class AnnonceAdmin(admin.ModelAdmin):
-    list_display = (
-        "id", "propriete", "utilisateur", "statut",
-        "date_publication", "moderateur", "date_moderation"
+    fieldsets = (
+        ("Informations générales", {
+            "fields": ("titre", "description", "type", "prix")
+        }),
+        ("Localisation", {
+            "fields": ("ville", "commune")
+        }),
+        ("Caractéristiques", {
+            "fields": ("caracteristiques",)
+        }),
+        ("Médias", {
+            "fields": ("image", "video", "duree_video")
+        }),
+        ("Statuts", {
+            "fields": ("statut", "statut_propriete_admin", "statut_propriete_owner")
+        }),
+        ("Publication", {
+            "fields": ("date_publication", "proprietaire")
+        }),
     )
-    list_filter = ("statut", "date_publication")
-    search_fields = ("propriete__titre", "utilisateur__username", "moderateur__username")
-    ordering = ("-date_publication",)
-
-
-# ---------------------------
-# Admin pour Transaction
-# ---------------------------
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    list_display = ("id", "propriete", "utilisateur", "montant", "type", "date_transaction")
-    list_filter = ("type", "date_transaction")
-    search_fields = ("propriete__titre", "utilisateur__username")
-    ordering = ("-date_transaction",)
 
 
 # ---------------------------
@@ -74,57 +112,31 @@ class VisiteAdmin(admin.ModelAdmin):
     list_filter = ("date_visite",)
     search_fields = ("propriete__titre", "utilisateur__username")
     ordering = ("-date_visite",)
+    readonly_fields = ("date_visite",)
 
-
-# ---------------------------
-# Admin pour Alerte
-# ---------------------------
-@admin.register(Alerte)
-class AlerteAdmin(admin.ModelAdmin):
-    list_display = ("id", "propriete", "description", "statut", "date_creation", "admin")
-    list_filter = ("statut", "date_creation")
-    search_fields = ("propriete__titre", "description", "admin__username")
-    ordering = ("-date_creation",)
-
-
-# ---------------------------
-# Admin pour Activite
-# ---------------------------
-@admin.register(Activite)
-class ActiviteAdmin(admin.ModelAdmin):
-    list_display = ("id", "utilisateur", "action", "cible", "date_action")
-    list_filter = ("date_action",)
-    search_fields = ("utilisateur__username", "action", "cible")
-    ordering = ("-date_action",)
-
-# --- NOUVELLES CLASSES ADMIN AJOUTÉES ---
 
 # ---------------------------
 # Admin pour Message
 # ---------------------------
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("id", "expediteur", "destinataire", "statut", "date_envoi")
+    list_display = ("id", "expediteur", "destinataire", "contact", "statut", "date_envoi", "date_lu")
     list_filter = ("statut", "date_envoi")
     search_fields = ("expediteur__username", "destinataire__username", "contenu")
     ordering = ("-date_envoi",)
-    
-# ---------------------------
-# Admin pour Information
-# ---------------------------
-@admin.register(Information)
-class InformationAdmin(admin.ModelAdmin):
-    list_display = ("id", "titre", "type", "date_creation", "admin" ,"image")
-    list_filter = ("type",)
-    search_fields = ("titre", "contenu")
-    ordering = ("-date_creation",)
-    
-# ---------------------------
-# Admin pour Temoignage
-# ---------------------------
-@admin.register(Temoignage)
-class TemoignageAdmin(admin.ModelAdmin):
-    list_display = ("id", "nom", "utilisateur", "statut", "date_creation")
-    list_filter = ("statut",)
-    search_fields = ("nom", "contenu")
-    ordering = ("-date_creation",)
+    readonly_fields = ("date_envoi", "date_lu")
+
+    fieldsets = (
+        ("Conversation", {
+            "fields": ("contact",)
+        }),
+        ("Expéditeur et Destinataire", {
+            "fields": ("expediteur", "destinataire")
+        }),
+        ("Message", {
+            "fields": ("contenu", "statut", "date_envoi", "date_lu")
+        }),
+        ("Suppression", {
+            "fields": ("supprime_par_expediteur", "supprime_par_destinataire", "supprime_pour_tous")
+        }),
+    )

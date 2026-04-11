@@ -1,4 +1,4 @@
-from pyexpat.errors import messages
+# from pyexpat.errors import messages
 from urllib import request
 from django.db.utils import IntegrityError
 from django.http import HttpResponse
@@ -23,19 +23,24 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from datetime import timedelta
 import json
+import random
+import json
+from datetime import datetime, timedelta
+from django.contrib import messages
+
 
 from .models import (
-    Utilisateur, Propriete, Annonce, Transaction,
-    Visite, Alerte, Activite, Message, Information, Temoignage,Contact
+    Utilisateur, Propriete, 
+    Visite,  Message, Contact
 )
 from .serializers import (
-    UtilisateurSerializer, ProprieteSerializer, AnnonceSerializer,
-    TransactionSerializer, VisiteSerializer, AlerteSerializer, ActiviteSerializer,
-    MessageSerializer, InformationSerializer, TemoignageSerializer,ContactSerializer
+    UtilisateurSerializer, ProprieteSerializer, 
+    VisiteSerializer, 
+    MessageSerializer,ContactSerializer
 )
 from .forms import (
-     ProprieteForm, AnnonceForm, TransactionForm,
-    VisiteForm, AlerteForm, ActiviteForm, MessageForm, InformationForm, TemoignageForm,ContactForm,UtilisateurCreationForm
+     ProprieteForm, 
+    VisiteForm,  MessageForm, ContactForm,UtilisateurCreationForm
 )
 
 
@@ -67,45 +72,20 @@ class ProprieteViewSet(viewsets.ModelViewSet):
     serializer_class = ProprieteSerializer
     permission_classes = [AllowAny]
 
-class AnnonceViewSet(viewsets.ModelViewSet):
-    queryset = Annonce.objects.all()
-    serializer_class = AnnonceSerializer
-    permission_classes = [IsAuthenticated]
-
-class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]
 
 class VisiteViewSet(viewsets.ModelViewSet):
     queryset = Visite.objects.all()
     serializer_class = VisiteSerializer
     permission_classes = [IsAuthenticated]
 
-class AlerteViewSet(viewsets.ModelViewSet):
-    queryset = Alerte.objects.all()
-    serializer_class = AlerteSerializer
-    permission_classes = [IsAuthenticated]
 
-class ActiviteViewSet(viewsets.ModelViewSet):
-    queryset = Activite.objects.all()
-    serializer_class = ActiviteSerializer
-    permission_classes = [IsAuthenticated]
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated]
 
-class InformationViewSet(viewsets.ModelViewSet):
-    queryset = Information.objects.all()
-    serializer_class = InformationSerializer
-    permission_classes = [AllowAny]
 
-class TemoignageViewSet(viewsets.ModelViewSet):
-    queryset = Temoignage.objects.all()
-    serializer_class = TemoignageSerializer
-    permission_classes = [AllowAny]
 
 class RegisterView(generics.CreateAPIView):
     queryset = Utilisateur.objects.all()
@@ -113,21 +93,252 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UtilisateurSerializer
 
 # --- VUES POUR LE SITE WEB (HTML) ---
+# views.py - Remplacer la fonction inscription
+
+import random
+import requests
+from datetime import timedelta
+from django.utils import timezone
+
+def generate_otp():
+    """Génère un code OTP à 6 chiffres"""
+    return f"{random.randint(100000, 999999)}"
+
+def send_sms(phone_number, code):
+    """
+    Envoie un SMS via un service.
+    Pour le moment, on simule l'envoi.
+    À remplacer par un vrai service SMS (Twilio, Africa's Talking, etc.)
+    """
+    # TODO: Remplacer par un vrai service SMS
+    print(f"📱 SMS envoyé à {phone_number} : Votre code est {code}")
+    
+    # Simuler un envoi réussi
+    return True
+
+# from twilio.rest import Client
+
+# def send_sms(telephone, otp):
+#     account_sid = 'TON_SID'
+#     auth_token = 'TON_TOKEN'
+#     client = Client(account_sid, auth_token)
+
+#     try:
+#         message = client.messages.create(
+#             body=f"Votre code OTP est : {otp}",
+#             from_='+1234567890',  # numéro Twilio
+#             to=telephone
+#         )
+#         return True
+#     except Exception as e:
+#         print("Erreur SMS:", e)
+#         return False
+
 def inscription(request):
+    """Étape 1 : Formulaire d'inscription"""
     if request.method == 'POST':
+        print("🔵 ========== DÉBUT POST INSCRIPTION ==========")
+        print("🔵 Données POST reçues:", request.POST)
+        print("🔵 Fichiers reçus:", request.FILES)
+        
         form = UtilisateurCreationForm(request.POST, request.FILES)
+        
         if form.is_valid():
-            utilisateur = form.save()
+            print("✅ FORMULAIRE VALIDE")
             
-            # ✅ Ajout du backend manquant :
-            utilisateur.backend = 'django.contrib.auth.backends.ModelBackend'
-
-            login(request, utilisateur)
-            return redirect('connexion')  # ou ta page d'accueil
+            # Vérifier si le téléphone existe déjà
+            telephone = form.cleaned_data.get('telephone')
+            print(f"📞 Téléphone: {telephone}")
+            
+            if Utilisateur.objects.filter(telephone=telephone).exists():
+                print("❌ Téléphone déjà utilisé")
+                messages.error(request, "Ce numéro de téléphone est déjà utilisé.")
+                return render(request, 'utilisateurs/inscription.html', {'form': form})
+            
+            # Sauvegarder les données en session (pas les fichiers)
+            # Pour les fichiers, on les garde temporairement ailleurs
+            request.session['inscription_data'] = {
+                'username': form.cleaned_data.get('username'),
+                'email': form.cleaned_data.get('email'),
+                'first_name': form.cleaned_data.get('first_name'),
+                'last_name': form.cleaned_data.get('last_name'),
+                'telephone': telephone,
+                'password': form.cleaned_data.get('password1'),
+                'role': form.cleaned_data.get('role', 'client'),
+            }
+            print("📦 Données texte sauvegardées en session")
+            
+            # Pour les fichiers, on les sauvegarde dans des variables temporaires
+            # ou on les garde dans request.FILES pour la prochaine étape
+            # Solution simple : sauvegarder les fichiers temporairement dans un dossier
+            import os
+            from django.core.files.storage import default_storage
+            from django.core.files.base import ContentFile
+            
+            # Créer un dossier temporaire pour les fichiers
+            temp_dir = 'temp_uploads/'
+            if not os.path.exists(temp_dir):
+                os.makedirs(temp_dir)
+            
+            # Sauvegarder la photo temporairement
+            if 'photo' in request.FILES and request.FILES['photo']:
+                photo_file = request.FILES['photo']
+                photo_path = default_storage.save(
+                    f'{temp_dir}{photo_file.name}', 
+                    ContentFile(photo_file.read())
+                )
+                request.session['temp_photo_path'] = photo_path
+                print(f"📸 Photo sauvegardée temporairement: {photo_path}")
+                # Remettre le curseur du fichier au début pour le formulaire
+                photo_file.seek(0)
+            
+            # Sauvegarder la CNI temporairement
+            if 'cni' in request.FILES and request.FILES['cni']:
+                cni_file = request.FILES['cni']
+                cni_path = default_storage.save(
+                    f'{temp_dir}{cni_file.name}', 
+                    ContentFile(cni_file.read())
+                )
+                request.session['temp_cni_path'] = cni_path
+                print(f"🪪 CNI sauvegardée temporairement: {cni_path}")
+                cni_file.seek(0)
+            
+            # Générer et envoyer OTP
+            otp = generate_otp()
+            request.session['otp'] = otp
+            request.session['otp_created_at'] = timezone.now().isoformat()
+            request.session['telephone'] = telephone
+            print(f"🔐 OTP généré: {otp}")
+            print(f"⏰ Créé à: {request.session['otp_created_at']}")
+            
+            # Envoyer le SMS
+            print(f"📱 Envoi SMS à {telephone} avec code {otp}")
+            if send_sms(telephone, otp):
+                print("✅ SMS envoyé avec succès")
+                print("➡️ Redirection vers inscription_otp")
+                return redirect('inscription_otp')
+            else:
+                print("❌ Erreur lors de l'envoi du SMS")
+                messages.error(request, "Erreur lors de l'envoi du SMS. Vérifiez votre numéro.")
+                return render(request, 'utilisateurs/inscription.html', {'form': form})
+        else:
+            print("❌ FORMULAIRE INVALIDE")
+            print("Erreurs du formulaire:")
+            for field, errors in form.errors.items():
+                print(f"  - {field}: {errors}")
+            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
+            return render(request, 'utilisateurs/inscription.html', {'form': form})
+    
     else:
+        print("🟢 GET sur la page d'inscription")
         form = UtilisateurCreationForm()
-
+    
     return render(request, 'utilisateurs/inscription.html', {'form': form})
+
+# views.py - Ajouter cette fonction
+
+def inscription_otp(request):
+    """Étape 2 : Vérification du code OTP"""
+    
+    # Vérifier que les données existent en session
+    if 'inscription_data' not in request.session:
+        return redirect('inscription')
+    
+    telephone = request.session.get('telephone')
+    
+    if request.method == 'POST':
+        otp_code = request.POST.get('otp_code')
+        saved_otp = request.session.get('otp')
+        otp_created = request.session.get('otp_created_at')
+        
+        # Vérifier si le code n'est pas expiré (5 minutes)
+        if otp_created:
+            otp_created = datetime.fromisoformat(otp_created)
+            if timezone.now() > otp_created + timedelta(minutes=5):
+                messages.error(request, "Le code a expiré. Veuillez demander un nouveau code.")
+                return redirect('inscription')
+        
+        if otp_code == saved_otp:
+            # Code correct : créer l'utilisateur
+            data = request.session['inscription_data']
+            
+            # Récupérer les fichiers temporaires
+            from django.core.files import File
+            import os
+            
+            user = Utilisateur(
+                username=data['username'],
+                email=data['email'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                telephone=data['telephone'],
+                role=data['role'],
+                phone_verified=True
+            )
+            
+            # Récupérer la photo temporaire
+            temp_photo_path = request.session.get('temp_photo_path')
+            if temp_photo_path and os.path.exists(temp_photo_path):
+                with open(temp_photo_path, 'rb') as f:
+                    user.photo.save(os.path.basename(temp_photo_path), File(f), save=False)
+                os.remove(temp_photo_path)
+            
+            # Récupérer la CNI temporaire
+            temp_cni_path = request.session.get('temp_cni_path')
+            if temp_cni_path and os.path.exists(temp_cni_path):
+                with open(temp_cni_path, 'rb') as f:
+                    user.cni.save(os.path.basename(temp_cni_path), File(f), save=False)
+                os.remove(temp_cni_path)
+            
+            # Sauvegarder l'utilisateur
+            user.set_password(data['password'])
+            user.save()
+            
+            # Nettoyer la session
+            del request.session['inscription_data']
+            del request.session['otp']
+            del request.session['otp_created_at']
+            del request.session['telephone']
+            if 'temp_photo_path' in request.session:
+                del request.session['temp_photo_path']
+            if 'temp_cni_path' in request.session:
+                del request.session['temp_cni_path']
+            
+            # Connecter l'utilisateur
+            login(request, user)
+            messages.success(request, "Inscription réussie ! Bienvenue sur IMB Immobilier.")
+            return redirect('index')
+        else:
+            messages.error(request, "Code incorrect. Veuillez réessayer.")
+            # Incrémenter les tentatives
+            attempts = request.session.get('otp_attempts', 0) + 1
+            request.session['otp_attempts'] = attempts
+            if attempts >= 3:
+                messages.error(request, "Trop de tentatives. Veuillez recommencer l'inscription.")
+                return redirect('inscription')
+    
+    return render(request, 'utilisateurs/inscription_otp.html', {'telephone': telephone})
+
+@csrf_exempt
+def resend_otp(request):
+    """Renvoie un nouveau code OTP"""
+    if request.method == 'POST':
+        telephone = request.session.get('telephone')
+        
+        if telephone:
+            otp = generate_otp()
+            request.session['otp'] = otp
+            request.session['otp_created_at'] = timezone.now().isoformat()
+            request.session['otp_attempts'] = 0
+            
+            print(f"🔐 Nouveau OTP généré: {otp}")
+            
+            if send_sms(telephone, otp):
+                return JsonResponse({'success': True, 'message': 'Code renvoyé avec succès'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Erreur lors de l\'envoi'}, status=400)
+    
+    return JsonResponse({'success': False, 'message': 'Requête invalide'}, status=400)
 
 @login_required(login_url='connexion')
 def modifier_profil(request):
@@ -1175,16 +1386,11 @@ def gestion_utilisateurs_admin(request):
 
 @login_required(login_url='connexion')
 def modifier_utilisateur_admin(request, pk):
-    """
-    Permet à un admin de modifier n'importe quel utilisateur.
-    """
     user = request.user
     
-    # Vérifier que l'utilisateur est un admin
     if not user.is_superuser and user.role != "superadmin" and user.role != "admin":
         return redirect('index')
     
-    # Récupérer l'utilisateur à modifier
     utilisateur_a_modifier = get_object_or_404(Utilisateur, pk=pk)
     
     if request.method == 'POST':
@@ -1196,20 +1402,17 @@ def modifier_utilisateur_admin(request, pk):
         
         if form.is_valid():
             form.save()
-            # Message de succès (si vous utilisez les messages Django)
-            # messages.success(request, f"Utilisateur {utilisateur_a_modifier.username} modifié avec succès.")
             return redirect('gestion_utilisateurs_admin')
+        else:
+            print("ERREURS FORMULAIRE :", form.errors)  # 👈 IMPORTANT
     else:
         form = UtilisateurModificationForm(instance=utilisateur_a_modifier)
     
-    context = {
+    return render(request, 'immobilier/modifier_profil_admin.html', {
         'form': form,
-        'action': 'Modifier',
         'utilisateur': utilisateur_a_modifier,
         'user': user,
-    }
-    
-    return render(request, 'immobilier/modifier_profil_admin.html', context)
+    })
 
 @login_required(login_url='connexion')
 def supprimer_utilisateur_admin(request, pk):
@@ -1544,8 +1747,8 @@ def toggle_statut_utilisateur(request, pk):
 
  
 
-def temoingnages(request):
-    return render(request,'immobilier/temoingnages.html' ) 
+# def temoingnages(request):
+#     return render(request,'immobilier/temoingnages.html' ) 
 
 
 def espace_client(request):

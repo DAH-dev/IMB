@@ -67,79 +67,71 @@
 </script>
 <body>
     <!-- DEBUT DE L'EN-TÊTE (NAVBAR) -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
-    <img src="{% static 'images_static/logo.png' %}" alt="Logo" class="logo-img">
-</a>
-            
-            <div class="mobile-toggles">
-                <button id="search-toggler" type="button" aria-label="Toggle Search">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-                <button id="menu-toggler" type="button" aria-label="Toggle Menu">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                       <a class="nav-link active" href="{% url 'index' %}">
-                      <i class="fa-solid fa-filter me-1"></i> Filtrer
-                    </a>
-                    </li>
-                    {% comment %} <li class="nav-item">
-                        <a class="nav-link" href="{% url 'proprietaire' %}"> <i class="fa-solid fa-user me-1"></i> Propriétaires</a>
-                    </li> {% endcomment %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}"><i class="fa-solid fa-star me-1"></i> A propos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contact' %}"><i class="fa-solid fa-phone me-1"></i> Contact</a>
-                    </li>
-                    
-                 
-
-            <li class="nav-item ms-lg-3 " style="border-left: 1px solid rgba(255, 255, 255, 0.5); background-color: white; border-radius: 5px; padding-left: 5px;padding-right: 5px;">
-        {% if user.is_authenticated %}
-            {% if user_role == "admin" %}
-                <a href="{% url 'gestion_utilisateurs_admin' %}">
-                    <i class="fa-solid fa-user-shield"></i> 
-                    <span>Admin</span>
-                </a>
-            {% elif user_role == "proprietaire" %}
-                <a href="{% url 'profil' %}">
-                    <i class="fa-solid fa-building-user"></i>
-                    <span>Propriétaire</span>
-                </a>
-            {% else %}
-                <a href="{% url 'profil' %}">
-                    <i class="fa-solid fa-user"></i>
-                    <span>Client</span>
-                </a>
-            {% endif %}
-        {% else %}
-            <a href="{% url 'connexion' %}">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                <span>Connexion</span>
-            </a>
-        {% endif %}
-
-           
-                    </li>
-
-                    
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="mobile-dropdown-panel" id="searchContent">
-        <form class="recherche" action="#" method="get">
-            <input type="text" name="recherche" id="rech_mobile" placeholder="Recherche de propriété par titre, commune...">
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+            <img src="{% static 'images_static/logo.png' %}" alt="Logo" class="logo-img">
+        </a>
+        
+        <!-- Barre de recherche - visible sur tous les écrans -->
+        <form class="search-form" action="{% url 'index' %}" method="get">
+            <input type="text" name="recherche" placeholder="Rechercher..." value="{{ recherche|default:'' }}">
             <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
         </form>
+        
+        <div class="mobile-toggles">
+            <button id="search-toggler" type="button" aria-label="Toggle Search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <button id="menu-toggler" type="button" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">
+                        <i class="fa-solid fa-filter me-1"></i> Filtrer
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'about' %}"><i class="fa-solid fa-star me-1"></i> A propos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact' %}"><i class="fa-solid fa-phone me-1"></i> Contact</a>
+                </li>
+                <li class="nav-item ms-lg-3 connexion-btn" style="color: white;">
+                    {% if user.is_authenticated %}
+                        {% if user_role == "admin" %}
+                            <a href="{% url 'gestion_utilisateurs_admin' %}">
+                                <i class="fa-solid fa-user-shield"></i> 
+                                <span>Admin</span>
+                            </a>
+                        {% elif user_role == "proprietaire" %}
+                            <a href="{% url 'profil' %}">
+                                <i class="fa-solid fa-building-user"></i>
+                                <span>Propriétaire</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'profil' %}">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Client</span>
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'connexion' %}">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Connexion</span>
+                        </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="mobile-dropdown-panel" id="searchContent">
 
         <ul class="mobile-links">
             <li>
@@ -179,6 +171,7 @@
             <li>
                 <a href="{% url 'contact' %}"><i class="fa-solid fa-phone me-2"></i> Contact</a>
             </li>
+            
             <li>
                         {% if user.is_authenticated %}
             {% if user_role == "admin" %}

@@ -153,10 +153,10 @@
     }
 
     /* Styles spécifiques pour le contenu des panneaux */
-    #searchContent .recherche {
+     #searchContent .recherche {
       max-width: 90%;
       margin: 10px auto;
-    }
+    } 
 
     .mobile-links {
       list-style: none;

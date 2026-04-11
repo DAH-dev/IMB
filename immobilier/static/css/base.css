@@ -112,6 +112,65 @@ nav.navbar ul.navbar-nav li a.nav-link.active,
 nav.navbar ul.navbar-nav li a.nav-link:hover {
     background-color: rgba(255, 255, 255, 0.15);
 }
+.search-form {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    padding: 2px 5px;
+    flex: 1;
+    max-width: 400px;
+    margin: 0 15px;
+    transition: all 0.3s ease;
+}
+
+.search-form input {
+    background: transparent;
+    border: none;
+    padding: 8px 15px;
+    color: white;
+    font-size: 0.9rem;
+    width: 100%;
+    outline: none;
+}
+
+.search-form input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-form button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border-radius: 30px;
+}
+
+.search-form button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Au focus */
+.search-form:focus-within {
+    background-color: white;
+    box-shadow: 0 0 0 2px rgba(30, 74, 141, 0.3);
+}
+
+.search-form:focus-within input {
+    color: var(--dark);
+}
+
+.search-form:focus-within input::placeholder {
+    color: var(--gray);
+}
+
+.search-form:focus-within button {
+    color: var(--primary);
+}
+
 
 /* Toggles Mobile */
 .mobile-toggles {
@@ -664,11 +723,16 @@ section.py-5.bg-light {
         min-height: 60px;
     }
     
+
     nav.navbar .container {
-        max-width: 100%;  /* ← Pour que le contenu prenne toute la largeur */
-        padding: 0 20px;  /* ← Petit padding pour ne pas coller au bord */
-        height: auto;
-    }
+    max-width: 100%;
+    margin: 0;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+}
     
     nav.navbar .navbar-brand {
         font-size: 1.2rem;
@@ -744,7 +808,18 @@ section.py-5.bg-light {
      .logo-img {
         height: 35px;
     }
+    .search-form {
+        max-width: 250px;
+        margin: 0 10px;
+    }
+    
+    .search-form input {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
 }
+
+
 
 /* Mobile (768px et moins) */
 @media (max-width: 768px) {
@@ -885,7 +960,36 @@ section.py-5.bg-light {
     .footer-wave svg {
         height: 15px;
     }
+    .search-form {
+        max-width: none;
+        flex: 1;
+        margin: 0 8px;
+        padding: 1px 3px;
+    }
+    
+    .search-form input {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .search-form button {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+    
+    /* Ajuster la hauteur de la navbar sur mobile */
+    nav.navbar .container {
+        height: 50px;
+        padding: 0 10px;
+    }
+    
+    /* Réduire la taille du logo */
+    .logo-img {
+        height: 37px;
+    }
 }
+
+
 
 /* Animation */
 .footer-modern {

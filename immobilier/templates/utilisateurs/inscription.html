@@ -239,10 +239,34 @@
         text-decoration: underline;
     }
 
-    /* Messages d'erreur globaux */
+    /* Messages d'erreur globaux - style pour messages Django */
     .global-error {
         background: #f8d7da;
         color: #721c24;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .global-success {
+        background: #d4edda;
+        color: #155724;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .global-info {
+        background: #d1ecf1;
+        color: #0c5460;
         padding: 12px;
         border-radius: 12px;
         margin-bottom: 20px;
@@ -293,7 +317,18 @@
             </div>
             
             <div class="register-body">
-                {% if form.errors %}
+                <!-- ✅ AFFICHAGE DES MESSAGES DJANGO (comme "Téléphone déjà utilisé") -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}global-error{% elif message.tags == 'success' %}global-success{% else %}global-info{% endif %}">
+                            <i class="fa-solid fa-{% if message.tags == 'error' %}circle-exclamation{% elif message.tags == 'success' %}circle-check{% else %}circle-info{% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- ✅ AFFICHAGE DES ERREURS DU FORMULAIRE -->
+                {% if form.errors and not messages %}
                 <div class="global-error">
                     <i class="fa-solid fa-circle-exclamation"></i>
                     <span>Veuillez corriger les erreurs ci-dessous.</span>

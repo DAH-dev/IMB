@@ -11,7 +11,7 @@ class Utilisateur(AbstractUser):
     photo = models.ImageField(upload_to="utilisateurs/", blank=True, null=True)
     
     # CNI obligatoire
-    cni = models.ImageField(upload_to="utilisateurs/cni/", default='', verbose_name="Carte Nationale d'Identité")
+    cni = models.ImageField(upload_to="utilisateurs/cni/", blank=True, null=True, verbose_name="Carte Nationale d'Identité")
     
     # telephone obligatoire
     telephone = models.CharField(max_length=20, blank=False)
@@ -25,6 +25,11 @@ class Utilisateur(AbstractUser):
     
     # Champ pour indiquer si la CNI est vérifiée
     cni_verifie = models.BooleanField(default=False, verbose_name="CNI vérifiée")
+
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
+    phone_verified = models.BooleanField(default=False)
+    otp_attempts = models.IntegerField(default=0)
 
     # ⚠️ évite le conflit avec auth.User
     groups = models.ManyToManyField(
@@ -136,37 +141,6 @@ class Propriete(models.Model):
         return self.titre
 
 
-# --- Annonce ---
-class Annonce(models.Model):
-    STATUT_CHOICES = [
-        ('attente', 'En attente'),
-        ('valide', 'Validée'),
-        ('rejete', 'Rejetée'),
-        ('supprime', 'Supprimée'),
-    ]
-
-    propriete = models.ForeignKey(Propriete, on_delete=models.CASCADE, related_name="annonces")
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="annonces")
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='attente')
-    date_publication = models.DateTimeField(auto_now_add=True)
-    date_moderation = models.DateTimeField(blank=True, null=True)
-    moderateur = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="modere_annonces")
-
-
-# --- Transaction ---
-class Transaction(models.Model):
-    TYPE_CHOICES = [
-        ('achat', 'Achat'),
-        ('location', 'Location'),
-    ]
-    propriete = models.ForeignKey(Propriete, on_delete=models.CASCADE, related_name="transactions")
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="transactions")
-    montant = models.DecimalField(max_digits=12, decimal_places=2)
-    date_transaction = models.DateTimeField(auto_now_add=True)
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
-
-
-
 # --- Visite ---
 class Visite(models.Model):
     propriete = models.ForeignKey('Propriete', on_delete=models.CASCADE, related_name="visites")
@@ -180,24 +154,6 @@ class Visite(models.Model):
         ]
 
 
-# --- Alerte ---
-class Alerte(models.Model):
-    STATUT_CHOICES = [
-        ('non_resolue', 'Non résolue'),
-        ('resolue', 'Résolue'),
-    ]
-    propriete = models.ForeignKey(Propriete, on_delete=models.CASCADE, related_name="alertes")
-    description = models.TextField()
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_resolue')
-    date_creation = models.DateTimeField(auto_now_add=True)
-    admin = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="alertes_traitees")
-
-# --- Activité ---
-class Activite(models.Model):
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="activites")
-    action = models.CharField(max_length=100)
-    cible = models.CharField(max_length=255)
-    date_action = models.DateTimeField(auto_now_add=True)
 
 # --- Message ---
 class Message(models.Model):
@@ -243,39 +199,5 @@ class Message(models.Model):
         return f"Message de {self.expediteur} à {self.destinataire} - {self.statut}"
 
 
-# --- Information ---
-class Information(models.Model):
-    TYPE_CHOICES = [
-        ('mission', 'Mission'),
-        ('vision', 'Vision'),
-        ('valeur', 'Valeur'),
-        ('presentation', 'Présentation'),
-    ]
-    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
-    titre = models.CharField(max_length=255)
-    contenu = models.TextField()
-    image = models.ImageField(upload_to='information_images/', blank=True, null=True)
-    date_creation = models.DateTimeField(auto_now_add=True)
-    date_mise_a_jour = models.DateTimeField(auto_now=True)
-    admin = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="informations_geres")
-
-    def __str__(self):
-        return f"{self.type} - {self.titre}"
 
 
-# --- Temoignage ---
-class Temoignage(models.Model):
-    STATUT_CHOICES = [
-        ('attente', 'En attente'),
-        ('valide', 'Validé'),
-        ('rejete', 'Rejeté'),
-    ]
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.SET_NULL, null=True, blank=True, related_name="temoignages")
-    nom = models.CharField(max_length=255, blank=True, null=True)
-    contenu = models.TextField()
-    date_creation = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='attente')
-
-    def __str__(self):
-        auteur = self.utilisateur if self.utilisateur else self.nom
-        return f"Témoignage de {auteur} - {self.statut}"

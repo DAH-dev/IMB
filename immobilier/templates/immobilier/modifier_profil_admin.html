@@ -593,7 +593,11 @@
             <h3 class="form-title">
               <i class="fas fa-user-edit me-2"></i> Modifier l'utilisateur
             </h3>
-
+{% if form.errors %}
+  <div class="alert alert-danger">
+    {{ form.errors }}
+  </div>
+{% endif %}
             <form method="POST" enctype="multipart/form-data">
               {% csrf_token %}
               
@@ -660,6 +664,22 @@
                       </div>
                     {% endif %}
                   </div>
+                  <div class="mb-3">
+  <label class="form-label">Carte Nationale d'Identité *</label>
+  {{ form.cni }}
+
+  {% if form.cni.errors %}
+    <div class="text-danger small">{{ form.cni.errors }}</div>
+  {% endif %}
+
+  {% if utilisateur.cni %}
+    <div class="mt-2">
+      <small>CNI actuelle :</small><br>
+      <img src="{{ utilisateur.cni.url }}" alt="CNI actuelle" 
+           class="img-thumbnail mt-1" width="120">
+    </div>
+  {% endif %}
+</div>
 
                   <div class="mb-3">
                     <label class="form-label">Superutilisateur</label>

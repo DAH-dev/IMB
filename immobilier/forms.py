@@ -3,14 +3,9 @@ import json
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from .models import (
-    Utilisateur, Propriete, Annonce, Transaction,
-    Visite, Alerte, Activite, Message, Information, Temoignage,Contact
+    Utilisateur, Propriete, 
+    Visite,  Message, Contact
 )
-
-
-
-
-
 
 # immobilier/forms.py
 from django.contrib.auth.forms import AuthenticationForm
@@ -250,42 +245,25 @@ class ProprieteForm(forms.ModelForm):
             raise ValidationError('Le format des caractéristiques est invalide.')
         
 
-class AnnonceForm(forms.ModelForm):
-    class Meta:
-        model = Annonce
-        fields = '__all__'
 
-class TransactionForm(forms.ModelForm):
-    class Meta:
-        model = Transaction
-        fields = '__all__'
 
 class VisiteForm(forms.ModelForm):
     class Meta:
         model = Visite
         fields = '__all__'
 
-class AlerteForm(forms.ModelForm):
-    class Meta:
-        model = Alerte
-        fields = '__all__'
+# class AlerteForm(forms.ModelForm):
+#     class Meta:
+#         model = Alerte
+#         fields = '__all__'
 
-class ActiviteForm(forms.ModelForm):
-    class Meta:
-        model = Activite
-        fields = '__all__'
+# class ActiviteForm(forms.ModelForm):
+#     class Meta:
+#         model = Activite
+#         fields = '__all__'
 
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = '__all__'
 
-class InformationForm(forms.ModelForm):
-    class Meta:
-        model = Information
-        fields = '__all__'
-
-class TemoignageForm(forms.ModelForm):
-    class Meta:
-        model = Temoignage
-        fields = '__all__'
