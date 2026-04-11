@@ -94,10 +94,13 @@ LOGGING = {
 SECRET_KEY = 'django-insecure-u!%c^v&i)w111x0vzz4+@&603()9vhdvz188tg@s0#05u*o5s+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
-    "frereric.pythonanywhere.com",
+    "imb-cmxe.onrender.com",      # Votre URL Render
+    "immoplus.com",               # Votre futur domaine (si vous l'avez)
+    "www.immoplus.com",           # Avec ou sans www
+    "frereric.pythonanywhere.com", # Votre ancien hébergement
     "127.0.0.1",
     "localhost",
 ]
