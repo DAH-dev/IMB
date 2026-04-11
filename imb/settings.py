@@ -94,7 +94,7 @@ LOGGING = {
 SECRET_KEY = 'django-insecure-u!%c^v&i)w111x0vzz4+@&603()9vhdvz188tg@s0#05u*o5s+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "imb-cmxe.onrender.com",      # Votre URL Render
@@ -109,6 +109,10 @@ ALLOWED_HOSTS = [
 LOGOUT_REDIRECT_URL = 'login' 
 # settings.py
 AUTH_USER_MODEL = 'immobilier.Utilisateur'
+# des ajout pour cloudinary pour l'upload des images et vidéos ebergées sur le cloud
+
+
+
 
 
 
