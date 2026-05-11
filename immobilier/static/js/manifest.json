@@ -1,0 +1,21 @@
+{
+  "name": "IMB.CI",
+  "short_name": "IMB.CI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e4a8d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/images_static/imb_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images_static/imb_icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
